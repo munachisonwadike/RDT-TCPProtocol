@@ -1,11 +1,3 @@
-#Nabil Rahiman
-#NYU Abudhabi
-#email:nr83@nyu.edu
-#Date:18/Jan/2018
-
-#Reference
-#http://makepp.sourceforge.net/1.19/makepp_tutorial.html
-
 CC = gcc -c
 SHELL = /bin/bash
 
