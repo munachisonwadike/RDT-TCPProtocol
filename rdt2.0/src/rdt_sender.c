@@ -218,12 +218,11 @@ int main (int argc, char **argv)
             /*resend the entire window if you don't recv ack for the last guy in the window (until we add the sliding part) */
         } while(recvpkt->hdr.ackno < next_seqno);
 	
-    int i;
-	for ( i = 0; i < 10; ++i)
-	{
-        free(window[i]);
-	}
-    
+    	for ( i = 0; i < 10; ++i)
+    	{
+            free(window[i]);
+    	}
+    }
 
     return 0;
 
