@@ -42,7 +42,7 @@ void resend_packets(int sig)
     if (sig == SIGALRM)
     {
 
-        VLOG(DEBUG, "GOT TO RESEND AFTER SIGALRM 1");   
+        VLOG(DEBUG, "RESEND FUNCTION TRIGGERED");   
         int i = 0;    
         for (i = 0; i < 10; ++i)
         {
@@ -55,7 +55,6 @@ void resend_packets(int sig)
                 error("sendto");
             }
         }
-        VLOG(DEBUG, "GOT TO RESEND AFTER SIGALRM 2");       
     }
 }
 
@@ -183,7 +182,6 @@ int main (int argc, char **argv)
             //should get an error based on the packet
             int i;
 	    
-            VLOG(DEBUG, "GOT HERE 1");
     	    for (i = 0; i < 10; ++i)
             {
             	if(sendto(sockfd, window[i], TCP_HDR_SIZE + get_data_size(window[i]), 0, 
@@ -192,7 +190,6 @@ int main (int argc, char **argv)
 	                error("sendto error");
                 }
             }
-    	    VLOG(DEBUG, "GOT HERE 2");
               
 
             start_timer();
