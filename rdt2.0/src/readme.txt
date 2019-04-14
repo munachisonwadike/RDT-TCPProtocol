@@ -23,4 +23,6 @@ the next one. Just as in go back n explained in 3.4.3, if packet n has been
 received, it means all packets with lower sequence numbers have also been received. 
 See table 3.2 for details of ack generation followed
 
-
+Since we only have one timer in the simplified version, and since we send acks
+cumulatively, we just need to shift the window base to the highest ack received
+and reset the timer to start as we send the packet at the base of the window
