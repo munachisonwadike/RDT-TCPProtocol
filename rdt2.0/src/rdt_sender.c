@@ -26,6 +26,7 @@ int next_seqno=0;
 int send_base=0;
 int window_size = 1;
 
+int eof = 0;
 int sockfd, serverlen;
 struct sockaddr_in serveraddr;
 struct itimerval timer; 
@@ -148,6 +149,7 @@ int main (int argc, char **argv)
     		len = fread(buffer, 1, DATA_SIZE, fp);
     		if (len<=0){
     			VLOG(INFO, "End Of File has been reached and we may have gotten some packets from it");
+                eof = i; 
     			break;
     		}
     		pkt_base = next_seqno;
@@ -167,7 +169,7 @@ int main (int argc, char **argv)
             sndpkt = make_packet(0);
             sendto(sockfd, sndpkt, TCP_HDR_SIZE,  0,
                     (const struct sockaddr *)&serveraddr, serverlen);
-	    free(sndpkt); 
+	        free(sndpkt); 
             break;
         }        
         //Wait for ACK
@@ -217,11 +219,22 @@ int main (int argc, char **argv)
             stop_timer();
             /*resend the entire window if you don't recv ack for the last guy in the window (until we add the sliding part) */
         } while(recvpkt->hdr.ackno < next_seqno);
-	
-    	for ( i = 0; i < 10; ++i)
-    	{
-            free(window[i]);
-    	}
+	   
+        if (eof == 0)
+        {
+        	for ( i = 0; i < 10; ++i)
+        	{
+                free(window[i]);
+        	}
+        }else
+        {   
+            for ( i = 0; i < eof; ++i)
+            {
+                free(window[i]);
+            }
+        }
+
+        
     }
 
     return 0;
