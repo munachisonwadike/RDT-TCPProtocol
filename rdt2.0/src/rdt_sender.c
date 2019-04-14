@@ -31,6 +31,8 @@ struct sockaddr_in serveraddr;
 struct itimerval timer; 
 tcp_packet *sndpkt;
 tcp_packet *recvpkt;
+tcp_packet* window[10]; //added a packet window  
+
 sigset_t sigmask;       
 
 
@@ -89,7 +91,6 @@ int main (int argc, char **argv)
     int window_base;//added this to identify the base of each window
     char *hostname;
     char buffer[DATA_SIZE];
-    tcp_packet* window[10]; //added a packet window  
     FILE *fp;
 
     /* check command line arguments */
@@ -145,17 +146,21 @@ int main (int argc, char **argv)
     		pkt_base = next_seqno;
         	next_seqno = pkt_base + len;
     		window[i] = make_packet(len);
+    		VLOG(DEBUG, "window[i]=%lu", window[i] );
     		memcpy(window[i]->data, buffer, len);
 	        window[i]->hdr.seqno = pkt_base;
+
+    		VLOG(DEBUG, "window[i]->hdr.seqno=%d", window[i]->hdr.seqno );
 	        i++;
     	}
 
         if ( len <= 0 && i == 0)
         {
-            VLOG(INFO, "End Of File has been reached and we didn't get any packets ");
+            VLOG(INFO, "End Of File has been reached and we didn't get any packets on this iteration ");
             sndpkt = make_packet(0);
             sendto(sockfd, sndpkt, TCP_HDR_SIZE,  0,
                     (const struct sockaddr *)&serveraddr, serverlen);
+	    free(sndpkt); 
             break;
         }        
         //Wait for ACK
@@ -171,16 +176,21 @@ int main (int argc, char **argv)
             //since the i'th packet is stored in window[i], loop through and attempt to send each packet
             //should get an error based on the packet
             int i;
+	    
+            VLOG(DEBUG, "GOT HERE 1");
+
+
 	    for (i = 0; i < 10; ++i)
             {
-            	if(sendto(sockfd, window[i], TCP_HDR_SIZE + get_data_size(sndpkt), 0, 
+            	if(sendto(sockfd, window[i], TCP_HDR_SIZE + get_data_size(window[i]), 0, 
                         ( const struct sockaddr *)&serveraddr, serverlen) < 0)
 	            {
 	                error("sendto error");
  			VLOG(DEBUG, "error for pckt seq no %d", window[i]->hdr.seqno);
 		    }
             }
-            
+	    VLOG(DEBUG, "GOT HERE 2");
+          
 
             start_timer();
             //ssize_t recvfrom(int sockfd, void *buf, size_t len, int flags,
@@ -202,8 +212,11 @@ int main (int argc, char **argv)
             stop_timer();
             /*resend the entire window if you don't recv ack for the window base */
         } while(recvpkt->hdr.ackno < window_base);
-
-        free(sndpkt);
+	int i;
+	for ( i = 0; i < 10; ++i)
+	{
+	     free(window[i]);
+	}
     }
 
     return 0;
