@@ -26,3 +26,5 @@ See table 3.2 for details of ack generation followed
 Since we only have one timer in the simplified version, and since we send acks
 cumulatively, we just need to shift the window base to the highest ack received
 and reset the timer to start as we send the packet at the base of the window.
+Also, for the same reasons, if we send all the packets in a window and all the acks
+arrive before the timeout except the first packet, then we must resend all of them
