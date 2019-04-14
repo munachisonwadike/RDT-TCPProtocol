@@ -40,14 +40,20 @@ void resend_packets(int sig)
 {
     if (sig == SIGALRM)
     {
-        //Resend all packets range between 
-        //sendBase and nextSeqNum
-        VLOG(INFO, "Timeout happened");
-        if(sendto(sockfd, sndpkt, TCP_HDR_SIZE + get_data_size(sndpkt), 0, 
-                    ( const struct sockaddr *)&serveraddr, serverlen) < 0)
+
+        VLOG(DEBUG, "GOT TO RESEND AFTER SIGALRM 1");       
+        for (i = 0; i < 10; ++i)
         {
-            error("sendto");
+            //Resend all packets range between 
+            //sendBase and nextSeqNum
+            VLOG(INFO, "Timeout happened");
+            if(sendto(sockfd, window[i], TCP_HDR_SIZE + get_data_size(window[i]), 0, 
+                        ( const struct sockaddr *)&serveraddr, serverlen) < 0)
+            {
+                error("sendto");
+            }
         }
+        VLOG(DEBUG, "GOT TO RESEND AFTER SIGALRM 2");       
     }
 }
 
@@ -178,19 +184,17 @@ int main (int argc, char **argv)
             int i;
 	    
             VLOG(DEBUG, "GOT HERE 1");
-
-
-	    for (i = 0; i < 10; ++i)
+    	    for (i = 0; i < 10; ++i)
             {
             	if(sendto(sockfd, window[i], TCP_HDR_SIZE + get_data_size(window[i]), 0, 
                         ( const struct sockaddr *)&serveraddr, serverlen) < 0)
 	            {
 	                error("sendto error");
- 			VLOG(DEBUG, "error for pckt seq no %d", window[i]->hdr.seqno);
-		    }
+ 			        VLOG(DEBUG, "error for pckt seq no %d", window[i]->hdr.seqno);
+                }
             }
-	    VLOG(DEBUG, "GOT HERE 2");
-          
+    	    VLOG(DEBUG, "GOT HERE 2");
+              
 
             start_timer();
             //ssize_t recvfrom(int sockfd, void *buf, size_t len, int flags,
@@ -210,14 +214,15 @@ int main (int argc, char **argv)
 	        }while(recvpkt->hdr.ackno != next_seqno);
             
             stop_timer();
-            /*resend the entire window if you don't recv ack for the window base */
-        } while(recvpkt->hdr.ackno < window_base);
-	int i;
+            /*resend the entire window if you don't recv ack for the last guy in the window (until we add the sliding part) */
+        } while(recvpkt->hdr.ackno < next_seqno);
+	
+    int i;
 	for ( i = 0; i < 10; ++i)
 	{
-	     free(window[i]);
+        free(window[i]);
 	}
-    }
+    
 
     return 0;
 
