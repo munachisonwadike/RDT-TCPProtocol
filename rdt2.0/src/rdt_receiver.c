@@ -29,6 +29,7 @@ tcp_packet *recvpkt;
 tcp_packet *sndpkt;
 
 int main(int argc, char **argv) {
+    VLOG(DEBUG, "VALUE OF DATA_SIZE! %lu",  DATA_SIZE);
     int sockfd; /* socket */
     int portno; /* port to listen on */
     int clientlen; /* byte size of client's address */
