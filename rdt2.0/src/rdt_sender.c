@@ -170,13 +170,15 @@ int main (int argc, char **argv)
              */
             //since the i'th packet is stored in window[i], loop through and attempt to send each packet
             //should get an error based on the packet
-            for (int i = 0; i < 10; ++i)
+            int i;
+	    for (i = 0; i < 10; ++i)
             {
             	if(sendto(sockfd, window[i], TCP_HDR_SIZE + get_data_size(sndpkt), 0, 
                         ( const struct sockaddr *)&serveraddr, serverlen) < 0)
 	            {
-	                error("sendto error for packet with seq no %d", window[i]->hdr.seqno);
-	            }
+	                error("sendto error");
+ 			VLOG(DEBUG, "error for pckt seq no %d", window[i]->hdr.seqno);
+		    }
             }
             
 
@@ -195,7 +197,7 @@ int main (int argc, char **argv)
 	            recvpkt = (tcp_packet *)buffer;
 	            printf("recvpckt-size %d \n", get_data_size(recvpkt));
 	            assert(get_data_size(recvpkt) <= DATA_SIZE);
-	        }while(recvpkt->hdr.ackno != next_seqno) 
+	        }while(recvpkt->hdr.ackno != next_seqno);
             
             stop_timer();
             /*resend the entire window if you don't recv ack for the window base */
