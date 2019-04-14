@@ -190,7 +190,6 @@ int main (int argc, char **argv)
                         ( const struct sockaddr *)&serveraddr, serverlen) < 0)
 	            {
 	                error("sendto error");
- 			        VLOG(DEBUG, "error for pckt seq no %d", window[i]->hdr.seqno);
                 }
             }
     	    VLOG(DEBUG, "GOT HERE 2");
