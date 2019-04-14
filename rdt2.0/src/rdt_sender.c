@@ -83,6 +83,7 @@ void init_timer(int delay, void (*sig_handler)(int))
 
 int main (int argc, char **argv)
 {
+    int pkt_base;
     int portno, len;
     int next_seqno;
     int window_base;//added this to identify the base of each window
@@ -137,7 +138,7 @@ int main (int argc, char **argv)
     	while ( i < 10 )//store the pointer to the i'th packet in window[i]
     	{
     		len = fread(buffer, 1, DATA_SIZE, fp);
-    		if len(<=0){
+    		if (len<=0){
     			VLOG(INFO, "End Of File has been reached and we may have gotten some packets from it");
     			break;
     		}
