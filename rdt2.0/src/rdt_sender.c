@@ -155,11 +155,8 @@ int main (int argc, char **argv)
     		pkt_base = next_seqno;
         	next_seqno = pkt_base + len;
     		window[i] = make_packet(len);
-    		VLOG(DEBUG, "window[i]=%lu", window[i] );
-    		memcpy(window[i]->data, buffer, len);
+     		memcpy(window[i]->data, buffer, len);
 	        window[i]->hdr.seqno = pkt_base;
-
-    		VLOG(DEBUG, "window[i]->hdr.seqno=%d", window[i]->hdr.seqno );
 	        i++;
     	}
 
@@ -234,7 +231,7 @@ int main (int argc, char **argv)
             }
         }
 
-        
+
     }
 
     return 0;
