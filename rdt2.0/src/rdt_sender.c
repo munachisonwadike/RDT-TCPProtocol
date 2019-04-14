@@ -85,7 +85,7 @@ int main (int argc, char **argv)
 {
     int portno, len;
     int next_seqno;
-    int window_base//added this to identify the base of each window
+    int window_base;//added this to identify the base of each window
     char *hostname;
     char buffer[DATA_SIZE];
     tcp_packet* window[10]; //added a packet window  
