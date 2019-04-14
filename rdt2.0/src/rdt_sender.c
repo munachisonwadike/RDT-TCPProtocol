@@ -210,11 +210,12 @@ int main (int argc, char **argv)
 	            // printf("recvpckt-size %d \n", get_data_size(recvpkt));
 	            assert(get_data_size(recvpkt) <= DATA_SIZE);
 	        }while(recvpkt->hdr.ackno != next_seqno);
-            VLOG(DEBUG, "ACK for packet of %d bytes with seq no %d received", recvpkt->hdr.data_size, recvpkt->hdr.seqno);
 
             stop_timer();
             /*resend the entire window if you don't recv ack for the last guy in the window (until we add the sliding part) */
         } while(recvpkt->hdr.ackno < next_seqno);
+        VLOG(DEBUG, "ACK for packets before the one with seq no %d received", recvpkt->hdr.ackno);
+
 	   
         if (eof == 0)
         {
