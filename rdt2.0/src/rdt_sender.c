@@ -41,7 +41,8 @@ void resend_packets(int sig)
     if (sig == SIGALRM)
     {
 
-        VLOG(DEBUG, "GOT TO RESEND AFTER SIGALRM 1");       
+        VLOG(DEBUG, "GOT TO RESEND AFTER SIGALRM 1");   
+        int i = 0;    
         for (i = 0; i < 10; ++i)
         {
             //Resend all packets range between 
