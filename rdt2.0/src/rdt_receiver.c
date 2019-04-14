@@ -122,6 +122,7 @@ int main(int argc, char **argv) {
                 (struct sockaddr *) &clientaddr, clientlen) < 0) {
             error("ERROR in sendto");
         }
+      
     }
 
     return 0;
