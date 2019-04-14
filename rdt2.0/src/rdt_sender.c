@@ -48,7 +48,7 @@ void resend_packets(int sig)
         {
             //Resend all packets range between 
             //sendBase and nextSeqNum
-            VLOG(INFO, "Timeout happened");
+            // VLOG(INFO, "Timeout happened");
             if(sendto(sockfd, window[i], TCP_HDR_SIZE + get_data_size(window[i]), 0, 
                         ( const struct sockaddr *)&serveraddr, serverlen) < 0)
             {
@@ -189,6 +189,8 @@ int main (int argc, char **argv)
 	            {
 	                error("sendto error");
                 }
+                printf("packet with seqno %d just sent \n", window[i]->hrd.seqno);
+
             }
               
 
@@ -205,7 +207,7 @@ int main (int argc, char **argv)
 	                error("recvfrom error");
 	            }
 	            recvpkt = (tcp_packet *)buffer;
-	            printf("recvpckt-size %d \n", get_data_size(recvpkt));
+	            // printf("recvpckt-size %d \n", get_data_size(recvpkt));
 	            assert(get_data_size(recvpkt) <= DATA_SIZE);
 	        }while(recvpkt->hdr.ackno != next_seqno);
             
