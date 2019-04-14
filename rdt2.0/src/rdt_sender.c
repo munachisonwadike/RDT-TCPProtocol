@@ -189,7 +189,7 @@ int main (int argc, char **argv)
 	            {
 	                error("sendto error");
                 }
-                printf("packet with seqno %d just sent \n", window[i]->hrd.seqno);
+                printf("packet with seqno %d just sent \n", window[i]->hdr.seqno);
 
             }
               
