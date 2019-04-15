@@ -32,6 +32,7 @@ int main(int argc, char **argv) {
     VLOG(DEBUG, "VALUE OF DATA_SIZE! %lu",  DATA_SIZE);
     int sockfd; /* socket */
     int portno; /* port to listen on */
+    int needed_pkt; /* int to ensure that we don't allow for out of order packets*/
     int clientlen; /* byte size of client's address */
     struct sockaddr_in serveraddr; /* server's addr */
     struct sockaddr_in clientaddr; /* client addr */
@@ -39,6 +40,7 @@ int main(int argc, char **argv) {
     FILE *fp;
     char buffer[MSS_SIZE];
     struct timeval tp;
+
 
     /* 
      * check command line arguments 
@@ -110,21 +112,31 @@ int main(int argc, char **argv) {
         /* 
          * sendto: ACK back to the client 
          */
-        gettimeofday(&tp, NULL);
-        VLOG(DEBUG, "%lu, %d, %d", tp.tv_sec, recvpkt->hdr.data_size, recvpkt->hdr.seqno);
+        if( recvpkt->hdr.seqno != needed_pkt )
+        {
+            sndpkt = make_packet(0);
+            sndpkt->hdr.ctr_flags = ACK;
+            if (sendto(sockfd, sndpkt, TCP_HDR_SIZE, 0, 
+                    (struct sockaddr *) &clientaddr, clientlen) < 0) {
+                error("ERROR in sendto");
+            }
+        }else{
+            gettimeofday(&tp, NULL);
+            VLOG(DEBUG, "%lu, %d, %d", tp.tv_sec, recvpkt->hdr.data_size, recvpkt->hdr.seqno);
 
-        fseek(fp, recvpkt->hdr.seqno, SEEK_SET);
-        fwrite(recvpkt->data, 1, recvpkt->hdr.data_size, fp);
-        sndpkt = make_packet(0);
-        sndpkt->hdr.ackno = recvpkt->hdr.seqno + recvpkt->hdr.data_size;
-        sndpkt->hdr.ctr_flags = ACK;
-        if (sendto(sockfd, sndpkt, TCP_HDR_SIZE, 0, 
-                (struct sockaddr *) &clientaddr, clientlen) < 0) {
-            error("ERROR in sendto");
+            fseek(fp, recvpkt->hdr.seqno, SEEK_SET);
+            fwrite(recvpkt->data, 1, recvpkt->hdr.data_size, fp);
+            sndpkt = make_packet(0);
+            sndpkt->hdr.ackno = recvpkt->hdr.seqno + recvpkt->hdr.data_size;
+            needed_pkt = sndpkt->hrd.ackno;
+            sndpkt->hdr.ctr_flags = ACK;
+            if (sendto(sockfd, sndpkt, TCP_HDR_SIZE, 0, 
+                    (struct sockaddr *) &clientaddr, clientlen) < 0) {
+                error("ERROR in sendto");
+            }
         }
-      
     }
-    
+
 
     return 0;
 }
