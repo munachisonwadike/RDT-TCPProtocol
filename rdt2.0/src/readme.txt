@@ -26,5 +26,14 @@ See table 3.2 for details of ack generation followed
 Since we only have one timer in the simplified version, and since we send acks
 cumulatively, we just need to shift the window base to the highest ack received
 and reset the timer to start as we send the packet at the base of the window.
-Also, for the same reasons, if we send all the packets in a window and all the acks
-arrive before the timeout except the first packet, then we must resend all of them
+
+The simple way I did this was to first implement the sender to send sequences
+of ten packets stored in an array. All the packets are sent, and if something is
+wrong, we resend the whole sequence. After that, the only adjustment was to 
+ensure that we shift the window up after every ack by copying the array and 
+placing a new packet at the end of it. Since there is only one timeout, we
+simply reset the timeout to start at the start of the first packet in the 
+window every time the window is shifted upwards.
+
+*Edit out*- still need to do the above, and note that you also chnage the
+values of next seq no and window base
