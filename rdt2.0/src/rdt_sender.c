@@ -166,7 +166,7 @@ int main (int argc, char **argv)
         sendto(sockfd, sndpkt, TCP_HDR_SIZE,  0,
                 (const struct sockaddr *)&serveraddr, serverlen);
         free(sndpkt); 
-        break;
+        exit(1);
     }        
 
     int stop = 0;
