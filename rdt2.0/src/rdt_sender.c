@@ -218,7 +218,10 @@ int main (int argc, char **argv)
 
             //if you received an ack, 
             shift = ( recvpkt->hdr.ackno - window_base ) / DATA_SIZE ; 
+            printf( "just received a shift of %d  \n", shift );
+
         }while(recvpkt->hdr.ackno != next_seqno); //next_seq_no is largest packet number in window
+        printf( "shift value leaving the loop is %d  \n", shift );
 
 
         stop_timer();
