@@ -204,40 +204,40 @@ int main(int argc, char **argv) {
              */ 
             needed_pkt2 = recvpkt->hdr.seqno + recvpkt->hdr.data_size; /* specify which number the next packet should have*/
                 
-        //     /* start the wait */
-        //     start_timer(); 
-        //     if (recvfrom(sockfd, buffer, MSS_SIZE, 0,
-        //         (struct sockaddr *) &clientaddr, (socklen_t *)&clientlen) < 0 && errno == EINTR) 
-        //     {
-        //         error("ERROR in recvfrom");
-        //     }
-        //     recvpkt2 = (tcp_packet *) buffer;
-        //     assert(get_data_size(recvpkt2) <= DATA_SIZE);
-        //     if ( recvpkt2->hdr.data_size == 0) /* if it was an empty packet, close program*/
-        //     {
-        //         sndpkt = make_packet(0);
-        //         if (sendto(sockfd, sndpkt, TCP_HDR_SIZE, 0, 
-        //                 (struct sockaddr *) &clientaddr, clientlen) < 0) {
-        //             error("ERROR in sendto");
-        //         }
-        //         VLOG(INFO, "End Of File has been reached");
-        //         fclose(fp);
-        //         free(sndpkt);
-        //         break;
-        //     }
-        //     /* end the wait*/
-        //     stop_timer(); 
+            /* start the wait */
+            start_timer(); 
+            if (recvfrom(sockfd, buffer, MSS_SIZE, 0,
+                (struct sockaddr *) &clientaddr, (socklen_t *)&clientlen) < 0 && errno == EINTR) 
+            {
+                error("ERROR in recvfrom");
+            }
+            recvpkt2 = (tcp_packet *) buffer;
+            assert(get_data_size(recvpkt2) <= DATA_SIZE);
+            if ( recvpkt2->hdr.data_size == 0) /* if it was an empty packet, close program*/
+            {
+                sndpkt = make_packet(0);
+                if (sendto(sockfd, sndpkt, TCP_HDR_SIZE, 0, 
+                        (struct sockaddr *) &clientaddr, clientlen) < 0) {
+                    error("ERROR in sendto");
+                }
+                VLOG(INFO, "End Of File has been reached");
+                fclose(fp);
+                free(sndpkt);
+                break;
+            }
+            /* end the wait*/
+            stop_timer(); 
 
-        //     /* if what you recieved was good, add it to the written file */
-        //     if( recvpkt2->hdr.seqno == needed_pkt2 )
-        //     {
-        //         gettimeofday(&tp, NULL);
-        //         VLOG(DEBUG, "%lu, %d, %d", tp.tv_sec, recvpkt2->hdr.data_size, recvpkt2->hdr.seqno);
-        //         fseek(fp, recvpkt2->hdr.seqno, SEEK_SET);
-        //         fwrite(recvpkt2->data, 1, recvpkt2->hdr.data_size, fp);
-        //         recvpkt2 = recvpkt; /* if the packet was good, make sure that you are sending a cumulative ack */
-        //     }       
-        // /**/
+            /* if what you recieved was good, add it to the written file */
+            if( recvpkt2->hdr.seqno == needed_pkt2 )
+            {
+                gettimeofday(&tp, NULL);
+                VLOG(DEBUG, "%lu, %d, %d", tp.tv_sec, recvpkt2->hdr.data_size, recvpkt2->hdr.seqno);
+                fseek(fp, recvpkt2->hdr.seqno, SEEK_SET);
+                fwrite(recvpkt2->data, 1, recvpkt2->hdr.data_size, fp);
+                recvpkt = recvpkt2; /* if the packet was good, make sure that you are sending a cumulative ack */
+            }       
+        /**/
 
             /* send cumulative ack of the two packets or the one packet if no second one came */
             sndpkt = make_packet(0);
