@@ -139,7 +139,6 @@ int main (int argc, char **argv)
 
     init_timer(RETRY, resend_packets);
     next_seqno = 0;
-    	
 	window_base = next_seqno;//set the initial value of window base
 	//loop 10 times to make 10 packets
 	int i = 0;
@@ -220,7 +219,7 @@ int main (int argc, char **argv)
 
 
         //change window base
-        window_base = window[j+shift]->hdr.seqno
+        window_base = window[shift]->hdr.seqno;
 
         //shift the window up      
         int j;
