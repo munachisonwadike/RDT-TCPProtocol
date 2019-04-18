@@ -200,36 +200,30 @@ int main (int argc, char **argv)
         //struct sockaddr *src_addr, socklen_t *addrlen);
 
 
-        //if you get an ack, process it and stop timer 
-        
+        /* if you get an ack, process it and stop timer */ 
         if(recvfrom(sockfd, buffer, MSS_SIZE, 0,
                     (struct sockaddr *) &serveraddr, (socklen_t *)&serverlen) < 0)
         {
             error("recvfrom error");
         }
         recvpkt = (tcp_packet *)buffer;
-
         // printf("recvpckt-size %d \n", get_data_size(recvpkt));
         assert(get_data_size(recvpkt) <= DATA_SIZE);
 
-        //if you received an ack, 
+        //if you received an ack, calculate the packet number relative to current sending windo to shift to that packet
         shift = ( recvpkt->hdr.ackno - window_base ) / DATA_SIZE ; 
         
-        //change window base
+        //shift to new window
         window_base = window[shift]->hdr.seqno;
         printf( "just received ack number %d causing shift %d while the window_base is %d \n",  recvpkt->hdr.ackno, shift, window_base );
         stop_timer();
 
-
-
-        //shift the window up      
+        //populate the new new window      
         int j;
         for ( j = 0 ; j < 10 - shift ; ++j )
         {
             window[j] = window[j + shift]; 
         }
-
-        //fill the rest of it with packets
         for ( j = 10 - shift ; j < 10 ; ++j )
         {
             len = fread(buffer, 1, DATA_SIZE, fp);
@@ -238,13 +232,33 @@ int main (int argc, char **argv)
                 window[j] = make_packet(0);
                 stop = 1;
             }else{
-                pkt_base = next_seqno;
-                next_seqno = pkt_base + len;
+                pkt_base = next_seqno; //next_seqno should be the past packet sequence number in old window
+                next_seqno = pkt_base + len; //through this loop, next_seqno becomes the seq number for the last packet in new window
                 window[j] = make_packet(len);
                 memcpy(window[j]->data, buffer, len);
                 window[j]->hdr.seqno = pkt_base;
                 j++;
             }
+        }
+
+        // if you are at the end of the file, go into a loop to send all the remaining packets
+        if( stop )
+        {
+            do
+            {   
+                start_timer();
+                /* if you get an ack, process it and stop timer */ 
+                if(recvfrom(sockfd, buffer, MSS_SIZE, 0,
+                            (struct sockaddr *) &serveraddr, (socklen_t *)&serverlen) < 0)
+                {
+                    error("recvfrom error");
+                }
+                recvpkt = (tcp_packet *)buffer;
+                // printf("recvpckt-size %d \n", get_data_size(recvpkt));
+                assert(get_data_size(recvpkt) <= DATA_SIZE);
+                printf( "just received ack number %d causing shift %d  for FINAL window %d \n",  recvpkt->hdr.ackno, shift, window_base );
+                stop_timer();
+            }while( recvpkt->hdr.ackno < next_seqno );
         }
 
     } while(!stop);
