@@ -168,7 +168,8 @@ int main (int argc, char **argv)
         exit(1);
     }        
 
-    int stop = 0;
+    int stop = 0; 
+    int count = 0;
     //Constantly send the packets, wait for acks, and slide the window up for the next iteration of this loop
     do {
 
@@ -246,6 +247,9 @@ int main (int argc, char **argv)
                 j++;
             }
         }
+    count ++;
+    if (count==1)
+        break;
 
     } while(!stop);
     VLOG(DEBUG, "ACK for packets before the one with seq no %d received", recvpkt->hdr.ackno);
