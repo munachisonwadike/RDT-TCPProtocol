@@ -28,6 +28,7 @@
  * only one send and receive packet
  */
 tcp_packet *recvpkt;
+tcp_packet *recvpkt2;
 tcp_packet *sndpkt;
 
 sigset_t sigmask;  
@@ -91,6 +92,7 @@ int main(int argc, char **argv) {
     int sockfd; /* socket */
     int portno; /* port to listen on */
     int needed_pkt = 0; /* int to ensure that we don't allow for out of order packets*/
+    int needed_pkt2 = 0; /* int to ensure that we don't allow for out of order packets*/
     int clientlen; /* byte size of client's address */
     struct sockaddr_in serveraddr; /* server's addr */
     struct sockaddr_in clientaddr; /* client addr */
@@ -165,7 +167,7 @@ int main(int argc, char **argv) {
         }
         recvpkt = (tcp_packet *) buffer;
         assert(get_data_size(recvpkt) <= DATA_SIZE);
-        if ( recvpkt->hdr.data_size == 0) {
+        if ( recvpkt->hdr.data_size == 0) { /* if it was empty packet, close the program */
             sndpkt = make_packet(0);
             if (sendto(sockfd, sndpkt, TCP_HDR_SIZE, 0, 
                     (struct sockaddr *) &clientaddr, clientlen) < 0) {
@@ -173,6 +175,7 @@ int main(int argc, char **argv) {
             }
             VLOG(INFO, "End Of File has been reached");
             fclose(fp);
+            free(sndpkt);
             break;
         }
 
@@ -194,42 +197,53 @@ int main(int argc, char **argv) {
             fseek(fp, recvpkt->hdr.seqno, SEEK_SET);
             fwrite(recvpkt->data, 1, recvpkt->hdr.data_size, fp);
 
+
+        /**/
             /*
-             * if you get a datagram, wait for another for 500 ms for another to possible packet
+             * Wait for another for 500 ms for another to possible packet
              */ 
-            
-
-            start_timer();
-            if (stop)
-            {
-                printf("cleanup \n");
-            }
-
+            needed_pkt2 = recvpkt->hdr.seqno + recvpkt->hdr.data_size; /* specify which number the next packet should have*/
+                
+            /* start the wait */
+            start_timer(); 
+            // if (stop)
+            // {
+            //     printf("cleanup \n");
+            // }
             if (recvfrom(sockfd, buffer, MSS_SIZE, 0,
-                (struct sockaddr *) &clientaddr, (socklen_t *)&clientlen) < 0 && errno == EINTR) {
-            error("ERROR in recvfrom");
+                (struct sockaddr *) &clientaddr, (socklen_t *)&clientlen) < 0 && errno == EINTR) 
+            {
+                error("ERROR in recvfrom");
             }
-            recvpkt = (tcp_packet *) buffer;
-            assert(get_data_size(recvpkt) <= DATA_SIZE);
-            if ( recvpkt->hdr.data_size == 0) {
-                sndpkt = make_packet(0);
-                if (sendto(sockfd, sndpkt, TCP_HDR_SIZE, 0, 
+            recvpkt2 = (tcp_packet *) buffer;
+            assert(get_data_size(recvpkt2) <= DATA_SIZE);
+            if ( recvpkt2->hdr.data_size == 0) /* if it was an empty packet, close program*/
+            {
+                sndpkt2 = make_packet(0);
+                if (sendto(sockfd, sndpkt2, TCP_HDR_SIZE, 0, 
                         (struct sockaddr *) &clientaddr, clientlen) < 0) {
                     error("ERROR in sendto");
                 }
                 VLOG(INFO, "End Of File has been reached");
                 fclose(fp);
+                free(sndpkt2);
                 break;
             }
-            gettimeofday(&tp, NULL);
-            VLOG(DEBUG, "%lu, %d, %d", tp.tv_sec, recvpkt->hdr.data_size, recvpkt->hdr.seqno);
+            /* end the wait*/
+            stop_timer(); 
 
-            fseek(fp, recvpkt->hdr.seqno, SEEK_SET);
-            fwrite(recvpkt->data, 1, recvpkt->hdr.data_size, fp);
-            stop_timer();
+            /* if what you recieved was good, add it to the written file */
+            if( recvpkt2->hdr.seqno == needed_pkt2 )
+            {
+                gettimeofday(&tp, NULL);
+                VLOG(DEBUG, "%lu, %d, %d", tp.tv_sec, recvpkt2->hdr.data_size, recvpkt2->hdr.seqno);
+                fseek(fp, recvpkt2->hdr.seqno, SEEK_SET);
+                fwrite(recvpkt2->data, 1, recvpkt2->hdr.data_size, fp);
+                recvpkt2 = recvpkt /* if the packet was good, make sure that you are sending a cumulative ack */
+            }       
+        /**/
 
-
-            /* send cumulative ack of the two packets below (or the one packet if no second one came) */
+            /* send cumulative ack of the two packets or the one packet if no second one came */
             sndpkt = make_packet(0);
             sndpkt->hdr.ackno = recvpkt->hdr.seqno + recvpkt->hdr.data_size;
             needed_pkt = sndpkt->hdr.ackno;
