@@ -150,7 +150,6 @@ int main (int argc, char **argv)
 		len = fread(buffer, 1, DATA_SIZE, fp);
 		if (len<=0){
 			VLOG(INFO, "End Of File has been reached and we may have gotten some packets from it");
-            eof = i; 
 			break;
 		}
 		pkt_base = next_seqno;
