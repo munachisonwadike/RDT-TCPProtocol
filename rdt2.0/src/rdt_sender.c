@@ -244,8 +244,8 @@ int main (int argc, char **argv)
                 VLOG(INFO, "End Of File has been reached and we may have gotten some packets from it");
                 window[j] = make_packet(0);
                 stop = 1;
-                final_end = j;
-                break;
+                // final_end = j;
+                // break;
             }else{
                 pkt_base = next_seqno;
                 next_seqno = pkt_base + len; 
@@ -265,13 +265,13 @@ int main (int argc, char **argv)
         if( stop == 1 )
         {   
             printf("WE ARE NOW IN THE STOP STATEMENT\n");
-            final_start = 0; 
+            // final_start = 0; 
             
             do
             {  
                 printf("GOT TO THE LOOP\n");
                 /* send the packets */
-                for ( k = final_start; k < final_end; ++k)
+                for ( k = 0; k < 10; ++k)
                 {
                     printf("kth value of loop = %d\n", k);
                     if(sendto(sockfd, window[k], TCP_HDR_SIZE + get_data_size(window[k]), 0, 
@@ -296,10 +296,10 @@ int main (int argc, char **argv)
                 stop_timer();
                
                 /* shrink the window start closer to the end by setting to the highest acked packet */
-                final_start = ( recvpkt->hdr.ackno - window[final_start]->hdr.seqno ) / DATA_SIZE ; 
-                printf( " and final start is %d \n", final_start );
+                // final_start = ( recvpkt->hdr.ackno - window[final_start]->hdr.seqno ) / DATA_SIZE ; 
+                // printf( " and final start is %d \n", final_start );
 
-            }while( recvpkt->hdr.ackno < window[final_end]->hdr.seqno );   
+            }while( recvpkt->hdr.ackno < window[10]->hdr.seqno );   
 
 
             /* after sending the last window off, send a 0 packet so that the receiver knows to close itself */
