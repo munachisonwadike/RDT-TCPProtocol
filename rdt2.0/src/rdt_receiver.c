@@ -215,7 +215,8 @@ int main(int argc, char **argv) {
              * Wait up to 500 ms for another to possible packet
              */ 
             needed_pkt = recvpkt->hdr.seqno + recvpkt->hdr.data_size; /* specify which number the next packet should have*/
-                
+            
+        /**/
             /* start the wait */
             start_timer(); 
             if (recvfrom(sockfd, buffer, MSS_SIZE, 0,
@@ -239,6 +240,8 @@ int main(int argc, char **argv) {
             }
             /* end the wait and restart the loop if you get another packet */
             stop_timer(); 
+
+        /**/
 
             
 
