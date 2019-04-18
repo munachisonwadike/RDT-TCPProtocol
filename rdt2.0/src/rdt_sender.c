@@ -172,8 +172,6 @@ int main (int argc, char **argv)
     //Constantly send the packets, wait for acks, and slide the window up for the next iteration of this loop
     do {
 
-        if (stop == 1) 
-            stop = 2;
 
         VLOG(DEBUG, "Sending window starting at seq number %d to %s", 
                 window_base, inet_ntoa(serveraddr.sin_addr));
@@ -222,7 +220,7 @@ int main (int argc, char **argv)
         stop_timer();
 
         //populate the new new window though you won't send out the content of the window till the next loop iteration     
-        int j;
+        int j; int final_end;
         for ( j = 0 ; j < 10 - shift ; ++j )
         {
 
@@ -235,6 +233,7 @@ int main (int argc, char **argv)
                 VLOG(INFO, "End Of File has been reached and we may have gotten some packets from it");
                 window[j] = make_packet(0);
                 stop = 1;
+                final_end = j;
             }else{
                 pkt_base = next_seqno; //next_seqno should be the past packet sequence number in old window
                 next_seqno = pkt_base + len; //through this loop, next_seqno becomes the seq number for the last packet in new window
@@ -246,13 +245,27 @@ int main (int argc, char **argv)
         }
 
         // if you are at the end of the file, go into a loop to send all the remaining packets
-        if( stop == 2 )
+        if( stop )
         {   
             printf("WE ARE NOW IN THE STOP STATEMENT\n");
+            int final_start = 0; 
+            int k;
             do
-            {   
+            {  
+                //send the packets
+                for ( k = final_start; k < final_end; ++k)
+                {
+                    if(sendto(sockfd, window[final_start], TCP_HDR_SIZE + get_data_size(window[i]), 0, 
+                            ( const struct sockaddr *)&serveraddr, serverlen) < 0)
+                    {
+                        error("sendto error");
+                    }
+                    printf("packet with seqno %d just sent \n", window[i]->hdr.seqno);
+
+                }
+          
                 start_timer();
-                /* if you get an ack, process it and stop timer */ 
+                // if you get an ack, process it and stop timer - timer ensures you don't wait indefinitely 
                 if(recvfrom(sockfd, buffer, MSS_SIZE, 0,
                             (struct sockaddr *) &serveraddr, (socklen_t *)&serverlen) < 0)
                 {
@@ -263,26 +276,31 @@ int main (int argc, char **argv)
                 assert(get_data_size(recvpkt) <= DATA_SIZE);
                 printf( "just received ack number %d causing shift %d  for FINAL window %d \n",  recvpkt->hdr.ackno, shift, window_base );
                 stop_timer();
-            }while( recvpkt->hdr.ackno < next_seqno );
-        }
+                final_start = ( recvpkt->hdr.ackno - window[final_start]->hdr.ackno ) / DATA_SIZE ;
 
+            }while( recvpkt->hdr.ackno < window[final_end]->hdr.ackno ); //if the packet received isn't the 
+
+
+            //after sending the last window off, send a 0 packet so that the receiver knows to close itself
+            VLOG(INFO, "End Of File has been reached and time to stop ");
+            sndpkt = make_packet(0);
+            sendto(sockfd, sndpkt, TCP_HDR_SIZE,  0,
+                    (const struct sockaddr *)&serveraddr, serverlen);
+            free(sndpkt); 
+            exit(1);
+        
+        }
+        
     } while(!stop);
     VLOG(DEBUG, "ACK for packets before the one with seq no %d received", recvpkt->hdr.ackno);
 
    
-    if (eof == 0)
+     
+    for ( i = 0; i < 10; ++i)
     {
-    	for ( i = 0; i < 10; ++i)
-    	{
-            free(window[i]);
-    	}
-    }else
-    {   
-        for ( i = 0; i < eof; ++i)
-        {
-            free(window[i]);
-        }
+        free(window[i]);
     }
+
 
 
 
