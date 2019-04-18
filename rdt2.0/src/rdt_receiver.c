@@ -4,8 +4,10 @@
  * email: nr83@nyu.edu
  */
 
+#include <errno.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <signal.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h> 
@@ -28,6 +30,27 @@
 tcp_packet *recvpkt;
 tcp_packet *sndpkt;
 
+sigset_t sigmask;  
+struct itimerval timer; 
+
+volatile int stop = 0;
+
+/*
+ * handler to know when the timer counts down 
+ */
+void handler(int sig)
+{
+    if (sig == SIGALRM)
+    {
+
+        VLOG(DEBUG, "RESEND FUNCTION TRIGGERED");   
+        stop = 1;
+    }
+    
+}
+
+
+
 void start_timer()
 {
     sigprocmask(SIG_UNBLOCK, &sigmask, NULL);
@@ -49,7 +72,7 @@ void stop_timer()
  */
 void init_timer(int delay, void (*sig_handler)(int)) 
 {
-    signal(SIGALRM, handle);
+    signal(SIGALRM, handler);
     timer.it_interval.tv_sec = delay / 1000;    // sets an interval of the timer
     timer.it_interval.tv_usec = (delay % 1000) * 1000;  
     timer.it_value.tv_sec = delay / 1000;       // sets an initial value
@@ -60,19 +83,7 @@ void init_timer(int delay, void (*sig_handler)(int))
 }
 
 
-/*
- * handler to know when the timer counts down 
- */
-void handler(int sig)
-{
-    if (sig == SIGALRM)
-    {
 
-        VLOG(DEBUG, "RESEND FUNCTION TRIGGERED");   
-        stop = 1;
-    }
-    
-}
 
 
 int main(int argc, char **argv) {
@@ -192,9 +203,8 @@ int main(int argc, char **argv) {
             if (stop)
             {
                 printf("cleanup \n");
-                return;
             }
-            
+
             if (recvfrom(sockfd, buffer, MSS_SIZE, 0,
                 (struct sockaddr *) &clientaddr, (socklen_t *)&clientlen) < 0 && errno == EINTR) {
             error("ERROR in recvfrom");
