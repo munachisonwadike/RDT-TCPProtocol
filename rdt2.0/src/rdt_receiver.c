@@ -219,14 +219,14 @@ int main(int argc, char **argv) {
             assert(get_data_size(recvpkt2) <= DATA_SIZE);
             if ( recvpkt2->hdr.data_size == 0) /* if it was an empty packet, close program*/
             {
-                sndpkt2 = make_packet(0);
-                if (sendto(sockfd, sndpkt2, TCP_HDR_SIZE, 0, 
+                sndpkt = make_packet(0);
+                if (sendto(sockfd, sndpkt, TCP_HDR_SIZE, 0, 
                         (struct sockaddr *) &clientaddr, clientlen) < 0) {
                     error("ERROR in sendto");
                 }
                 VLOG(INFO, "End Of File has been reached");
                 fclose(fp);
-                free(sndpkt2);
+                free(sndpkt);
                 break;
             }
             /* end the wait*/
@@ -239,7 +239,7 @@ int main(int argc, char **argv) {
                 VLOG(DEBUG, "%lu, %d, %d", tp.tv_sec, recvpkt2->hdr.data_size, recvpkt2->hdr.seqno);
                 fseek(fp, recvpkt2->hdr.seqno, SEEK_SET);
                 fwrite(recvpkt2->data, 1, recvpkt2->hdr.data_size, fp);
-                recvpkt2 = recvpkt /* if the packet was good, make sure that you are sending a cumulative ack */
+                recvpkt2 = recvpkt; /* if the packet was good, make sure that you are sending a cumulative ack */
             }       
         /**/
 
