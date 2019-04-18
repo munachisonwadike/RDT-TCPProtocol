@@ -222,7 +222,7 @@ int main (int argc, char **argv)
         
         /* shift to new window */
         window_base = window[shift]->hdr.seqno;
-        printf( "just received ack number %d causing shift %d while the window_base is %d \n",  recvpkt->hdr.ackno, shift, window_base );
+        printf( "just received ack number %d causing shift %d while the window_base goes from %d to %d \n",  recvpkt->hdr.ackno, shift, window_base );
         stop_timer();
 
 
@@ -269,6 +269,7 @@ int main (int argc, char **argv)
             
             do
             {  
+
                 printf("GOT TO THE LOOP\n");
                 /* send the packets */
                 for ( k = 0; k < 10; ++k)
