@@ -244,7 +244,8 @@ int main (int argc, char **argv)
 
         // if you are at the end of the file, go into a loop to send all the remaining packets
         if( stop )
-        {
+        {   
+            printf("WE ARE NOW IN THE STOP STATEMENT\n");
             do
             {   
                 start_timer();
