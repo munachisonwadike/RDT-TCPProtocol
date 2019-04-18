@@ -242,9 +242,6 @@ int main (int argc, char **argv)
             }
         }
 
-        if(window_base == 29120 ){
-            break;
-        }
         // if you are at the end of the file, go into a loop to send all the remaining packets
         if( stop )
         {
