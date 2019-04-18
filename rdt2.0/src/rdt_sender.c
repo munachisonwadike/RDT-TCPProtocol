@@ -222,6 +222,7 @@ int main (int argc, char **argv)
         int j;
         for ( j = 0 ; j < 10 - shift ; ++j )
         {
+
             window[j] = window[j + shift]; 
         }
         for ( j = 10 - shift ; j < 10 ; ++j )
@@ -241,6 +242,9 @@ int main (int argc, char **argv)
             }
         }
 
+        if(window_base == 29120 ){
+            break;
+        }
         // if you are at the end of the file, go into a loop to send all the remaining packets
         if( stop )
         {
