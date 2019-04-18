@@ -260,7 +260,7 @@ int main (int argc, char **argv)
                 for ( k = final_start; k < final_end; ++k)
                 {
                     printf("kth value of loop = %d\n", k);
-                    if(sendto(sockfd, window[k], TCP_HDR_SIZE + get_data_size(window[i]), 0, 
+                    if(sendto(sockfd, window[k], TCP_HDR_SIZE + get_data_size(window[k]), 0, 
                             ( const struct sockaddr *)&serveraddr, serverlen) < 0)
                     {
                         error("sendto error");
