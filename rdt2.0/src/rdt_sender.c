@@ -219,7 +219,10 @@ int main (int argc, char **argv)
         stop_timer();
 
 
-        //shift the window up        
+        //change window base
+        window_base = window[j+shift]->hdr.seqno
+
+        //shift the window up      
         int j;
         for ( j = 0 ; j < 10 - shift ; ++j )
         {
@@ -243,6 +246,7 @@ int main (int argc, char **argv)
                 j++;
             }
         }
+
     } while(!stop);
     VLOG(DEBUG, "ACK for packets before the one with seq no %d received", recvpkt->hdr.ackno);
 
