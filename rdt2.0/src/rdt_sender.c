@@ -172,6 +172,9 @@ int main (int argc, char **argv)
     //Constantly send the packets, wait for acks, and slide the window up for the next iteration of this loop
     do {
 
+        if (stop == 1) 
+            stop = 2;
+
         VLOG(DEBUG, "Sending window starting at seq number %d to %s", 
                 window_base, inet_ntoa(serveraddr.sin_addr));
         /*
@@ -218,7 +221,7 @@ int main (int argc, char **argv)
         printf( "just received ack number %d causing shift %d while the window_base is %d \n",  recvpkt->hdr.ackno, shift, window_base );
         stop_timer();
 
-        //populate the new new window      
+        //populate the new new window though you won't send out the content of the window till the next loop iteration     
         int j;
         for ( j = 0 ; j < 10 - shift ; ++j )
         {
@@ -243,7 +246,7 @@ int main (int argc, char **argv)
         }
 
         // if you are at the end of the file, go into a loop to send all the remaining packets
-        if( stop )
+        if( stop == 2 )
         {   
             printf("WE ARE NOW IN THE STOP STATEMENT\n");
             do
