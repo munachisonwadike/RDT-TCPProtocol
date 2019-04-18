@@ -32,7 +32,7 @@ int main(int argc, char **argv) {
     VLOG(DEBUG, "VALUE OF DATA_SIZE! %lu",  DATA_SIZE);
     int sockfd; /* socket */
     int portno; /* port to listen on */
-    int needed_pkt; /* int to ensure that we don't allow for out of order packets*/
+    int needed_pkt = 0; /* int to ensure that we don't allow for out of order packets*/
     int clientlen; /* byte size of client's address */
     struct sockaddr_in serveraddr; /* server's addr */
     struct sockaddr_in clientaddr; /* client addr */
