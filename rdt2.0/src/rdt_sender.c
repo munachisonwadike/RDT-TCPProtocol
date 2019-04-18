@@ -35,6 +35,7 @@ tcp_packet* window[10]; /* array to store packet window */
 
 sigset_t sigmask;       
 
+volatile int stop = 0;
 
 void resend_packets(int sig)
 {
@@ -205,7 +206,10 @@ int main (int argc, char **argv)
 
         }
           
-        /* start the timer right after sending and while waiting for ACKS */
+        /* 
+         * start the timer right after sending and while waiting for ACKS
+         * this is the only time that gets restarted every time we shift the window
+         */
         start_timer();
 
         /* if you get an ack, process it and stop timer */ 
@@ -229,7 +233,7 @@ int main (int argc, char **argv)
 
 
         /* 
-         * populate the empty part of the new new window 
+         * populate the empty part of the new window 
          * note you won't send out the content of the window till the next loop iteration 
          */     
         int j; 

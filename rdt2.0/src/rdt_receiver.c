@@ -28,6 +28,53 @@
 tcp_packet *recvpkt;
 tcp_packet *sndpkt;
 
+void start_timer()
+{
+    sigprocmask(SIG_UNBLOCK, &sigmask, NULL);
+    setitimer(ITIMER_REAL, &timer, NULL);
+}
+
+
+void stop_timer()
+{
+
+    sigprocmask(SIG_BLOCK, &sigmask, NULL);
+}
+
+
+/*
+ * init_timer: Initialize timer
+ * delay: delay in milliseconds
+ * sig_handler: signal handler function for resending unacknowledged packets
+ */
+void init_timer(int delay, void (*sig_handler)(int)) 
+{
+    signal(SIGALRM, handle);
+    timer.it_interval.tv_sec = delay / 1000;    // sets an interval of the timer
+    timer.it_interval.tv_usec = (delay % 1000) * 1000;  
+    timer.it_value.tv_sec = delay / 1000;       // sets an initial value
+    timer.it_value.tv_usec = (delay % 1000) * 1000;
+
+    sigemptyset(&sigmask);
+    sigaddset(&sigmask, SIGALRM);
+}
+
+
+/*
+ * handler to know when the timer counts down 
+ */
+void handler(int sig)
+{
+    if (sig == SIGALRM)
+    {
+
+        VLOG(DEBUG, "RESEND FUNCTION TRIGGERED");   
+        stop = 1;
+    }
+    
+}
+
+
 int main(int argc, char **argv) {
     VLOG(DEBUG, "VALUE OF DATA_SIZE! %lu",  DATA_SIZE);
     int sockfd; /* socket */
@@ -87,6 +134,10 @@ int main(int argc, char **argv) {
                 sizeof(serveraddr)) < 0) 
         error("ERROR on binding");
 
+    
+
+    init_timer(500, handler);
+
     /* 
      * main loop: wait for a datagram, then echo it
      */
@@ -95,7 +146,7 @@ int main(int argc, char **argv) {
     clientlen = sizeof(clientaddr);
     while (1) {
         /*
-         * recvfrom: receive a UDP datagram from a client
+         * recvfrom: receive a udp datagram from a client
          */
         if (recvfrom(sockfd, buffer, MSS_SIZE, 0,
                 (struct sockaddr *) &clientaddr, (socklen_t *)&clientlen) < 0) {
@@ -113,12 +164,13 @@ int main(int argc, char **argv) {
             fclose(fp);
             break;
         }
+
         /* 
-         * sendto: ACK back to the client 
+         * sendto: ack back to the client 
          */
 
         /* 
-         * Case 1: If we get the next packet we are expecting in sequence,
+         * case 1: if we get the next packet we are expecting in sequence,
          * then send write the packet to the output file. Wait to see if there is any new packet coming for 
          * 500 ms before sending ack. If there was already one waiting, send ack for both, cumulatively
          */
@@ -131,7 +183,43 @@ int main(int argc, char **argv) {
             fseek(fp, recvpkt->hdr.seqno, SEEK_SET);
             fwrite(recvpkt->data, 1, recvpkt->hdr.data_size, fp);
 
+            /*
+             * if you get a datagram, wait for another for 500 ms for another to possible packet
+             */ 
+            
 
+            start_timer();
+            if (stop)
+            {
+                printf("cleanup \n");
+                return;
+            }
+            
+            if (recvfrom(sockfd, buffer, MSS_SIZE, 0,
+                (struct sockaddr *) &clientaddr, (socklen_t *)&clientlen) < 0 && errno == EINTR) {
+            error("ERROR in recvfrom");
+            }
+            recvpkt = (tcp_packet *) buffer;
+            assert(get_data_size(recvpkt) <= DATA_SIZE);
+            if ( recvpkt->hdr.data_size == 0) {
+                sndpkt = make_packet(0);
+                if (sendto(sockfd, sndpkt, TCP_HDR_SIZE, 0, 
+                        (struct sockaddr *) &clientaddr, clientlen) < 0) {
+                    error("ERROR in sendto");
+                }
+                VLOG(INFO, "End Of File has been reached");
+                fclose(fp);
+                break;
+            }
+            gettimeofday(&tp, NULL);
+            VLOG(DEBUG, "%lu, %d, %d", tp.tv_sec, recvpkt->hdr.data_size, recvpkt->hdr.seqno);
+
+            fseek(fp, recvpkt->hdr.seqno, SEEK_SET);
+            fwrite(recvpkt->data, 1, recvpkt->hdr.data_size, fp);
+            stop_timer();
+
+
+            /* send cumulative ack of the two packets below (or the one packet if no second one came) */
             sndpkt = make_packet(0);
             sndpkt->hdr.ackno = recvpkt->hdr.seqno + recvpkt->hdr.data_size;
             needed_pkt = sndpkt->hdr.ackno;
@@ -139,23 +227,17 @@ int main(int argc, char **argv) {
             if (sendto(sockfd, sndpkt, TCP_HDR_SIZE, 0, 
                     (struct sockaddr *) &clientaddr, clientlen) < 0) {
                 error("ERROR in sendto");
-            }
-
-                    // if you get a datagram, wait for another for 500 ms
-        // do
-        // {
-        //     //wait 500ms
-        // }while(!stop);
+            }            
 
         /*
-         * Case 2: Ignore duplicates received from rdt sender
+         * case 2: ignore duplicates received from rdt sender
          */
         }else if ( recvpkt->hdr.seqno < needed_pkt ){
 
             continue;
 
         /*
-         * Case 3: Send a duplicate ack when we are getting an out of order packet
+         * case 3: send a duplicate ack when we are getting an out of order packet
          * higher than what is needed
          */
         }else{
