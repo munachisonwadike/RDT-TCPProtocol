@@ -233,7 +233,7 @@ int main (int argc, char **argv)
                 VLOG(INFO, "End Of File has been reached and we may have gotten some packets from it");
                 window[j] = make_packet(0);
                 stop = 1;
-                final_end = j+1;
+                final_end = j;
                 break;
             }else{
                 pkt_base = next_seqno; //next_seqno should be the past packet sequence number in old window
