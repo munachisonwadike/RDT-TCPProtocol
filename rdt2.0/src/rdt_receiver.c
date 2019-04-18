@@ -97,7 +97,6 @@ int main(int argc, char **argv) {
         /*
          * recvfrom: receive a UDP datagram from a client
          */
-        //VLOG(DEBUG, "waiting from server \n");
         if (recvfrom(sockfd, buffer, MSS_SIZE, 0,
                 (struct sockaddr *) &clientaddr, (socklen_t *)&clientlen) < 0) {
             error("ERROR in recvfrom");
@@ -111,6 +110,12 @@ int main(int argc, char **argv) {
         }
         /* 
          * sendto: ACK back to the client 
+         */
+
+        /* 
+         * Case 1: If we get the next packet we are expecting in sequence,
+         * then send write the packet to the output file. Wait to see if there is any new packet coming for 
+         * 500 ms before sending ack. If there was already one waiting, send ack for both, cumulatively
          */
         if( recvpkt->hdr.seqno == needed_pkt )
         {
@@ -131,10 +136,23 @@ int main(int argc, char **argv) {
                 error("ERROR in sendto");
             }
 
+                    // if you get a datagram, wait for another for 500 ms
+        // do
+        // {
+        //     //wait 500ms
+        // }while(!stop);
+
+        /*
+         * Case 2: Ignore duplicates received from rdt sender
+         */
         }else if ( recvpkt->hdr.seqno < needed_pkt ){
 
             continue;
-            
+
+        /*
+         * Case 3: Send a duplicate ack when we are getting an out of order packet
+         * higher than what is needed
+         */
         }else{
             sndpkt = make_packet(0);
             sndpkt->hdr.ackno = needed_pkt;
