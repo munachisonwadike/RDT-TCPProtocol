@@ -299,7 +299,7 @@ int main (int argc, char **argv)
                 // final_start = ( recvpkt->hdr.ackno - window[final_start]->hdr.seqno ) / DATA_SIZE ; 
                 // printf( " and final start is %d \n", final_start );
 
-            }while( recvpkt->hdr.ackno < window[10]->hdr.seqno );   
+            }while( recvpkt->hdr.ackno > 0 );   
 
 
             /* after sending the last window off, send a 0 packet so that the receiver knows to close itself */
