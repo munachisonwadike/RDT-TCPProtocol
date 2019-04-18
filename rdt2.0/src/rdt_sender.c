@@ -215,7 +215,7 @@ int main (int argc, char **argv)
 
         //if you received an ack, 
         shift = ( recvpkt->hdr.ackno - window_base ) / DATA_SIZE ; 
-        printf( "just received ack number %d causing shift %d while the window_base is %d \n", shift, window_base, recvpkt->hdr.ackno );
+        printf( "just received ack number %d causing shift %d while the window_base is %d \n",  recvpkt->hdr.ackno, shift, window_base );
         stop_timer();
 
 
