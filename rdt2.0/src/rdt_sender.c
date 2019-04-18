@@ -234,6 +234,7 @@ int main (int argc, char **argv)
                 window[j] = make_packet(0);
                 stop = 1;
                 final_end = j;
+                break;
             }else{
                 pkt_base = next_seqno; //next_seqno should be the past packet sequence number in old window
                 next_seqno = pkt_base + len; //through this loop, next_seqno becomes the seq number for the last packet in new window
@@ -245,7 +246,7 @@ int main (int argc, char **argv)
         }
 
         // if you are at the end of the file, go into a loop to send all the remaining packets
-        if( stop )
+        if( stop == 1 )
         {   
             printf("WE ARE NOW IN THE STOP STATEMENT\n");
             int final_start = 0; 
@@ -290,7 +291,7 @@ int main (int argc, char **argv)
             exit(1);
         
         }
-        
+
     } while(!stop);
     VLOG(DEBUG, "ACK for packets before the one with seq no %d received", recvpkt->hdr.ackno);
 
