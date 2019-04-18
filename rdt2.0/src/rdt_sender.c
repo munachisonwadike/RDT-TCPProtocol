@@ -281,7 +281,7 @@ int main (int argc, char **argv)
                 assert(get_data_size(recvpkt) <= DATA_SIZE);
                 printf( "just received ack number %d causing shift %d  for FINAL window %d \n",  recvpkt->hdr.ackno, shift, window_base );
                 stop_timer();
-                final_start = ( recvpkt->hdr.ackno - window[k]->hdr.ackno ) / DATA_SIZE ; //shrink the window start closer to the end by setting to the highest acked packet
+                final_start = ( recvpkt->hdr.ackno - window[final_start]->hdr.ackno ) / DATA_SIZE ; //shrink the window start closer to the end by setting to the highest acked packet
                 printf( " and final start is %d \n", final_start );
 
             }while( recvpkt->hdr.ackno < window[final_end]->hdr.ackno ); //if the packet received isn't the 
