@@ -254,7 +254,6 @@ int main (int argc, char **argv)
                 window[j] = make_packet(len);
                 memcpy(window[j]->data, buffer, len);
                 window[j]->hdr.seqno = pkt_base;
-                j++;
             }
         }
 
