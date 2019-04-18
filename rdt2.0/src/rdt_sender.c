@@ -245,23 +245,25 @@ int main (int argc, char **argv)
             }
         }
 
+
+        int final_start; int k;
         // if you are at the end of the file, go into a loop to send all the remaining packets
         if( stop == 1 )
         {   
             printf("WE ARE NOW IN THE STOP STATEMENT\n");
-            int final_start = 0; 
-            int k;
+            final_start = 0; 
+            
             do
             {  
                 //send the packets
                 for ( k = final_start; k < final_end; ++k)
                 {
-                    if(sendto(sockfd, window[final_start], TCP_HDR_SIZE + get_data_size(window[i]), 0, 
+                    if(sendto(sockfd, window[k], TCP_HDR_SIZE + get_data_size(window[i]), 0, 
                             ( const struct sockaddr *)&serveraddr, serverlen) < 0)
                     {
                         error("sendto error");
                     }
-                    printf("packet with seqno %d just sent \n", window[i]->hdr.seqno);
+                    printf("packet with seqno %d just sent \n", window[k]->hdr.seqno);
 
                 }
           
@@ -277,7 +279,7 @@ int main (int argc, char **argv)
                 assert(get_data_size(recvpkt) <= DATA_SIZE);
                 printf( "just received ack number %d causing shift %d  for FINAL window %d \n",  recvpkt->hdr.ackno, shift, window_base );
                 stop_timer();
-                final_start = ( recvpkt->hdr.ackno - window[final_start]->hdr.ackno ) / DATA_SIZE ;
+                final_start = ( recvpkt->hdr.ackno - window[final_start]->hdr.ackno ) / DATA_SIZE ; //shrink the window start closer to the end by setting to the highest acked packet
 
             }while( recvpkt->hdr.ackno < window[final_end]->hdr.ackno ); //if the packet received isn't the 
 
