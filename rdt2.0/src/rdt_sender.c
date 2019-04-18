@@ -94,6 +94,7 @@ int main (int argc, char **argv)
     int next_seqno;
     int shift;
     int window_base; /* to identify the base of each window */
+    int window_old;
     char *hostname;
     char buffer[DATA_SIZE];
     FILE *fp;
@@ -221,8 +222,9 @@ int main (int argc, char **argv)
         shift = ( recvpkt->hdr.ackno - window_base ) / DATA_SIZE ; 
         
         /* shift to new window */
+        window_old = window_base;
         window_base = window[shift]->hdr.seqno;
-        printf( "just received ack number %d causing shift %d while the window_base goes from %d to %d \n",  recvpkt->hdr.ackno, shift, window_base );
+        printf( "just received ack number %d causing shift %d while the window_base goes from %d to %d \n",  recvpkt->hdr.ackno, shift, window_old, window_base );
         stop_timer();
 
 
