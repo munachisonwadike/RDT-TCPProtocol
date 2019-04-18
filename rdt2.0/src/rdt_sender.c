@@ -233,7 +233,7 @@ int main (int argc, char **argv)
                 VLOG(INFO, "End Of File has been reached and we may have gotten some packets from it");
                 window[j] = make_packet(0);
                 stop = 1;
-                final_end = j;
+                final_end = j+1;
                 break;
             }else{
                 pkt_base = next_seqno; //next_seqno should be the past packet sequence number in old window
@@ -258,6 +258,7 @@ int main (int argc, char **argv)
                 //send the packets
                 for ( k = final_start; k < final_end; ++k)
                 {
+                    printf("kth value of loop = %d", k);
                     if(sendto(sockfd, window[k], TCP_HDR_SIZE + get_data_size(window[i]), 0, 
                             ( const struct sockaddr *)&serveraddr, serverlen) < 0)
                     {
