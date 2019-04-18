@@ -131,6 +131,10 @@ int main(int argc, char **argv) {
                 error("ERROR in sendto");
             }
 
+        }else if ( recvpkt->hdr.seqno < needed_pkt ){
+
+            continue;
+            
         }else{
             sndpkt = make_packet(0);
             sndpkt->hdr.ackno = needed_pkt;
