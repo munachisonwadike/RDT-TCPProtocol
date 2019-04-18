@@ -232,7 +232,7 @@ int main(int argc, char **argv) {
             if( recvpkt2->hdr.seqno == needed_pkt2 )
             {
                 gettimeofday(&tp, NULL);
-                VLOG(DEBUG, "%lu, %d, %d", tp.tv_sec, recvpkt2->hdr.data_size, recvpkt2->hdr.seqno);
+                VLOG(DEBUG, "TYPE 2%lu, %d, %d", tp.tv_sec, recvpkt2->hdr.data_size, recvpkt2->hdr.seqno);
                 fseek(fp, recvpkt2->hdr.seqno, SEEK_SET);
                 fwrite(recvpkt2->data, 1, recvpkt2->hdr.data_size, fp);
                 recvpkt = recvpkt2; /* if the packet was good, make sure that you are sending a cumulative ack */
