@@ -214,12 +214,13 @@ int main (int argc, char **argv)
 
         //if you received an ack, 
         shift = ( recvpkt->hdr.ackno - window_base ) / DATA_SIZE ; 
+        
+        //change window base
+        window_base = window[shift]->hdr.seqno;
         printf( "just received ack number %d causing shift %d while the window_base is %d \n",  recvpkt->hdr.ackno, shift, window_base );
         stop_timer();
 
 
-        //change window base
-        window_base = window[shift]->hdr.seqno;
 
         //shift the window up      
         int j;
