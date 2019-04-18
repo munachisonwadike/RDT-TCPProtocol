@@ -201,40 +201,33 @@ int main (int argc, char **argv)
         //struct sockaddr *src_addr, socklen_t *addrlen);
 
 
-        //keep receiving acks until you get the largest ack or the timer runs out (in background). 
-        //if the timer runs out, resend the entire last window
-        do
-        {
-
-            if(recvfrom(sockfd, buffer, MSS_SIZE, 0,
-                        (struct sockaddr *) &serveraddr, (socklen_t *)&serverlen) < 0)
-            {
-                error("recvfrom error");
-            }
-            recvpkt = (tcp_packet *)buffer;
-
-            // printf("recvpckt-size %d \n", get_data_size(recvpkt));
-            assert(get_data_size(recvpkt) <= DATA_SIZE);
-
-            //if you received an ack, 
-            shift = ( recvpkt->hdr.ackno - window_base ) / DATA_SIZE ; 
-            printf( "just received a shift of %d from ack nuumber %d while th window_base is %d \n", shift, recvpkt->hdr.ackno, window_base );
-
-        }while(recvpkt->hdr.ackno != next_seqno); //next_seq_no is largest packet number in window
-        printf( "shift value leaving the loop is %d  \n", shift );
-
-
-        stop_timer();
+        //if you get an ack, process it and stop timer 
         
-        //When you receive 
-        //an ack, shift the window up, fill with packets, and exit this loop (to restart from top)        
+        if(recvfrom(sockfd, buffer, MSS_SIZE, 0,
+                    (struct sockaddr *) &serveraddr, (socklen_t *)&serverlen) < 0)
+        {
+            error("recvfrom error");
+        }
+        recvpkt = (tcp_packet *)buffer;
+
+        // printf("recvpckt-size %d \n", get_data_size(recvpkt));
+        assert(get_data_size(recvpkt) <= DATA_SIZE);
+
+        //if you received an ack, 
+        shift = ( recvpkt->hdr.ackno - window_base ) / DATA_SIZE ; 
+        printf( "just received ack number %d causing shift %d while the window_base is %d \n", shift, window_base, recvpkt->hdr.ackno );
+        stop_timer();
+
+
+        //shift the window up        
         int j;
         for ( j = 0 ; j < 10 - shift ; ++j )
         {
             window[j] = window[j + shift]; 
         }
 
-        for ( j = 10 - shift ; j < 10 ; ++j )//store the pointer to the i'th packet in window[i]
+        //fill the rest of it with packets
+        for ( j = 10 - shift ; j < 10 ; ++j )
         {
             len = fread(buffer, 1, DATA_SIZE, fp);
             if ( len <=0 ){
