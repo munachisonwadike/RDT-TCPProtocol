@@ -232,7 +232,7 @@ int main (int argc, char **argv)
          * populate the empty part of the new new window 
          * note you won't send out the content of the window till the next loop iteration 
          */     
-        int j; int final_end;
+        int j; 
         for ( j = 0 ; j < 10 - shift ; ++j )
         {
 
@@ -246,8 +246,6 @@ int main (int argc, char **argv)
                 VLOG(INFO, "End Of File has been reached and we may have gotten some packets from it");
                 window[j] = make_packet(0);
                 stop = 1;
-                // final_end = j;
-                // break;
             }else{
                 pkt_base = next_seqno;
                 next_seqno = pkt_base + len; 
@@ -262,12 +260,10 @@ int main (int argc, char **argv)
          * if you are at the end of the file, 
          * go into a loop to send all the remaining packets 
          */
-        int final_start; int k;
+        int k;
         if( stop == 1 )
         {   
-            printf("WE ARE NOW IN THE STOP STATEMENT\n");
-            // final_start = 0; 
-            
+            printf("WE ARE NOW IN THE STOP STATEMENT\n");            
             do
             {  
 
@@ -298,8 +294,6 @@ int main (int argc, char **argv)
                 stop_timer();
                
                 /* shrink the window start closer to the end by setting to the highest acked packet */
-                // final_start = ( recvpkt->hdr.ackno - window[final_start]->hdr.seqno ) / DATA_SIZE ; 
-                // printf( " and final start is %d \n", final_start );
 
             }while( recvpkt->hdr.ackno > 0 );   
 
