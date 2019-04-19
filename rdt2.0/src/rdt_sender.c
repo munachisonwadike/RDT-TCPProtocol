@@ -358,10 +358,14 @@ int main (int argc, char **argv)
 
                     shift = ( recvpkt->hdr.ackno - window[k]->hdr.seqno ) / DATA_SIZE ; 
                     k += shift;
-                    printf( "just received ack number %d causing shift to k=%d, window[k]=%d \n",  recvpkt->hdr.ackno, k, window[k]->hdr.ackno );
+                    printf( "just received ack number %d causing shift to k=%d \n",  recvpkt->hdr.ackno, k);
                     stop_timer();
                 }
-               
+
+                if(recvpkt->hdr.ackno == 0)
+                {   
+                    break;
+                }
             }
           
 

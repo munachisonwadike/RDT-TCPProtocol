@@ -1,8 +1,3 @@
-/*
- * Nabil Rahiman
- * NYU Abudhabi
- * email: nr83@nyu.edu
- */
 #include <stdlib.h>
 #include"packet.h"
 
@@ -17,6 +12,7 @@ tcp_packet* make_packet(int len)
 
     *pkt = zero_packet;
     pkt->hdr.data_size = len;
+    pkt->hdr.ackno = 0;
     return pkt;
 }
 
