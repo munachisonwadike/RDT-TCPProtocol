@@ -233,7 +233,7 @@ int main(int argc, char **argv) {
             
         /**/
             /* start the wait */
-            start_timer(); 
+            // start_timer(); 
             if (recvfrom(sockfd, buffer, MSS_SIZE, 0,
                 (struct sockaddr *) &clientaddr, (socklen_t *)&clientlen) < 0 && errno == EINTR) 
             {
@@ -254,7 +254,7 @@ int main(int argc, char **argv) {
                 break;
             }
             /* end the wait and restart the loop if you get another packet */
-            stop_timer(); 
+            // stop_timer(); 
 
         
             /* 
