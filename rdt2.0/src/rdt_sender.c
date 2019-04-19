@@ -364,21 +364,18 @@ int main (int argc, char **argv)
 
                 if(recvpkt->hdr.ackno == 0)
                 {   
-                    break;
+                    /* 
+                    //  * after sending the last window off, send a
+                    //  * 0 packet so that the receiver knows to close itself 
+                    //  */
+                    // VLOG(INFO, "End Of File has been reached and time to stop ");
+                    // sndpkt = make_packet(0);
+                    // sendto(sockfd, sndpkt, TCP_HDR_SIZE,  0,
+                    //         (const struct sockaddr *)&serveraddr, serverlen);
+                    // free(sndpkt); 
+                    // exit(1);
                 }
             }
-          
-
-            /* 
-             * after sending the last window off, send a
-             * 0 packet so that the receiver knows to close itself 
-             */
-            VLOG(INFO, "End Of File has been reached and time to stop ");
-            sndpkt = make_packet(0);
-            sendto(sockfd, sndpkt, TCP_HDR_SIZE,  0,
-                    (const struct sockaddr *)&serveraddr, serverlen);
-            free(sndpkt); 
-            exit(1);
         
         }
 
