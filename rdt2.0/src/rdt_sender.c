@@ -39,6 +39,8 @@ int window_size = 1;
 struct sockaddr_in serveraddr;
 struct itimerval timer; 
 
+volatile int k = -1;
+
 FILE *fp;
 
 sigset_t sigmask;  
@@ -54,21 +56,31 @@ void resend_packets(int sig)
 {
     if (sig == SIGALRM)
     {
+        if ( k > -1){
+            if(sendto(sockfd, window[k], TCP_HDR_SIZE + get_data_size(window[k]), 0, 
+                            ( const struct sockaddr *)&serveraddr, serverlen) < 0)
+                {
+                    error("sendto");
+                }
 
-        VLOG(DEBUG, "RESEND FUNCTION TRIGGERED");   
-        int i = 0;    
-        for (i = 0; i < 10; ++i)
-        {
-            /* 
-             * resend all packets range between sendBase and nextSeqNum 
-             */ 
-            if(sendto(sockfd, window[i], TCP_HDR_SIZE + get_data_size(window[i]), 0, 
-                        ( const struct sockaddr *)&serveraddr, serverlen) < 0)
+            printf("packet with seqno %d resent -- loop[%d] \n", window[k]->hdr.seqno, k );
+
+        }else{
+            VLOG(DEBUG, "RESEND FUNCTION TRIGGERED");   
+            int i = 0;    
+            for (i = 0; i < 10; ++i)
             {
-                error("sendto");
-            }
-            printf("packet with seqno %d just sent -- loop[%d] \n", window[i]->hdr.seqno, i );
+                /* 
+                 * resend all packets range between sendBase and nextSeqNum 
+                 */ 
+                if(sendto(sockfd, window[i], TCP_HDR_SIZE + get_data_size(window[i]), 0, 
+                            ( const struct sockaddr *)&serveraddr, serverlen) < 0)
+                {
+                    error("sendto");
+                }
+                printf("packet with seqno %d resent -- loop[%d] \n", window[i]->hdr.seqno, i );
 
+            }
         }
     }
 }
@@ -321,7 +333,7 @@ int main (int argc, char **argv)
             /* 
              * send the packets 
              */
-            int k=0;
+            k=0;
             while ( k < 10 )
             {
                 printf("GOT TO THE LOOP\n");
@@ -335,7 +347,8 @@ int main (int argc, char **argv)
                 printf("packet with seqno %d just sent \n", window[k]->hdr.seqno);
 
                 printf("wait for recv %d\n", k);
-                 
+
+                start_timer();
                 if(recvfrom(sockfd, buffer, MSS_SIZE, 0,
                         (struct sockaddr *) &serveraddr, (socklen_t *)&serverlen) < 0)
                 {
@@ -358,7 +371,7 @@ int main (int argc, char **argv)
                     shift = ( recvpkt->hdr.ackno - window[k]->hdr.seqno ) / DATA_SIZE ; 
                     k += shift;
                     printf( "just received ack number %d causing shift to k=%d \n",  recvpkt->hdr.ackno, k);
-            
+                    stop_timer();
                 }
 
                 if(recvpkt->hdr.ackno == 0)
