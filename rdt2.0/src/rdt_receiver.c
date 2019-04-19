@@ -72,7 +72,9 @@ void ack_sender(int sig)
         if (sendto(sockfd, sndpkt, TCP_HDR_SIZE, 0, 
                 (struct sockaddr *) &clientaddr, clientlen) < 0) {
             error("ERROR in sendto");
- 
+        
+        printf("sending ack number %d\n", needed_pkt );
+
         }else if ( recvpkt->hdr.seqno > needed_pkt ) { /* if higher than expected out of order packet, send a duplicate ack */
             
             sndpkt = make_packet(0);
@@ -82,6 +84,8 @@ void ack_sender(int sig)
                     (struct sockaddr *) &clientaddr, clientlen) < 0) {
                 error("ERROR in sendto");
             }
+            printf("sending ack number %d\n", needed_pkt );
+
         }else if(recvpkt->hdr.seqno < needed_pkt){
         
         }
@@ -270,6 +274,8 @@ int main(int argc, char **argv) {
                     VLOG(DEBUG, "TYPE 2 %lu, %d, %d", tp.tv_sec, recvpkt->hdr.data_size, recvpkt->hdr.seqno);
                     fseek(fp, recvpkt->hdr.seqno, SEEK_SET);
                     fwrite(recvpkt->data, 1, recvpkt->hdr.data_size, fp);
+                    printf("after type 2 receipt needed_pkt has a value %d\n", needed_pkt );
+
                 }       
                 /* send ack for the packet */
                 sndpkt = make_packet(0);
@@ -280,6 +286,8 @@ int main(int argc, char **argv) {
                         (struct sockaddr *) &clientaddr, clientlen) < 0) {
                     error("ERROR in sendto");
                 } 
+                printf("sending ack number %d\n", needed_pkt );
+
             }
         /**/
 
@@ -296,6 +304,8 @@ int main(int argc, char **argv) {
                     (struct sockaddr *) &clientaddr, clientlen) < 0) {
                 error("ERROR in sendto");
             }
+            printf("sending ack number %d\n", needed_pkt );
+
         }
 
         /*
