@@ -15,7 +15,7 @@
 #include"packet.h"
 
 #define STDIN_FD    0
-#define RETRY  120 /* millisecond */ 
+#define RESEND  2000 /* millisecond */ 
 #define WINDOW_SIZE 10
 
 
@@ -160,7 +160,7 @@ int main (int argc, char **argv)
     /* 
      * stop and wait protocol 
      */
-    init_timer(RETRY, resend_packets);
+    init_timer(RESEND, resend_packets);
 
     /*
      * set the initial value of window base loop 10 times to make 10 packets
