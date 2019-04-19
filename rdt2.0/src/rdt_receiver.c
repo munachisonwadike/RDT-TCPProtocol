@@ -67,7 +67,7 @@ void ack_sender(int sig)
                     (struct sockaddr *) &clientaddr, clientlen) < 0) {
                 error("ERROR in sendto");
             }
-            printf("sending ack number %d\n", needed_pkt );
+            printf("sending ack (3) number %d\n", needed_pkt );
 
         /* 
          * if higher than needed,
@@ -82,7 +82,7 @@ void ack_sender(int sig)
                     (struct sockaddr *) &clientaddr, clientlen) < 0) {
                 error("ERROR in sendto");
             }
-            printf("sending ack number %d\n", needed_pkt );
+            printf("sending duplicate ack (3) number %d\n", needed_pkt );
 
         } 
 
@@ -289,7 +289,7 @@ int main(int argc, char **argv) {
                             (struct sockaddr *) &clientaddr, clientlen) < 0) {
                         error("ERROR in sendto");
                     } 
-                    printf("sending ack number %d\n", needed_pkt );
+                    printf("sending ack (1) number %d\n", needed_pkt );
 
                 /* if higher than expected out of order packet, send a duplicate ack */
                 }else if ( recvpkt->hdr.seqno > needed_pkt ) { 
@@ -301,7 +301,7 @@ int main(int argc, char **argv) {
                             (struct sockaddr *) &clientaddr, clientlen) < 0) {
                         error("ERROR in sendto");
                     }
-                    printf("sending ack number %d\n", needed_pkt );
+                    printf("sending duplicate ack (1) number %d\n", needed_pkt );
 
                 } 
                 
@@ -323,7 +323,7 @@ int main(int argc, char **argv) {
                     (struct sockaddr *) &clientaddr, clientlen) < 0) {
                 error("ERROR in sendto");
             }
-            printf("sending ack number %d\n", needed_pkt );
+            printf("sending duplicate ack (2) number %d\n", needed_pkt );
 
         }
 
