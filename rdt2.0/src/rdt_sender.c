@@ -228,7 +228,7 @@ int main (int argc, char **argv)
         
         recvpkt = (tcp_packet *)buffer;
 
-        printf(" ack receieved - %d \n", recvpkt->hdr.ackno );
+        printf(" ack receieved - %d | needed_ack - %d \n", recvpkt->hdr.ackno, needed_ack );
         assert(get_data_size(recvpkt) <= DATA_SIZE);
 
 
