@@ -365,31 +365,26 @@ int main (int argc, char **argv)
                 if(recvpkt->hdr.ackno == 0)
                 {   
                     /* 
-                    //  * after sending the last window off, send a
-                    //  * 0 packet so that the receiver knows to close itself 
-                    //  */
-                    // VLOG(INFO, "End Of File has been reached and time to stop ");
-                    // sndpkt = make_packet(0);
-                    // sendto(sockfd, sndpkt, TCP_HDR_SIZE,  0,
-                    //         (const struct sockaddr *)&serveraddr, serverlen);
-                    // free(sndpkt); 
-                    // exit(1);
+                     * after sending the last window off, send a
+                     * 0 packet so that the receiver knows to close itself 
+                     */
+                    VLOG(INFO, "End Of File has been reached and time to stop ");
+                    /* 
+                     * free the packets allocated with malloc 
+                     */   
+                    for ( i = 0; i < 10; ++i)
+                    {
+                        free(window[i]);
+                    }
                 }
             }
         
         }
 
     } while(!stop);
-    VLOG(DEBUG, "ACK for packets before the one with seq no %d received", recvpkt->hdr.ackno);
 
    
-    /* 
-     * free the packets allocated with malloc 
-     */   
-    for ( i = 0; i < 10; ++i)
-    {
-        free(window[i]);
-    }
+    
 
 
 
