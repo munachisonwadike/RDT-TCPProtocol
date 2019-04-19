@@ -82,8 +82,8 @@ void ack_sender(int sig)
                     (struct sockaddr *) &clientaddr, clientlen) < 0) {
                 error("ERROR in sendto");
             }
-        }else if(recvpkt->hrd.seqno < needed_pkt){
-            continue;
+        }else if(recvpkt->hdr.seqno < needed_pkt){
+        
         }
 
         /* ignore out of order packets higher lower than needed  */
@@ -301,7 +301,7 @@ int main(int argc, char **argv) {
         /*
          * case 3: ignore out of order packets lower than needed
          */
-        else if(recvpkt->hrd.seqno < needed_pkt){
+        else if(recvpkt->hdr.seqno < needed_pkt){
             continue;
         }
 
