@@ -63,7 +63,7 @@ void resend_packets(int sig)
                     error("sendto");
                 }
 
-            printf("packet with seqno %d resent no dash loop[%d] \n", window[k]->hdr.seqno, k );
+            printf("packet with seqno %d resent no loop[%d] \n", window[k]->hdr.seqno, k );
             k++;
         }else{
             VLOG(DEBUG, "RESEND FUNCTION TRIGGERED");   
@@ -222,7 +222,7 @@ int main (int argc, char **argv)
 
 
         /* 
-         * distinguish between the regular and stopping windows 
+         * distinguish between the regular and stopping windows if stop = 0, it is regular sliding window
          */
         if (stop == 0){
 
@@ -258,6 +258,7 @@ int main (int argc, char **argv)
             }
             recvpkt = (tcp_packet *)buffer;
 
+            printf("the ack we keep receiving at this point is \n", recvpkt->hdr.ackno);
             assert(get_data_size(recvpkt) <= DATA_SIZE);
 
             if(recvpkt->hdr.ackno >= needed_ack)
@@ -321,11 +322,8 @@ int main (int argc, char **argv)
         }
         /* 
          * if you are at the end of the file, 
-         * go into a loop to send all the remaining packets 
+         * go into a loop to send all the remaining packets "stopping window"
          */
-        
-
-
         if( stop == 1 )
         {   
             printf("WE ARE NOW IN THE STOP STATEMENT\n");            
