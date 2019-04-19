@@ -259,9 +259,9 @@ int main(int argc, char **argv) {
         
             /* 
              * if did receve a packet, then you can send the cumulative ack since you will reach here
-             * make sure to check that the stop variable hasn't been set to 0 i.e there was no timeout
+             * make sure to check that the stop variable hasn't been set to 1 i.e there was no timeout
              */
-            if (stop==1){
+            if (stop==0){
                 if( recvpkt->hdr.seqno == needed_pkt )
                 {
                     gettimeofday(&tp, NULL);
