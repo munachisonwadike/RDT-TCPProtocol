@@ -282,12 +282,16 @@ int main (int argc, char **argv)
         VLOG(DEBUG, "sending window from base %d -> %s", 
                 window[i]->hdr.seqno, inet_ntoa(serveraddr.sin_addr));
 
+        printf("breakpoint 1 \n");
+
 
         /*
          * since the i'th packet is stored in window[i], loop through 
          * and attempt to send each packet should get an error based on the packet
          */
         
+
+
 	    for (i = WINDOW_SIZE - shift; i < WINDOW_SIZE; ++i)
         {
         	if(sendto(sockfd, window[i], TCP_HDR_SIZE + get_data_size(window[i]), 0, 
@@ -297,6 +301,7 @@ int main (int argc, char **argv)
             }
             printf("packet %d sent \n", window[i]->hdr.seqno);
 
+            printf(" i->%d \n", i);
         }
               
        start_timer();  
