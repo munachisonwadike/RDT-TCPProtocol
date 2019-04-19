@@ -33,7 +33,7 @@ int shift;
 int needed_ack = 0;
 int next_seqno=0;
 int send_base=0;
-
+int stop = 0;
 
        
 struct sockaddr_in serveraddr;
@@ -267,8 +267,10 @@ int main (int argc, char **argv)
                 len = fread(buffer, 1, DATA_SIZE, fp);
                 if ( len <=0 ){
                     VLOG(INFO, " End Of File ");
-                    window[j] = make_packet(0);
-                       
+                    window[j] = make_packet(1);
+                    window[j]->hdr.seqno = 0; /*send an older packet number so the sender ignores these
+                                                just a filler so it doesn't close*/
+                    stop = 1;
                 }else{
                     pkt_base = next_seqno;
                     next_seqno = pkt_base + len; 
@@ -303,10 +305,22 @@ int main (int argc, char **argv)
             start_timer(); 
         }
 
+        if (stop == 1){
+            break;
+        }
 
              
 
     } while( 1 );
+
+    /*
+     *send 0 ack in closing
+     */
+    VLOG(INFO, "Empty file");
+    sndpkt = make_packet(0);
+    sendto(sockfd, sndpkt, TCP_HDR_SIZE,  0,
+            (const struct sockaddr *)&serveraddr, serverlen);
+    free(sndpkt); 
 
    /* 
     * if you are at the end of the program, 
