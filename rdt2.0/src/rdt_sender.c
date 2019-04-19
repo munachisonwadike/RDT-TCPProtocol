@@ -242,59 +242,63 @@ int main (int argc, char **argv)
 
         assert(get_data_size(recvpkt) <= DATA_SIZE);
 
-        printf( "3. just received ack number %d \n",  recvpkt->hdr.ackno);
+        if(recvpkt->hdr.ackno >= needed_ack)
+        {   
+            needed_ack = recvpkt->hdr.ackno;
+            printf( "3. just received ack number %d \n",  recvpkt->hdr.ackno);
 
-        /* 
-         * if you received an ack, calculate the packet 
-         * number relative to current sending windo to shift to that packet 
-         */
-        shift = ( recvpkt->hdr.ackno - window_base ) / DATA_SIZE ; 
-        printf( "4. just received ack number %d \n",  recvpkt->hdr.ackno);
+            /* 
+             * if you received an ack, calculate the packet 
+             * number relative to current sending windo to shift to that packet 
+             */
+            shift = ( recvpkt->hdr.ackno - window_base ) / DATA_SIZE ; 
+            printf( "4. just received ack number %d \n",  recvpkt->hdr.ackno);
 
-        /*
-         * shift to new window 
-         */
-        window_old = window_base;
-        printf( "2. just received ack number %d window_base = %d shift = %d \n",  recvpkt->hdr.ackno, window_base, shift);
+            /*
+             * shift to new window 
+             */
+            window_old = window_base;
+            printf( "2. just received ack number %d window_base = %d shift = %d \n",  recvpkt->hdr.ackno, window_base, shift);
 
-        window_base = window[shift]->hdr.seqno;
-        printf( "just received ack number %d causing shift %d while the window_base goes from %d to %d \n",  recvpkt->hdr.ackno, shift, window_old, window_base );
-        stop_timer();
+            window_base = window[shift]->hdr.seqno;
+            printf( "just received ack number %d causing shift %d while the window_base goes from %d to %d \n",  recvpkt->hdr.ackno, shift, window_old, window_base );
+            stop_timer();
 
 
-        /* 
-         * populate the empty part of the new window note you won't send
-         * out the content of the window till the next loop iteration 
-         */     
-        int j; 
-        for ( j = 0 ; j < 10 - shift ; ++j )
-        {
+            /* 
+             * populate the empty part of the new window note you won't send
+             * out the content of the window till the next loop iteration 
+             */     
+            int j; 
+            for ( j = 0 ; j < 10 - shift ; ++j )
+            {
 
-            window[j] = window[j + shift]; 
-        }
-        /* 
-         * 'next_seqno' becomes the seq number 
-         * for the last packet in new window 
-         */
-        printf( "WTH 1" );
-
-        for ( j = 10 - shift ; j < 10 ; ++j )
-        {
-            len = fread(buffer, 1, DATA_SIZE, fp);
-            if ( len <=0 ){
-                VLOG(INFO, "End Of File has been reached and we may have gotten some packets from it");
-                window[j] = make_packet(0);
-                stop = 1;
-            }else{
-                pkt_base = next_seqno;
-                next_seqno = pkt_base + len; 
-                window[j] = make_packet(len);
-                memcpy(window[j]->data, buffer, len);
-                window[j]->hdr.seqno = pkt_base;
+                window[j] = window[j + shift]; 
             }
-        }
+            /* 
+             * 'next_seqno' becomes the seq number 
+             * for the last packet in new window 
+             */
+            printf( "WTH 1" );
 
-        printf( "WTH 2" );
+            for ( j = 10 - shift ; j < 10 ; ++j )
+            {
+                len = fread(buffer, 1, DATA_SIZE, fp);
+                if ( len <=0 ){
+                    VLOG(INFO, "End Of File has been reached and we may have gotten some packets from it");
+                    window[j] = make_packet(0);
+                    stop = 1;
+                }else{
+                    pkt_base = next_seqno;
+                    next_seqno = pkt_base + len; 
+                    window[j] = make_packet(len);
+                    memcpy(window[j]->data, buffer, len);
+                    window[j]->hdr.seqno = pkt_base;
+                }
+            }
+
+            printf( "WTH 2" );
+        }
         /* 
          * if you are at the end of the file, 
          * go into a loop to send all the remaining packets 
@@ -320,11 +324,10 @@ int main (int argc, char **argv)
                         error("sendto error");
                     }
                     printf("packet with seqno %d just sent \n", window[k]->hdr.seqno);
-
                 }
           
                 start_timer();
-
+      
                 /* 
                  * if you get an ack, process it and stop timer 
                  * timer ensures you don't wait indefinitely 
