@@ -35,7 +35,7 @@ struct sockaddr_in clientaddr; /* client addr */
 int optval; /* flag value for setsockopt */
 FILE *fp;
 char buffer[MSS_SIZE];
-int needed_pkt = 0; /* int to ensure that we don't allow for out of order packets*/
+volatile int needed_pkt = 0; /* int to ensure that we don't allow for out of order packets*/
 struct timeval tp;
 
 tcp_packet *recvpkt;
@@ -230,10 +230,10 @@ int main(int argc, char **argv) {
              * Wait up to 500 ms for another to possible packet
              */ 
             needed_pkt = recvpkt->hdr.seqno + recvpkt->hdr.data_size; /* specify which number the next packet should have*/
-            
+            printf("after type 1 receipt needed_pkt has a value %s\n", needed_pkt );
         /**/
             /* start the wait */
-            // start_timer(); 
+            start_timer(); 
             if (recvfrom(sockfd, buffer, MSS_SIZE, 0,
                 (struct sockaddr *) &clientaddr, (socklen_t *)&clientlen) < 0 && errno == EINTR) 
             {
@@ -254,7 +254,7 @@ int main(int argc, char **argv) {
                 break;
             }
             /* end the wait and restart the loop if you get another packet */
-            // stop_timer(); 
+            stop_timer(); 
 
         
             /* 
