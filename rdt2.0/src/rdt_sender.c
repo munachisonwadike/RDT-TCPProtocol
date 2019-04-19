@@ -35,7 +35,6 @@ tcp_packet* window[10]; /* array to store packet window */
 
 sigset_t sigmask;       
 
-volatile int stop = 0;
 
 void resend_packets(int sig)
 {
@@ -52,6 +51,8 @@ void resend_packets(int sig)
             {
                 error("sendto");
             }
+            printf("packet with seqno %d just sent -- loop[%d] \n", window[i]->hdr.seqno, i );
+
         }
     }
 }
