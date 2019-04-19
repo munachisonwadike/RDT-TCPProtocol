@@ -335,8 +335,7 @@ int main (int argc, char **argv)
                 printf("packet with seqno %d just sent \n", window[k]->hdr.seqno);
 
                 printf("wait for recv %d\n", k);
-
-                start_timer();
+                 
                 if(recvfrom(sockfd, buffer, MSS_SIZE, 0,
                         (struct sockaddr *) &serveraddr, (socklen_t *)&serverlen) < 0)
                 {
@@ -359,7 +358,7 @@ int main (int argc, char **argv)
                     shift = ( recvpkt->hdr.ackno - window[k]->hdr.seqno ) / DATA_SIZE ; 
                     k += shift;
                     printf( "just received ack number %d causing shift to k=%d \n",  recvpkt->hdr.ackno, k);
-                    stop_timer();
+            
                 }
 
                 if(recvpkt->hdr.ackno == 0)
