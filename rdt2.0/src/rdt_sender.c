@@ -312,6 +312,9 @@ int main (int argc, char **argv)
          * go into a loop to send all the remaining packets 
          */
         
+        printf("first thing in the window %d\n", window[0]->hdr.ackno);
+
+
         if( stop == 1 )
         {   
             printf("WE ARE NOW IN THE STOP STATEMENT\n");            
