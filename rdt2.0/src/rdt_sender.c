@@ -223,11 +223,16 @@ int main (int argc, char **argv)
 
         assert(get_data_size(recvpkt) <= DATA_SIZE);
 
+        printf( "3. just received ack number %d \n",  recvpkt->hdr.ackno);
+
         /* if you received an ack, calculate the packet number relative to current sending windo to shift to that packet */
         shift = ( recvpkt->hdr.ackno - window_base ) / DATA_SIZE ; 
-        
+        printf( "4. just received ack number %d \n",  recvpkt->hdr.ackno);
+
         /* shift to new window */
         window_old = window_base;
+        printf( "2. just received ack number %d \n",  recvpkt->hdr.ackno);
+
         window_base = window[shift]->hdr.seqno;
         printf( "just received ack number %d causing shift %d while the window_base goes from %d to %d \n",  recvpkt->hdr.ackno, shift, window_old, window_base );
         stop_timer();
