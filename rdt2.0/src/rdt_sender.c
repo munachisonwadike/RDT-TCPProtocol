@@ -230,12 +230,15 @@ int main (int argc, char **argv)
         printf(" ack receieved - %d \n", recvpkt->hdr.ackno );
         assert(get_data_size(recvpkt) <= DATA_SIZE);
 
+        printf(" breakpoint 1   \n");
+
         if(recvpkt->hdr.ackno >= needed_ack)
         {   
             /* 
              * if you get an ack, stop time to process it 
              */ 
             stop_timer();
+            printf(" breakpoint 2 \n");
             needed_ack = recvpkt->hdr.ackno;
             /* 
              * if you received an ack, calculate the new window 
@@ -250,6 +253,7 @@ int main (int argc, char **argv)
                     free(window[i]);
                     shift++;
                 }
+                printf(" i->%d \n", i);
                 i++;
             }
             /* 
