@@ -352,9 +352,11 @@ int main (int argc, char **argv)
                      * if you received an ack, calculate the packet 
                      * number relative to current sending windo to shift to that packet 
                      */
+                    printf("window[k] = %d\n", window[k]->hdr.ackno);
+
                     shift = ( recvpkt->hdr.ackno - window[k]->hdr.ackno ) / DATA_SIZE ; 
                     k += shift;
-                    printf( "just received ack number %d causing shift to k=%d \n",  recvpkt->hdr.ackno, k );
+                    printf( "just received ack number %d causing shift to k=%d, window[k]= \n",  recvpkt->hdr.ackno, k, window[k] );
                     stop_timer();
                 }
                
