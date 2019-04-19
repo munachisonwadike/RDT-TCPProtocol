@@ -66,6 +66,20 @@ void resend_packets(int sig)
             printf("packet with seqno %d resent no loop[%d] \n", window[k]->hdr.seqno, k );
             k++;
         }else{
+            // /* 
+            //  * if you get an ack, process it and stop timer 
+            //  */ 
+            // if(recvfrom(sockfd, buffer, MSS_SIZE, 0,
+            //             (struct sockaddr *) &serveraddr, (socklen_t *)&serverlen) < 0)
+            // {
+            //     error("recvfrom error");
+            // }
+            // recvpkt = (tcp_packet *)buffer;
+
+             
+
+
+
             VLOG(DEBUG, "RESEND FUNCTION TRIGGERED");   
             int i = 0;    
             for (i = 0; i < 10; ++i)
@@ -261,18 +275,16 @@ int main (int argc, char **argv)
             printf("the ack we keep receiving at this point is %d \n", recvpkt->hdr.ackno );
             assert(get_data_size(recvpkt) <= DATA_SIZE);
 
+            stop_timer();
+
             if(recvpkt->hdr.ackno >= needed_ack)
             {   
                 needed_ack = recvpkt->hdr.ackno;
-                printf( "3. just received ack number %d \n",  recvpkt->hdr.ackno);
-
                 /* 
                  * if you received an ack, calculate the packet 
                  * number relative to current sending windo to shift to that packet 
                  */
                 shift = ( recvpkt->hdr.ackno - window_base ) / DATA_SIZE ; 
-                printf( "4. just received ack number %d \n",  recvpkt->hdr.ackno);
-
                 /*
                  * shift to new window 
                  */
@@ -281,8 +293,7 @@ int main (int argc, char **argv)
 
                 window_base = window[shift]->hdr.seqno;
                 printf( "just received ack number %d causing shift %d while the window_base goes from %d to %d \n",  recvpkt->hdr.ackno, shift, window_old, window_base );
-                stop_timer();
-
+                
 
                 /* 
                  * populate the empty part of the new window note you won't send
