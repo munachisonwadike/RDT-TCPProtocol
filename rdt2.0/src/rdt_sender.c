@@ -268,8 +268,6 @@ int main (int argc, char **argv)
                 if ( len <=0 ){
                     VLOG(INFO, " End Of File ");
                     window[j] = make_packet(1);
-                    last_packet = window[j-1]->hdr.seqno;
-                    break;
                 }else{
                     pkt_base = next_seqno;
                     next_seqno = pkt_base + len; 
