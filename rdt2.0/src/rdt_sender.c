@@ -1,39 +1,52 @@
-/*
- * Nabil Rahiman
- * NYU Abudhabi
- * email: nr83@nyu.edu
- */
-#include <stdio.h>
-#include <unistd.h>
+#include <arpa/inet.h>
+#include <assert.h>
+#include <netinet/in.h>
+#include <signal.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
+#include <sys/time.h>
 #include <sys/types.h> 
 #include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <signal.h>
-#include <sys/time.h>
 #include <time.h>
-#include <assert.h>
-
-#include"packet.h"
+#include <unistd.h>
+ 
 #include"common.h"
+#include"packet.h"
 
 #define STDIN_FD    0
 #define RETRY  120 /* millisecond */ 
 
+char buffer[DATA_SIZE];
+char *hostname;
+    
+int pkt_base;
+int portno; 
+int len;
+int next_seqno;
+int sockfd;
+int serverlen;
+int shift;
+int window_base; /* to identify the base of each window */
+int window_old;
+
+int needed_ack = 0;
 int next_seqno=0;
 int send_base=0;
 int window_size = 1;
- 
-int sockfd, serverlen;
+       
 struct sockaddr_in serveraddr;
 struct itimerval timer; 
+
+FILE *fp;
+
+sigset_t sigmask;  
+
 tcp_packet *sndpkt;
 tcp_packet *recvpkt;
 tcp_packet* window[10]; /* array to store packet window */  
 
-sigset_t sigmask;       
+     
 
 
 void resend_packets(int sig)
@@ -45,7 +58,9 @@ void resend_packets(int sig)
         int i = 0;    
         for (i = 0; i < 10; ++i)
         {
-            /* Resend all packets range between sendBase and nextSeqNum */ 
+            /* 
+             * resend all packets range between sendBase and nextSeqNum 
+             */ 
             if(sendto(sockfd, window[i], TCP_HDR_SIZE + get_data_size(window[i]), 0, 
                         ( const struct sockaddr *)&serveraddr, serverlen) < 0)
             {
@@ -72,9 +87,8 @@ void stop_timer()
 
 
 /*
- * init_timer: Initialize timer
- * delay: delay in milliseconds
- * sig_handler: signal handler function for resending unacknowledged packets
+ * function to initialize timer, delay in milliseconds,
+ * signal handler function for resending unacknowledged packets
  */
 void init_timer(int delay, void (*sig_handler)(int)) 
 {
@@ -91,17 +105,11 @@ void init_timer(int delay, void (*sig_handler)(int))
 
 int main (int argc, char **argv)
 {
-    int pkt_base;
-    int portno, len;
-    int next_seqno;
-    int shift;
-    int window_base; /* to identify the base of each window */
-    int window_old;
-    char *hostname;
-    char buffer[DATA_SIZE];
-    FILE *fp;
+ 
 
-    /* check command line arguments */
+    /* 
+     * check command line arguments 
+     */
     if (argc != 4) {
         fprintf(stderr,"usage: %s <hostname> <port> <FILE>\n", argv[0]);
         exit(0);
@@ -113,30 +121,39 @@ int main (int argc, char **argv)
         error(argv[3]);
     }
 
-    /* socket: create the socket */
+    /* 
+     * socket: create the socket 
+     */
     sockfd = socket(AF_INET, SOCK_DGRAM, 0);
     if (sockfd < 0) 
         error("ERROR opening socket");
 
 
-    /* initialize server server details */
+    /*
+     * initialize server server details 
+     */
     bzero((char *) &serveraddr, sizeof(serveraddr));
     serverlen = sizeof(serveraddr);
 
-    /* covert host into network byte order */
+    /* 
+     * covert host into network byte order 
+     */
     if (inet_aton(hostname, &serveraddr.sin_addr) == 0) {
         fprintf(stderr,"ERROR, invalid host %s\n", hostname);
         exit(0);
     }
 
-    /* build the server's Internet address */
+    /* 
+     * build the server's Internet address 
+     */
     serveraddr.sin_family = AF_INET;
     serveraddr.sin_port = htons(portno);
 
     assert(MSS_SIZE - TCP_HDR_SIZE > 0);
 
-    /* Stop and wait protocol */
-
+    /* 
+     * stop and wait protocol 
+     */
     init_timer(RETRY, resend_packets);
 
     /*
@@ -185,15 +202,15 @@ int main (int argc, char **argv)
         VLOG(DEBUG, "Sending window starting at seq number %d to %s", 
                 window_base, inet_ntoa(serveraddr.sin_addr));
         /*
-         * If the sendto is called for the first time, the system will
+         * if the sendto is called for the first time, the system will
          * will assign a random port number so that server can send its
          * response to the src port.
          */
         
 
         /*
-         * since the i'th packet is stored in window[i], loop through and attempt to send each packet
-         * should get an error based on the packet
+         * since the i'th packet is stored in window[i], loop through 
+         * and attempt to send each packet should get an error based on the packet
          */
         int i;
 	    for (i = 0; i < 10; ++i)
@@ -213,7 +230,9 @@ int main (int argc, char **argv)
          */
         start_timer();
 
-        /* if you get an ack, process it and stop timer */ 
+        /* 
+         * if you get an ack, process it and stop timer 
+         */ 
         if(recvfrom(sockfd, buffer, MSS_SIZE, 0,
                     (struct sockaddr *) &serveraddr, (socklen_t *)&serverlen) < 0)
         {
@@ -225,11 +244,16 @@ int main (int argc, char **argv)
 
         printf( "3. just received ack number %d \n",  recvpkt->hdr.ackno);
 
-        /* if you received an ack, calculate the packet number relative to current sending windo to shift to that packet */
+        /* 
+         * if you received an ack, calculate the packet 
+         * number relative to current sending windo to shift to that packet 
+         */
         shift = ( recvpkt->hdr.ackno - window_base ) / DATA_SIZE ; 
         printf( "4. just received ack number %d \n",  recvpkt->hdr.ackno);
 
-        /* shift to new window */
+        /*
+         * shift to new window 
+         */
         window_old = window_base;
         printf( "2. just received ack number %d window_base = %d shift = %d \n",  recvpkt->hdr.ackno, window_base, shift);
 
@@ -239,8 +263,8 @@ int main (int argc, char **argv)
 
 
         /* 
-         * populate the empty part of the new window 
-         * note you won't send out the content of the window till the next loop iteration 
+         * populate the empty part of the new window note you won't send
+         * out the content of the window till the next loop iteration 
          */     
         int j; 
         for ( j = 0 ; j < 10 - shift ; ++j )
@@ -248,7 +272,10 @@ int main (int argc, char **argv)
 
             window[j] = window[j + shift]; 
         }
-        /* 'next_seqno' becomes the seq number for the last packet in new window */
+        /* 
+         * 'next_seqno' becomes the seq number 
+         * for the last packet in new window 
+         */
         printf( "WTH 1" );
 
         for ( j = 10 - shift ; j < 10 ; ++j )
@@ -280,7 +307,10 @@ int main (int argc, char **argv)
             {  
 
                 printf("GOT TO THE LOOP\n");
-                /* send the packets */
+
+                /* 
+                 * send the packets 
+                 */
                 for ( k = 0; k < 10; ++k)
                 {
                     printf("kth value of loop = %d\n", k);
@@ -294,7 +324,11 @@ int main (int argc, char **argv)
                 }
           
                 start_timer();
-                /* if you get an ack, process it and stop timer - timer ensures you don't wait indefinitely */
+
+                /* 
+                 * if you get an ack, process it and stop timer 
+                 * timer ensures you don't wait indefinitely 
+                 */
                 if(recvfrom(sockfd, buffer, MSS_SIZE, 0,
                             (struct sockaddr *) &serveraddr, (socklen_t *)&serverlen) < 0)
                 {
@@ -305,12 +339,18 @@ int main (int argc, char **argv)
                 printf( "just received ack number %d causing shift %d  for FINAL window %d \n",  recvpkt->hdr.ackno, shift, window_base );
                 stop_timer();
                
-                /* shrink the window start closer to the end by setting to the highest acked packet */
+                /*
+                 * shrink the window start closer to the end
+                 * by setting to the highest acked packet 
+                 */
 
             }while( recvpkt->hdr.ackno > 0 );   
 
 
-            /* after sending the last window off, send a 0 packet so that the receiver knows to close itself */
+            /* 
+             * after sending the last window off, send a
+             * 0 packet so that the receiver knows to close itself 
+             */
             VLOG(INFO, "End Of File has been reached and time to stop ");
             sndpkt = make_packet(0);
             sendto(sockfd, sndpkt, TCP_HDR_SIZE,  0,
@@ -324,7 +364,9 @@ int main (int argc, char **argv)
     VLOG(DEBUG, "ACK for packets before the one with seq no %d received", recvpkt->hdr.ackno);
 
    
-    /* free the packets allocated with malloc */   
+    /* 
+     * free the packets allocated with malloc 
+     */   
     for ( i = 0; i < 10; ++i)
     {
         free(window[i]);

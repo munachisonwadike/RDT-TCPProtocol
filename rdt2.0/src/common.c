@@ -1,8 +1,3 @@
-/*
- * Nabil Rahiman
- * NYU Abudhabi
- * email: nr83@nyu.edu
- */
 #include <stdio.h>
 #include <stdlib.h>
 #include"common.h"

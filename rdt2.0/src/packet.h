@@ -1,8 +1,3 @@
-/*
- * Nabil Rahiman
- * NYU Abudhabi
- * email: nr83@nyu.edu
- */
 enum packet_type {
     DATA,
     ACK,

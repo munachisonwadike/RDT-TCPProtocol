@@ -1,52 +1,41 @@
-/*
- * Nabil Rahiman
- * NYU Abudhabi
- * email: nr83@nyu.edu
- */
-
+#include <arpa/inet.h>
+#include <assert.h>
 #include <errno.h>
-#include <stdio.h>
-#include <unistd.h>
+#include <netinet/in.h>
 #include <signal.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/time.h>
 #include <sys/types.h> 
 #include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <sys/time.h>
-#include <assert.h>
+#include <unistd.h>
 
 #include "common.h"
 #include "packet.h"
 
+char buffer[MSS_SIZE]; /* buffer to store any received packets */
 
-/*
- * You are required to change the implementation to support
- * window size greater than one.
- * In the current implementation window size is one, hence we have
- * only one send and receive packet
- */
-int sockfd; /* socket */
-int portno; /* port to listen on */
 int clientlen; /* byte size of client's address */
+int sockfd; /* socket */
+int optval; /* flag value for setsockopt */
+int portno; /* port to listen on */
+volatile int needed_pkt = 0; /* int to ensure that we don't allow for out of order packets*/
+volatile int stop = 0;
+
 struct sockaddr_in serveraddr; /* server's addr */
 struct sockaddr_in clientaddr; /* client addr */
-int optval; /* flag value for setsockopt */
-FILE *fp;
-char buffer[MSS_SIZE];
-volatile int needed_pkt = 0; /* int to ensure that we don't allow for out of order packets*/
-
-
 struct timeval tp;
+struct itimerval timer;
+
+FILE *fp; /* pointer for output file */
+
+sigset_t sigmask;  
 
 tcp_packet *recvpkt;
 tcp_packet *sndpkt;
 
-sigset_t sigmask;  
-struct itimerval timer; 
 
-volatile int stop = 0;
 
 /*
  * handler to know when the timer counts down 
@@ -58,13 +47,18 @@ void ack_sender(int sig)
         stop = 1;
 
         VLOG(DEBUG, "HANDLER TRIGGERED");   
-       /* if what you recieved was good, add it to the written file */
+       
+        /* 
+         * if received exact packet needed, write to file 
+         * ignore out of order packets lower than needed  
+         */
         if( recvpkt->hdr.seqno == needed_pkt )
         {
             gettimeofday(&tp, NULL);
             VLOG(DEBUG, "TYPE 2 %lu, %d, %d", tp.tv_sec, recvpkt->hdr.data_size, recvpkt->hdr.seqno);
             fseek(fp, recvpkt->hdr.seqno, SEEK_SET);
             fwrite(recvpkt->data, 1, recvpkt->hdr.data_size, fp);
+
             /* send ack for the packet */
             sndpkt = make_packet(0);
             sndpkt->hdr.ackno = recvpkt->hdr.seqno + recvpkt->hdr.data_size;
@@ -74,7 +68,12 @@ void ack_sender(int sig)
                 error("ERROR in sendto");
             }
             printf("sending ack number %d\n", needed_pkt );
-        }else if ( recvpkt->hdr.seqno > needed_pkt ) { /* if higher than expected out of order packet, send a duplicate ack */
+
+        /* 
+         * if higher than needed,
+         * out of order packet, send a duplicate ack 
+         */
+        }else if ( recvpkt->hdr.seqno > needed_pkt ) { 
             
             sndpkt = make_packet(0);
             sndpkt->hdr.ackno = needed_pkt;
@@ -87,7 +86,7 @@ void ack_sender(int sig)
 
         } 
 
-        /* ignore out of order packets higher lower than needed  */
+        
 
 
     }
@@ -217,10 +216,11 @@ int main(int argc, char **argv) {
          */
 
         /* 
-         * case 1: if we get the next packet we are expecting in sequence,
+         * if we get the next packet we are expecting in sequence,
          * then write the packet to the output file. Wait to see if there is any new packet coming for 
          * 500 ms before sending ack. If there was already one waiting, send ack for both, cumulatively
          * otherwise, ack for the first will be triggered automatically
+         * ignore out of order packets lower than needed
          */
         if( recvpkt->hdr.seqno == needed_pkt )
         {
@@ -270,6 +270,7 @@ int main(int argc, char **argv) {
              * 
              */
             if (stop==0){
+
                 /* if it was the second packet was needed */
                 if( recvpkt->hdr.seqno == needed_pkt ) 
                 {
@@ -289,7 +290,9 @@ int main(int argc, char **argv) {
                         error("ERROR in sendto");
                     } 
                     printf("sending ack number %d\n", needed_pkt );
-                }else if ( recvpkt->hdr.seqno > needed_pkt ) { /* if higher than expected out of order packet, send a duplicate ack */
+
+                /* if higher than expected out of order packet, send a duplicate ack */
+                }else if ( recvpkt->hdr.seqno > needed_pkt ) { 
             
                     sndpkt = make_packet(0);
                     sndpkt->hdr.ackno = needed_pkt;
@@ -304,10 +307,11 @@ int main(int argc, char **argv) {
                 
 
             }
-        /**/
+
+
 
         /*
-         * case 2: send a duplicate ack when we are getting an out of order packet
+         * send a duplicate ack when we are getting an out of order packet
          * higher than what is needed
          */
         
@@ -323,10 +327,7 @@ int main(int argc, char **argv) {
 
         }
 
-        /*
-         * case 3: ignore out of order packets lower than needed
-         */
-         
+       
 
 
     }
