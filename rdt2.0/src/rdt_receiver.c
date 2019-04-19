@@ -72,7 +72,20 @@ void ack_sender(int sig)
         if (sendto(sockfd, sndpkt, TCP_HDR_SIZE, 0, 
                 (struct sockaddr *) &clientaddr, clientlen) < 0) {
             error("ERROR in sendto");
-        }            
+        } else if ( recvpkt->hdr.seqno < needed_pkt ){ /* if lower-than-expected and out of order, specify needed one */
+
+            continue;
+
+        
+        }else{ /* if higher than expected out of order packet, send a duplicate ack */
+            sndpkt = make_packet(0);
+            sndpkt->hdr.ackno = needed_pkt;
+            sndpkt->hdr.ctr_flags = ACK;
+            if (sendto(sockfd, sndpkt, TCP_HDR_SIZE, 0, 
+                    (struct sockaddr *) &clientaddr, clientlen) < 0) {
+                error("ERROR in sendto");
+            }
+        }         
     }
     
 }
