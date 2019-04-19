@@ -96,7 +96,8 @@ void resend_packets(int sig)
                         window[j]->hdr.seqno = pkt_base;
                     }
                 }
-                window_base = window[9]->hdr.seqno;
+                window_base = window[0]->hdr.seqno;
+                needed_ack = window_base;
             }
 
 
