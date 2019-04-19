@@ -64,7 +64,7 @@ void resend_packets(int sig)
                 }
 
             printf("packet with seqno %d resent -- loop[%d] \n", window[k]->hdr.seqno, k );
-
+            k++;
         }else{
             VLOG(DEBUG, "RESEND FUNCTION TRIGGERED");   
             int i = 0;    
