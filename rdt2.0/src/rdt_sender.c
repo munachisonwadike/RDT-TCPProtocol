@@ -30,11 +30,11 @@ int sockfd;
 int serverlen;
 int shift;
 
+
+int last_packet = -1;
 int needed_ack = 0;
 int next_seqno=0;
 int send_base=0;
-int stop = 0;
-
        
 struct sockaddr_in serveraddr;
 struct itimerval timer; 
@@ -268,9 +268,8 @@ int main (int argc, char **argv)
                 if ( len <=0 ){
                     VLOG(INFO, " End Of File ");
                     window[j] = make_packet(1);
-                    window[j]->hdr.seqno = 0; /*send an older packet number so the sender ignores these
-                                                just a filler so it doesn't close*/
-                    stop = 1;
+                    last_packet = window[j-1]->hdr.seqno;
+                    break;
                 }else{
                     pkt_base = next_seqno;
                     next_seqno = pkt_base + len; 
@@ -305,11 +304,12 @@ int main (int argc, char **argv)
             start_timer(); 
         }
 
-        if (stop == 1){
+        
+        if( last_packet == recvpkt->hdr.ackno){
             break;
         }
 
-             
+        
 
     } while( 1 );
 
