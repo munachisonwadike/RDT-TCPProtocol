@@ -63,7 +63,7 @@ void resend_packets(int sig)
                     error("sendto");
                 }
 
-            printf("packet with seqno %d resent -- loop[%d] \n", window[k]->hdr.seqno, k );
+            printf("packet with seqno %d resent no dash loop[%d] \n", window[k]->hdr.seqno, k );
             k++;
         }else{
             VLOG(DEBUG, "RESEND FUNCTION TRIGGERED");   
