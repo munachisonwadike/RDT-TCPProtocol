@@ -51,6 +51,8 @@ void resend_packets(int sig)
             {
                 error("sendto");
             }
+            printf("packet with seqno %d just sent -- loop[%d] \n", window[i]->hdr.seqno, i );
+
         }
     }
 }
@@ -220,10 +222,17 @@ int main (int argc, char **argv)
         recvpkt = (tcp_packet *)buffer;
 
         assert(get_data_size(recvpkt) <= DATA_SIZE);
+
+        printf( "3. just received ack number %d \n",  recvpkt->hdr.ackno);
+
         /* if you received an ack, calculate the packet number relative to current sending windo to shift to that packet */
         shift = ( recvpkt->hdr.ackno - window_base ) / DATA_SIZE ; 
+        printf( "4. just received ack number %d \n",  recvpkt->hdr.ackno);
+
         /* shift to new window */
         window_old = window_base;
+        printf( "2. just received ack number %d window_base = %d shift = %d \n",  recvpkt->hdr.ackno, window_base, shift);
+
         window_base = window[shift]->hdr.seqno;
         printf( "just received ack number %d causing shift %d while the window_base goes from %d to %d \n",  recvpkt->hdr.ackno, shift, window_old, window_base );
         stop_timer();
@@ -264,11 +273,15 @@ int main (int argc, char **argv)
         int k;
         if( stop == 1 )
         {   
+            printf("WE ARE NOW IN THE STOP STATEMENT\n");            
             do
             {  
+
+                printf("GOT TO THE LOOP\n");
                 /* send the packets */
                 for ( k = 0; k < 10; ++k)
                 {
+                    printf("kth value of loop = %d\n", k);
                     if(sendto(sockfd, window[k], TCP_HDR_SIZE + get_data_size(window[k]), 0, 
                             ( const struct sockaddr *)&serveraddr, serverlen) < 0)
                     {

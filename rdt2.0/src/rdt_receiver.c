@@ -132,6 +132,9 @@ void init_timer(int delay, void (*sig_handler)(int))
 
 
 int main(int argc, char **argv) {
+    VLOG(DEBUG, "VALUE OF DATA_SIZE! %lu",  DATA_SIZE);
+  
+
     /* 
      * check command line arguments 
      */
