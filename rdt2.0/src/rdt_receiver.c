@@ -84,9 +84,7 @@ void ack_sender(int sig)
             }
             printf("sending ack number %d\n", needed_pkt );
 
-        }else if(recvpkt->hdr.seqno < needed_pkt){
-        
-        }
+        } 
 
         /* ignore out of order packets higher lower than needed  */
 
@@ -264,27 +262,42 @@ int main(int argc, char **argv) {
             /* 
              * if did receve a packet, then you can send the cumulative ack since you will reach here
              * make sure to check that the stop variable hasn't been set to 1 i.e there was no timeout
+             * also note that we increment the value of needed packet
              */
             if (stop==0){
-                if( recvpkt->hdr.seqno == needed_pkt )
+            
+                if( recvpkt->hdr.seqno == needed_pkt ) /* if it was the need packet */
                 {
+                    needed_pkt = recvpkt->hdr.seqno + recvpkt->hdr.data_size;
                     gettimeofday(&tp, NULL);
                     VLOG(DEBUG, "TYPE 2 %lu, %d, %d", tp.tv_sec, recvpkt->hdr.data_size, recvpkt->hdr.seqno);
                     fseek(fp, recvpkt->hdr.seqno, SEEK_SET);
                     fwrite(recvpkt->data, 1, recvpkt->hdr.data_size, fp);
                     printf("after type 2 receipt needed_pkt has a value %d\n", needed_pkt );
 
-                }       
-                /* send ack for the packet */
-                sndpkt = make_packet(0);
-                sndpkt->hdr.ackno = recvpkt->hdr.seqno + recvpkt->hdr.data_size;
-                needed_pkt = sndpkt->hdr.ackno;
-                sndpkt->hdr.ctr_flags = ACK;
-                if (sendto(sockfd, sndpkt, TCP_HDR_SIZE, 0, 
-                        (struct sockaddr *) &clientaddr, clientlen) < 0) {
-                    error("ERROR in sendto");
+                    /* send ack for the packet */
+                    sndpkt = make_packet(0);
+                    sndpkt->hdr.ackno = recvpkt->hdr.seqno + recvpkt->hdr.data_size;
+                    needed_pkt = sndpkt->hdr.ackno;
+                    sndpkt->hdr.ctr_flags = ACK;
+                    if (sendto(sockfd, sndpkt, TCP_HDR_SIZE, 0, 
+                            (struct sockaddr *) &clientaddr, clientlen) < 0) {
+                        error("ERROR in sendto");
+                    } 
+                    printf("sending ack number %d\n", needed_pkt );
+                }else if ( recvpkt->hdr.seqno > needed_pkt ) { /* if higher than expected out of order packet, send a duplicate ack */
+            
+                    sndpkt = make_packet(0);
+                    sndpkt->hdr.ackno = needed_pkt;
+                    sndpkt ->hdr.ctr_flags = ACK;
+                    if (sendto(sockfd, sndpkt, TCP_HDR_SIZE, 0, 
+                            (struct sockaddr *) &clientaddr, clientlen) < 0) {
+                        error("ERROR in sendto");
+                    }
+                    printf("sending ack number %d\n", needed_pkt );
+
                 } 
-                printf("sending ack number %d\n", needed_pkt );
+                
 
             }
         /**/
@@ -294,7 +307,8 @@ int main(int argc, char **argv) {
          * higher than what is needed
          */
         
-        }else if ( recvpkt->hdr.seqno > needed_pkt ) {
+        }
+        else if ( recvpkt->hdr.seqno > needed_pkt ) {
             sndpkt = make_packet(0);
             sndpkt->hdr.ackno = needed_pkt;
             sndpkt ->hdr.ctr_flags = ACK;
@@ -309,9 +323,7 @@ int main(int argc, char **argv) {
         /*
          * case 3: ignore out of order packets lower than needed
          */
-        else if(recvpkt->hdr.seqno < needed_pkt){
-            continue;
-        }
+         
 
 
     }
