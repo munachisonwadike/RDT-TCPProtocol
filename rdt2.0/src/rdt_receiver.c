@@ -36,6 +36,8 @@ int optval; /* flag value for setsockopt */
 FILE *fp;
 char buffer[MSS_SIZE];
 volatile int needed_pkt = 0; /* int to ensure that we don't allow for out of order packets*/
+
+
 struct timeval tp;
 
 tcp_packet *recvpkt;
@@ -66,7 +68,6 @@ void ack_sender(int sig)
             /* send ack for the packet */
             sndpkt = make_packet(0);
             sndpkt->hdr.ackno = recvpkt->hdr.seqno + recvpkt->hdr.data_size;
-            needed_pkt = sndpkt->hdr.ackno;
             sndpkt->hdr.ctr_flags = ACK;
             if (sendto(sockfd, sndpkt, TCP_HDR_SIZE, 0, 
                     (struct sockaddr *) &clientaddr, clientlen) < 0) {
@@ -217,8 +218,9 @@ int main(int argc, char **argv) {
 
         /* 
          * case 1: if we get the next packet we are expecting in sequence,
-         * then send write the packet to the output file. Wait to see if there is any new packet coming for 
+         * then write the packet to the output file. Wait to see if there is any new packet coming for 
          * 500 ms before sending ack. If there was already one waiting, send ack for both, cumulatively
+         * otherwise, ack for the first will be triggered automatically
          */
         if( recvpkt->hdr.seqno == needed_pkt )
         {
@@ -226,15 +228,18 @@ int main(int argc, char **argv) {
             gettimeofday(&tp, NULL);
             VLOG(DEBUG, "TYPE 1 %lu, %d, %d", tp.tv_sec, recvpkt->hdr.data_size, recvpkt->hdr.seqno);
 
+            /* write the packet*/
             fseek(fp, recvpkt->hdr.seqno, SEEK_SET);
             fwrite(recvpkt->data, 1, recvpkt->hdr.data_size, fp);
-            /*
-             * Wait up to 500 ms for another to possible packet
-             */ 
+            
+            /* we are now expecting the second packet*/
+            
             needed_pkt = recvpkt->hdr.seqno + recvpkt->hdr.data_size; /* specify which number the next packet should have*/
             printf("after type 1 receipt needed_pkt has a value %d\n", needed_pkt );
-        /**/
-            /* start the wait */
+            
+
+            /* start the wait for second packet */
+           
             start_timer(); 
             if (recvfrom(sockfd, buffer, MSS_SIZE, 0,
                 (struct sockaddr *) &clientaddr, (socklen_t *)&clientlen) < 0 && errno == EINTR) 
@@ -255,18 +260,18 @@ int main(int argc, char **argv) {
                 free(sndpkt);
                 break;
             }
-            /* end the wait and restart the loop if you get another packet */
+            /* stop the timer */
             stop_timer(); 
 
         
             /* 
-             * if did receve a packet, then you can send the cumulative ack since you will reach here
-             * make sure to check that the stop variable hasn't been set to 1 i.e there was no timeout
-             * also note that we increment the value of needed packet
+             * if did receive a packet, then stop will still have  a value 0
+             * otherwise it will have a value 1 and would have already sent ack for first packet 
+             * 
              */
             if (stop==0){
-            
-                if( recvpkt->hdr.seqno == needed_pkt ) /* if it was the need packet */
+                /* if it was the second packet was needed */
+                if( recvpkt->hdr.seqno == needed_pkt ) 
                 {
                     needed_pkt = recvpkt->hdr.seqno + recvpkt->hdr.data_size;
                     gettimeofday(&tp, NULL);
@@ -278,7 +283,6 @@ int main(int argc, char **argv) {
                     /* send ack for the packet */
                     sndpkt = make_packet(0);
                     sndpkt->hdr.ackno = recvpkt->hdr.seqno + recvpkt->hdr.data_size;
-                    needed_pkt = sndpkt->hdr.ackno;
                     sndpkt->hdr.ctr_flags = ACK;
                     if (sendto(sockfd, sndpkt, TCP_HDR_SIZE, 0, 
                             (struct sockaddr *) &clientaddr, clientlen) < 0) {
@@ -307,8 +311,7 @@ int main(int argc, char **argv) {
          * higher than what is needed
          */
         
-        }
-        else if ( recvpkt->hdr.seqno > needed_pkt ) {
+        } else if ( recvpkt->hdr.seqno > needed_pkt ) {
             sndpkt = make_packet(0);
             sndpkt->hdr.ackno = needed_pkt;
             sndpkt ->hdr.ctr_flags = ACK;
