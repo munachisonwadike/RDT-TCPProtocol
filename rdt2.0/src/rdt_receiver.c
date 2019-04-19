@@ -53,6 +53,7 @@ void ack_sender(int sig)
 {
     if (sig == SIGALRM)
     {
+        stop = 1;
 
         VLOG(DEBUG, "HANDLER TRIGGERED");   
        /* if what you recieved was good, add it to the written file */
@@ -218,32 +219,53 @@ int main(int argc, char **argv) {
             
         /**/
             /* start the wait */
-        //     start_timer(); 
-        //     if (recvfrom(sockfd, buffer, MSS_SIZE, 0,
-        //         (struct sockaddr *) &clientaddr, (socklen_t *)&clientlen) < 0 && errno == EINTR) 
-        //     {
-        //         error("ERROR in recvfrom");
-        //     }
-        //     recvpkt = (tcp_packet *) buffer;
-        //     assert(get_data_size(recvpkt) <= DATA_SIZE);
-        //     if ( recvpkt->hdr.data_size == 0) /* if it was an empty packet, close program*/
-        //     {
-        //         sndpkt = make_packet(0);
-        //         if (sendto(sockfd, sndpkt, TCP_HDR_SIZE, 0, 
-        //                 (struct sockaddr *) &clientaddr, clientlen) < 0) {
-        //             error("ERROR in sendto");
-        //         }
-        //         VLOG(INFO, "End Of File has been reached");
-        //         fclose(fp);
-        //         free(sndpkt);
-        //         break;
-        //     }
-        //     /* end the wait and restart the loop if you get another packet */
-        //     stop_timer(); 
+            start_timer(); 
+            if (recvfrom(sockfd, buffer, MSS_SIZE, 0,
+                (struct sockaddr *) &clientaddr, (socklen_t *)&clientlen) < 0 && errno == EINTR) 
+            {
+                error("ERROR in recvfrom");
+            }
+            recvpkt = (tcp_packet *) buffer;
+            assert(get_data_size(recvpkt) <= DATA_SIZE);
+            if ( recvpkt->hdr.data_size == 0) /* if it was an empty packet, close program*/
+            {
+                sndpkt = make_packet(0);
+                if (sendto(sockfd, sndpkt, TCP_HDR_SIZE, 0, 
+                        (struct sockaddr *) &clientaddr, clientlen) < 0) {
+                    error("ERROR in sendto");
+                }
+                VLOG(INFO, "End Of File has been reached");
+                fclose(fp);
+                free(sndpkt);
+                break;
+            }
+            /* end the wait and restart the loop if you get another packet */
+            stop_timer(); 
 
-        // /**/
-
-            
+        
+            /* 
+             * if did receve a packet, then you can send the cumulative ack since you will reach here
+             * make sure to check that the stop variable hasn't been set to 0 i.e there was no timeout
+             */
+            if (stop==1){
+                if( recvpkt->hdr.seqno == needed_pkt )
+                {
+                    gettimeofday(&tp, NULL);
+                    VLOG(DEBUG, "TYPE 1 %lu, %d, %d", tp.tv_sec, recvpkt->hdr.data_size, recvpkt->hdr.seqno);
+                    fseek(fp, recvpkt->hdr.seqno, SEEK_SET);
+                    fwrite(recvpkt->data, 1, recvpkt->hdr.data_size, fp);
+                }       
+                /* send ack for the packet */
+                sndpkt = make_packet(0);
+                sndpkt->hdr.ackno = recvpkt->hdr.seqno + recvpkt->hdr.data_size;
+                needed_pkt = sndpkt->hdr.ackno;
+                sndpkt->hdr.ctr_flags = ACK;
+                if (sendto(sockfd, sndpkt, TCP_HDR_SIZE, 0, 
+                        (struct sockaddr *) &clientaddr, clientlen) < 0) {
+                    error("ERROR in sendto");
+                } 
+            }
+        /**/
 
         /*
          * case 2: ignore duplicates received from rdt sender
