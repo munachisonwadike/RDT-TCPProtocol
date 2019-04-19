@@ -39,6 +39,8 @@ int window_size = 1;
 struct sockaddr_in serveraddr;
 struct itimerval timer; 
 
+
+int j;
 volatile int k = -1;
 
 FILE *fp;
@@ -78,6 +80,23 @@ void resend_packets(int sig)
             printf("still receiving this ack no %d\n", recvpkt->hdr.ackno);
              
 
+            if( recvpkt->hdr.ackno > window[9]->hdr.seqno ){
+                for ( j = 0 ; j < 10 ; ++j )
+                {
+                    len = fread(buffer, 1, DATA_SIZE, fp);
+                    if ( len <=0 ){
+                        VLOG(INFO, "End Of File has been reached and we may have gotten some packets from it");
+                        window[j] = make_packet(0);
+                        stop = 1;
+                    }else{
+                        pkt_base = next_seqno;
+                        next_seqno = pkt_base + len; 
+                        window[j] = make_packet(len);
+                        memcpy(window[j]->data, buffer, len);
+                        window[j]->hdr.seqno = pkt_base;
+                    }
+                }
+            }
 
 
             VLOG(DEBUG, "RESEND FUNCTION TRIGGERED");   
@@ -299,7 +318,7 @@ int main (int argc, char **argv)
                  * populate the empty part of the new window note you won't send
                  * out the content of the window till the next loop iteration 
                  */     
-                int j; 
+                
                 for ( j = 0 ; j < 10 - shift ; ++j )
                 {
 
