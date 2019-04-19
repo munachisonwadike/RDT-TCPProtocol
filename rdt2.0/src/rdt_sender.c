@@ -279,35 +279,31 @@ int main (int argc, char **argv)
                  
  
             }
-        }
 
+            /*
+             * since the i'th packet is stored in window[i], loop through 
+             * and attempt to send each packet should get an error based on the packet
+             */
+            VLOG(DEBUG, "sending window from base %d -> %s", 
+                window[0]->hdr.seqno, inet_ntoa(serveraddr.sin_addr));       
 
-        VLOG(DEBUG, "sending window from base %d -> %s", 
-                window[0]->hdr.seqno, inet_ntoa(serveraddr.sin_addr));
-
-        
-
-
-        /*
-         * since the i'th packet is stored in window[i], loop through 
-         * and attempt to send each packet should get an error based on the packet
-         */
-        
-
-
-	    for (i = WINDOW_SIZE - shift; i < WINDOW_SIZE; ++i)
-        {
-        	if(sendto(sockfd, window[i], TCP_HDR_SIZE + get_data_size(window[i]), 0, 
-                    ( const struct sockaddr *)&serveraddr, serverlen) < 0)
+            for (i = WINDOW_SIZE - shift; i < WINDOW_SIZE; ++i)
             {
-                error("sendto error");
-            }
-            printf("packet %d sent \n", window[i]->hdr.seqno);
+                if(sendto(sockfd, window[i], TCP_HDR_SIZE + get_data_size(window[i]), 0, 
+                        ( const struct sockaddr *)&serveraddr, serverlen) < 0)
+                {
+                    error("sendto error");
+                }
+                printf("packet %d sent \n", window[i]->hdr.seqno);
 
- 
-        }
+     
+            }
+
               
-       start_timer();  
+            start_timer(); 
+        }
+
+
              
 
     } while( 1 );

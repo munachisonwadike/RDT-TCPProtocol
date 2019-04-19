@@ -199,7 +199,7 @@ int main(int argc, char **argv) {
         {
 
             gettimeofday(&tp, NULL);
-            VLOG(DEBUG, "TYPE 1 %lu, %d, %d", tp.tv_sec, recvpkt->hdr.data_size, recvpkt->hdr.seqno);
+            VLOG(DEBUG, " %lu, %d, %d", tp.tv_sec, recvpkt->hdr.data_size, recvpkt->hdr.seqno);
 
             /* write the packet*/
             fseek(fp, recvpkt->hdr.seqno, SEEK_SET);
@@ -208,78 +208,12 @@ int main(int argc, char **argv) {
             /* we are now expecting the second packet*/
             
             needed_pkt = recvpkt->hdr.seqno + recvpkt->hdr.data_size; /* specify which number the next packet should have*/
-            printf("after type 1 receipt needed_pkt has a value %d\n", needed_pkt );
+            printf("after receipt needed_pkt has a value %d\n", needed_pkt );
             
             stop_timer();
             /* start the wait for second packet */
             start_timer(); 
-            // if (recvfrom(sockfd, buffer, MSS_SIZE, 0,
-            //     (struct sockaddr *) &clientaddr, (socklen_t *)&clientlen) < 0 && errno == EINTR) 
-            // {
-            //     error("ERROR in recvfrom");
-            // }
-            // recvpkt = (tcp_packet *) buffer;
-            // assert(get_data_size(recvpkt) <= DATA_SIZE);
-            // if ( recvpkt->hdr.data_size == 0) /* if it was an empty packet, close program*/
-            // {
-            //     sndpkt = make_packet(0);
-            //     if (sendto(sockfd, sndpkt, TCP_HDR_SIZE, 0, 
-            //             (struct sockaddr *) &clientaddr, clientlen) < 0) {
-            //         error("ERROR in sendto");
-            //     }
-            //     VLOG(INFO, "End Of File has been reached");
-            //     fclose(fp);
-            //     free(sndpkt);
-            //     break;
-            // }
-            // /* stop the timer */
-            // stop_timer(); 
-
-        
-            /* 
-             * if did receive a packet, then stop will still have  a value 0
-             * otherwise it will have a value 1 and would have already sent ack for first packet 
-             * 
-             */
-            // if (stop==0){
-
-            //     /* if it was the second packet was needed */
-            //     if( recvpkt->hdr.seqno == needed_pkt ) 
-            //     {
-            //         needed_pkt = recvpkt->hdr.seqno + recvpkt->hdr.data_size;
-            //         gettimeofday(&tp, NULL);
-            //         VLOG(DEBUG, "TYPE 2 %lu, %d, %d", tp.tv_sec, recvpkt->hdr.data_size, recvpkt->hdr.seqno);
-            //         fseek(fp, recvpkt->hdr.seqno, SEEK_SET);
-            //         fwrite(recvpkt->data, 1, recvpkt->hdr.data_size, fp);
-            //         printf("after type 2 receipt needed_pkt has a value %d\n", needed_pkt );
-
-            //         /* send ack for the packet */
-            //         sndpkt = make_packet(0);
-            //         sndpkt->hdr.ackno = recvpkt->hdr.seqno + recvpkt->hdr.data_size;
-            //         sndpkt->hdr.ctr_flags = ACK;
-            //         if (sendto(sockfd, sndpkt, TCP_HDR_SIZE, 0, 
-            //                 (struct sockaddr *) &clientaddr, clientlen) < 0) {
-            //             error("ERROR in sendto");
-            //         } 
-            //         printf("sending ack (1) number %d\n", needed_pkt );
-
-            //     /* if higher than expected out of order packet, send a duplicate ack */
-            //     }else if ( recvpkt->hdr.seqno > needed_pkt ) { 
-            
-            //         sndpkt = make_packet(0);
-            //         sndpkt->hdr.ackno = needed_pkt;
-            //         sndpkt ->hdr.ctr_flags = ACK;
-            //         if (sendto(sockfd, sndpkt, TCP_HDR_SIZE, 0, 
-            //                 (struct sockaddr *) &clientaddr, clientlen) < 0) {
-            //             error("ERROR in sendto");
-            //         }
-            //         printf("sending duplicate ack (1) number %d\n", needed_pkt );
-
-            //     } 
-                
-
-            // }
-
+             
 
 
         /*
