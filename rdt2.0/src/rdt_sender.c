@@ -245,9 +245,9 @@ int main (int argc, char **argv)
             int i = 0; int shift = 0;
             while (i < WINDOW_SIZE)
             {
-                printf("window[i]->hdr.ackno=>%d, recvpkt->hdr.ackno=>%d \n", window[i]->hdr.ackno, recvpkt->hdr.ackno);
+                printf("window[i]->hdr.seqno=>%d, recvpkt->hdr.ackno=>%d \n", window[i]->hdr.ackno, recvpkt->hdr.ackno);
 
-                if ( window[i]->hdr.ackno > recvpkt->hdr.ackno ){
+                if ( window[i]->hdr.seqno > recvpkt->hdr.ackno ){
                     window[i-shift] = window[i];
 
                 }else{
