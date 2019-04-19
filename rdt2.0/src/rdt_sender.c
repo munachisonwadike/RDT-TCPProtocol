@@ -245,6 +245,7 @@ int main (int argc, char **argv)
             int i = 0; int shift = 0;
             while (i < WINDOW_SIZE)
             {
+                printf("window[i]->hdr.ackno=>%d, recvpkt->hdr.ackno=>%d \n", window[i]->hdr.ackno, recvpkt->hdr.ackno);
                 if ( window[i]->hdr.ackno > recvpkt->hdr.ackno ){
                     window[i-shift] = window[i];
 
@@ -259,7 +260,7 @@ int main (int argc, char **argv)
              * out the content of the window till the next loop iteration 'next_seqno' becomes the seq number 
              * for the last packet in new window 
              */
-            printf("shift->%d\n", shift);
+
             for ( j =  WINDOW_SIZE - shift ; j < WINDOW_SIZE ; ++j )
             {
                 len = fread(buffer, 1, DATA_SIZE, fp);
@@ -283,8 +284,7 @@ int main (int argc, char **argv)
         VLOG(DEBUG, "sending window from base %d -> %s", 
                 window[i]->hdr.seqno, inet_ntoa(serveraddr.sin_addr));
 
-        printf("breakpoint 1 \n");
-
+ 
 
         /*
          * since the i'th packet is stored in window[i], loop through 
@@ -302,8 +302,6 @@ int main (int argc, char **argv)
             }
             printf("packet %d sent \n", window[i]->hdr.seqno);
 
-            printf(" i->%d \n", i);
-        }
               
        start_timer();  
              
