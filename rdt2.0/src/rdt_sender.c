@@ -108,7 +108,7 @@ void init_timer(int delay, void (*sig_handler)(int))
     sigaddset(&sigmask, SIGALRM);
 }
 
-
+int i;
 int main (int argc, char **argv)
 {
  
@@ -167,7 +167,7 @@ int main (int argc, char **argv)
      * store pointer to packet i in window[i]
      */
     next_seqno = 0;
-	int i = 0;
+	i = 0;
 	while ( i < WINDOW_SIZE )
 	{
 		len = fread(buffer, 1, DATA_SIZE, fp);
@@ -193,7 +193,7 @@ int main (int argc, char **argv)
 	}
 
 
-    for (int i = 0; i < WINDOW_SIZE; ++i)
+    for ( i = 0; i < WINDOW_SIZE; ++i)
     {
         if(sendto(sockfd, window[i], TCP_HDR_SIZE + get_data_size(window[i]), 0, 
                 ( const struct sockaddr *)&serveraddr, serverlen) < 0)
@@ -284,7 +284,7 @@ int main (int argc, char **argv)
          * and attempt to send each packet should get an error based on the packet
          */
         
-	    for (int i = WINDOW_SIZE - shift; i < WINDOW_SIZE; ++i)
+	    for (i = WINDOW_SIZE - shift; i < WINDOW_SIZE; ++i)
         {
         	if(sendto(sockfd, window[i], TCP_HDR_SIZE + get_data_size(window[i]), 0, 
                     ( const struct sockaddr *)&serveraddr, serverlen) < 0)
