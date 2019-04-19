@@ -306,6 +306,7 @@ int main (int argc, char **argv)
 
         
         if( last_packet == recvpkt->hdr.ackno){
+            printf("last_packet %d, recvpkt->hdr.ackno %d\n", last_packet, recvpkt->hdr.ackno );
             break;
         }
 
