@@ -51,7 +51,6 @@ void ack_sender(int sig)
         /* 
          * if this gets triggered, just resend an ack of the packets
          */
-          
         sndpkt = make_packet(0);
         sndpkt->hdr.ackno = needed_pkt;
         sndpkt ->hdr.ctr_flags = ACK;

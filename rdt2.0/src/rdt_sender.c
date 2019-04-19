@@ -217,9 +217,6 @@ int main (int argc, char **argv)
          * start the timer right after sending and while waiting for ACKS
          * this is the only time that gets restarted every time we shift the window
          */
-        
-
-        
         if(recvfrom(sockfd, buffer, MSS_SIZE, 0,
                     (struct sockaddr *) &serveraddr, (socklen_t *)&serverlen) < 0)
         {
