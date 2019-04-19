@@ -286,7 +286,7 @@ int main (int argc, char **argv)
 
                 }
           
-                start_timer();
+                // start_timer();
                 /* if you get an ack, process it and stop timer - timer ensures you don't wait indefinitely */
                 if(recvfrom(sockfd, buffer, MSS_SIZE, 0,
                             (struct sockaddr *) &serveraddr, (socklen_t *)&serverlen) < 0)
@@ -296,7 +296,7 @@ int main (int argc, char **argv)
                 recvpkt = (tcp_packet *)buffer;
                 assert(get_data_size(recvpkt) <= DATA_SIZE);
                 printf( "just received ack number %d causing shift %d  for FINAL window %d \n",  recvpkt->hdr.ackno, shift, window_base );
-                stop_timer();
+                // stop_timer();
                
                 /* shrink the window start closer to the end by setting to the highest acked packet */
 
