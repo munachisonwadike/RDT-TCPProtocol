@@ -69,13 +69,13 @@ void resend_packets(int sig)
             // /* 
             //  * if you get an ack, process it and stop timer 
             //  */ 
-            // if(recvfrom(sockfd, buffer, MSS_SIZE, 0,
-            //             (struct sockaddr *) &serveraddr, (socklen_t *)&serverlen) < 0)
-            // {
-            //     error("recvfrom error");
-            // }
-            // recvpkt = (tcp_packet *)buffer;
-
+            if(recvfrom(sockfd, buffer, MSS_SIZE, 0,
+                        (struct sockaddr *) &serveraddr, (socklen_t *)&serverlen) < 0)
+            {
+                error("recvfrom error");
+            }
+            recvpkt = (tcp_packet *)buffer;
+            printf("still receiving this ack no %d\n", recvpkt->hdr.ackno);
              
 
 
