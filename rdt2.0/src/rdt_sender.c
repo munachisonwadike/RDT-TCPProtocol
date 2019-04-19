@@ -315,67 +315,49 @@ int main (int argc, char **argv)
         if( stop == 1 )
         {   
             printf("WE ARE NOW IN THE STOP STATEMENT\n");            
-            do
-            {  
-
+             
+            /* 
+             * send the packets 
+             */
+            int k=0;
+            while ( k < 10 )
+            {
                 printf("GOT TO THE LOOP\n");
 
-                /* 
-                 * send the packets 
-                 */
-                int k=0;
-                while ( k < 10 )
+                printf("kth value of loop = %d\n", k);
+                if(sendto(sockfd, window[k], TCP_HDR_SIZE + get_data_size(window[k]), 0, 
+                        ( const struct sockaddr *)&serveraddr, serverlen) < 0)
                 {
-                    printf("kth value of loop = %d\n", k);
-                    if(sendto(sockfd, window[k], TCP_HDR_SIZE + get_data_size(window[k]), 0, 
-                            ( const struct sockaddr *)&serveraddr, serverlen) < 0)
-                    {
-                        error("sendto error");
-                    }
-                    printf("packet with seqno %d just sent \n", window[k]->hdr.seqno);
-
-                    if(recvfrom(sockfd, buffer, MSS_SIZE, 0,
-                            (struct sockaddr *) &serveraddr, (socklen_t *)&serverlen) < 0)
-                    {
-                        error("recvfrom error");
-                    }
-                    recvpkt = (tcp_packet *)buffer;
-                    assert(get_data_size(recvpkt) <= DATA_SIZE);
-                    printf( "just received ack number %d causing shift %d  for FINAL window %d \n",  recvpkt->hdr.ackno, shift, window_base );
-                    stop_timer();
-
-
-                    if(recvpkt->hdr.ackno >= needed_ack)
-                    {   
-                        needed_ack = recvpkt->hdr.ackno;
-                        printf( "[S]3. just received ack number %d \n",  recvpkt->hdr.ackno);
-
-                        /* 
-                         * if you received an ack, calculate the packet 
-                         * number relative to current sending windo to shift to that packet 
-                         */
-                        shift = ( recvpkt->hdr.ackno - window[k]->hdr.ackno ) / DATA_SIZE ; 
-                        k += shift;
-                        printf( "just received ack number %d causing shift to k=%d \n",  recvpkt->hdr.ackno, k );
-                        stop_timer();
-                    }
-                   
+                    error("sendto error");
                 }
-          
+                printf("packet with seqno %d just sent \n", window[k]->hdr.seqno);
+
                 start_timer();
-      
-                /* 
-                 * if you get an ack, process it and stop timer 
-                 * timer ensures you don't wait indefinitely 
-                 */
-                
-                /*
-                 * shrink the window start closer to the end
-                 * by setting to the highest acked packet 
-                 */
+                if(recvfrom(sockfd, buffer, MSS_SIZE, 0,
+                        (struct sockaddr *) &serveraddr, (socklen_t *)&serverlen) < 0)
+                {
+                    error("recvfrom error");
+                }
+                recvpkt = (tcp_packet *)buffer;
+                assert(get_data_size(recvpkt) <= DATA_SIZE);
+                 
+                if(recvpkt->hdr.ackno >= needed_ack)
+                {   
+                    needed_ack = recvpkt->hdr.ackno;
+                    printf( "[S]3. just received ack number %d \n",  recvpkt->hdr.ackno);
 
-            }while( recvpkt->hdr.ackno > 0 );   
-
+                    /* 
+                     * if you received an ack, calculate the packet 
+                     * number relative to current sending windo to shift to that packet 
+                     */
+                    shift = ( recvpkt->hdr.ackno - window[k]->hdr.ackno ) / DATA_SIZE ; 
+                    k += shift;
+                    printf( "just received ack number %d causing shift to k=%d \n",  recvpkt->hdr.ackno, k );
+                    stop_timer();
+                }
+               
+            }
+          
 
             /* 
              * after sending the last window off, send a
