@@ -311,7 +311,6 @@ int main (int argc, char **argv)
                 window_old = window_base;
                 printf( "2. just received ack number %d window_base = %d shift = %d \n",  recvpkt->hdr.ackno, window_base, shift);
 
-                printf( "just received ack number %d causing shift %d while the window_base goes from %d to %d \n",  recvpkt->hdr.ackno, shift, window_old, window_base );
                 
 
                 /* 
@@ -347,6 +346,7 @@ int main (int argc, char **argv)
                 }
 
                 window_base = window[shift]->hdr.seqno;
+                printf( "just received ack number %d caused shift of %d from %d to %d \n",  recvpkt->hdr.ackno, shift, window_old, window_base );
 
 
                 printf( "WTH 2" );
