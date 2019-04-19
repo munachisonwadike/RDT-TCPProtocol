@@ -230,7 +230,7 @@ int main(int argc, char **argv) {
              * Wait up to 500 ms for another to possible packet
              */ 
             needed_pkt = recvpkt->hdr.seqno + recvpkt->hdr.data_size; /* specify which number the next packet should have*/
-            printf("after type 1 receipt needed_pkt has a value %s\n", needed_pkt );
+            printf("after type 1 receipt needed_pkt has a value %d\n", needed_pkt );
         /**/
             /* start the wait */
             start_timer(); 
