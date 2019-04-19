@@ -247,7 +247,7 @@ int main (int argc, char **argv)
             int i = 0; int shift = 0;
             while (i < WINDOW_SIZE)
             {
-                // printf("window[i]->hdr.seqno=>%d, recvpkt->hdr.ackno=>%d \n", window[i]->hdr.ackno, recvpkt->hdr.ackno);
+                printf("window[i]->hdr.seqno=>%d, recvpkt->hdr.ackno=>%d \n", window[i]->hdr.seqno, recvpkt->hdr.ackno);
 
                 if ( window[i]->hdr.seqno > recvpkt->hdr.ackno ){
                     window[i-shift] = window[i];
@@ -279,6 +279,7 @@ int main (int argc, char **argv)
                     window[j]->hdr.seqno = pkt_base;
                 }
                  
+                printf("(2)window[j]->hdr.seqno=>%d \n", window[j]->hdr.seqno);
 
             }
         }
