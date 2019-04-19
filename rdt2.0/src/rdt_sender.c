@@ -249,6 +249,8 @@ int main (int argc, char **argv)
             window[j] = window[j + shift]; 
         }
         /* 'next_seqno' becomes the seq number for the last packet in new window */
+        printf( "WTH 1" );
+
         for ( j = 10 - shift ; j < 10 ; ++j )
         {
             len = fread(buffer, 1, DATA_SIZE, fp);
@@ -265,7 +267,7 @@ int main (int argc, char **argv)
             }
         }
 
-
+        printf( "WTH 2" );
         /* 
          * if you are at the end of the file, 
          * go into a loop to send all the remaining packets 
