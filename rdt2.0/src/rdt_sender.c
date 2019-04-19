@@ -195,7 +195,7 @@ int main (int argc, char **argv)
 
     for ( i = 0; i < WINDOW_SIZE; ++i)
     {
-        printf("window[i]->hdr.seqno=>%d\n", window->hdr.seqno);
+        printf("window[i]->hdr.seqno=>%d\n", window[i]->hdr.seqno);
 
         if(sendto(sockfd, window[i], TCP_HDR_SIZE + get_data_size(window[i]), 0, 
                 ( const struct sockaddr *)&serveraddr, serverlen) < 0)
