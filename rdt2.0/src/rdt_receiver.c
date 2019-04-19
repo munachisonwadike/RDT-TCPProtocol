@@ -265,7 +265,7 @@ int main(int argc, char **argv) {
                 if( recvpkt->hdr.seqno == needed_pkt )
                 {
                     gettimeofday(&tp, NULL);
-                    VLOG(DEBUG, "TYPE 1 %lu, %d, %d", tp.tv_sec, recvpkt->hdr.data_size, recvpkt->hdr.seqno);
+                    VLOG(DEBUG, "TYPE 2 %lu, %d, %d", tp.tv_sec, recvpkt->hdr.data_size, recvpkt->hdr.seqno);
                     fseek(fp, recvpkt->hdr.seqno, SEEK_SET);
                     fwrite(recvpkt->data, 1, recvpkt->hdr.data_size, fp);
                 }       
