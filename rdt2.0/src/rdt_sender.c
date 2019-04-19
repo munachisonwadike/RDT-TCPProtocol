@@ -195,6 +195,8 @@ int main (int argc, char **argv)
 
     for ( i = 0; i < WINDOW_SIZE; ++i)
     {
+        printf("window[i]->hdr.seqno=>%d\n", window->hdr.seqno);
+
         if(sendto(sockfd, window[i], TCP_HDR_SIZE + get_data_size(window[i]), 0, 
                 ( const struct sockaddr *)&serveraddr, serverlen) < 0)
         {
@@ -245,7 +247,7 @@ int main (int argc, char **argv)
             int i = 0; int shift = 0;
             while (i < WINDOW_SIZE)
             {
-                printf("window[i]->hdr.seqno=>%d, recvpkt->hdr.ackno=>%d \n", window[i]->hdr.ackno, recvpkt->hdr.ackno);
+                // printf("window[i]->hdr.seqno=>%d, recvpkt->hdr.ackno=>%d \n", window[i]->hdr.ackno, recvpkt->hdr.ackno);
 
                 if ( window[i]->hdr.seqno > recvpkt->hdr.ackno ){
                     window[i-shift] = window[i];
