@@ -332,6 +332,8 @@ int main (int argc, char **argv)
                 }
                 printf("packet with seqno %d just sent \n", window[k]->hdr.seqno);
 
+                printf("wait for recv %d\n", k);
+
                 start_timer();
                 if(recvfrom(sockfd, buffer, MSS_SIZE, 0,
                         (struct sockaddr *) &serveraddr, (socklen_t *)&serverlen) < 0)
