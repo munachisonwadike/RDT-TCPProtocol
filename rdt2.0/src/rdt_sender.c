@@ -286,7 +286,7 @@ int main (int argc, char **argv)
 
 
         VLOG(DEBUG, "sending window from base %d -> %s", 
-                window[i]->hdr.seqno, inet_ntoa(serveraddr.sin_addr));
+                window[0]->hdr.seqno, inet_ntoa(serveraddr.sin_addr));
 
         
 
@@ -306,6 +306,7 @@ int main (int argc, char **argv)
                 error("sendto error");
             }
             printf("packet %d sent \n", window[i]->hdr.seqno);
+
  
         }
               
