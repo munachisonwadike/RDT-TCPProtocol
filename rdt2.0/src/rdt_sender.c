@@ -15,7 +15,7 @@
 #include"packet.h"
 
 #define STDIN_FD    0
-#define RESEND  2000 /* millisecond */ 
+#define RESEND  1000 /* millisecond */ 
 #define WINDOW_SIZE 10
 
 
