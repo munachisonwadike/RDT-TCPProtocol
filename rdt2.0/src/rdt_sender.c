@@ -258,7 +258,7 @@ int main (int argc, char **argv)
             }
             recvpkt = (tcp_packet *)buffer;
 
-            printf("the ack we keep receiving at this point is \n", recvpkt->hdr.ackno);
+            printf("the ack we keep receiving at this point is %d \n", recvpkt->hdr.ackno );
             assert(get_data_size(recvpkt) <= DATA_SIZE);
 
             if(recvpkt->hdr.ackno >= needed_ack)
