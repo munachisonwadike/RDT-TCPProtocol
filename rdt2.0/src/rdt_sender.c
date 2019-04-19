@@ -247,7 +247,7 @@ int main (int argc, char **argv)
             while (i < WINDOW_SIZE)
             {
  
-                if ( window[i]->hdr.seqno > recvpkt->hdr.ackno ){
+                if ( window[i]->hdr.seqno >= recvpkt->hdr.ackno ){
                     window[i-shift] = window[i];
 
                 }else{
