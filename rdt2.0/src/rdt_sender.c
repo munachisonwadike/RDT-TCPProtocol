@@ -312,7 +312,6 @@ int main (int argc, char **argv)
          * go into a loop to send all the remaining packets 
          */
         
-        printf("first thing in the window %d\n", window[0]->hdr.ackno);
 
 
         if( stop == 1 )
@@ -355,9 +354,9 @@ int main (int argc, char **argv)
                      * if you received an ack, calculate the packet 
                      * number relative to current sending windo to shift to that packet 
                      */
-                    printf("recvpkt->hdr.ackno=%d, window[k] = %d\n", recvpkt->hdr.ackno, window[k]->hdr.ackno);
+                    printf("recvpkt->hdr.ackno=%d, window[k] = %d\n", recvpkt->hdr.ackno, window[k]->hdr.seqno);
 
-                    shift = ( recvpkt->hdr.ackno - window[k]->hdr.ackno ) / DATA_SIZE ; 
+                    shift = ( recvpkt->hdr.ackno - window[k]->hdr.seqno ) / DATA_SIZE ; 
                     k += shift;
                     printf( "just received ack number %d causing shift to k=%d, window[k]=%d \n",  recvpkt->hdr.ackno, k, window[k]->hdr.ackno );
                     stop_timer();
