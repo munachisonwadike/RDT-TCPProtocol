@@ -259,6 +259,7 @@ int main (int argc, char **argv)
              * out the content of the window till the next loop iteration 'next_seqno' becomes the seq number 
              * for the last packet in new window 
              */
+            printf("shift\n");
             for ( j =  WINDOW_SIZE - shift ; j < WINDOW_SIZE ; ++j )
             {
                 len = fread(buffer, 1, DATA_SIZE, fp);
