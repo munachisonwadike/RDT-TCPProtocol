@@ -189,10 +189,8 @@ int main(int argc, char **argv) {
 
         /* 
          * if we get the next packet we are expecting in sequence,
-         * then write the packet to the output file. Wait to see if there is any new packet coming for 
-         * 500 ms before sending ack. If there was already one waiting, send ack for both, cumulatively
-         * otherwise, ack for the first will be triggered automatically
-         * ignore out of order packets lower than needed
+         * then write the packet to the output file and send an ack. If 
+         * the packet doesn't arrive, ack_sender is triggered
          */
         if( recvpkt->hdr.seqno == needed_pkt )
         {
@@ -210,8 +208,18 @@ int main(int argc, char **argv) {
             printf("after receipt needed_pkt has a value %d\n", needed_pkt );
             
             stop_timer();
-            /* start the wait for second packet */
-            start_timer(); 
+
+            /*
+             * stopped the timer, so now make the ack and send
+             */
+            sndpkt = make_packet(0);
+	        sndpkt->hdr.ackno = needed_pkt;
+	        sndpkt ->hdr.ctr_flags = ACK;
+	        if (sendto(sockfd, sndpkt, TCP_HDR_SIZE, 0, 
+	                (struct sockaddr *) &clientaddr, clientlen) < 0) {
+	            error("ERROR in sendto");
+	        }
+	        printf("sending ack (1) number %d\n", needed_pkt );   
              
 
 
