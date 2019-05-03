@@ -151,9 +151,6 @@ int main(int argc, char **argv) {
                 sizeof(serveraddr)) < 0) 
         error("ERROR on binding");
 
-    
-
-    init_timer(500, ack_sender);
 
     /* 
      * main loop: wait for a datagram, then echo it
@@ -188,9 +185,9 @@ int main(int argc, char **argv) {
          */
 
         /* 
-         * if we get the next packet we are expecting in sequence,
-         * then write the packet to the output file and send an ack. If 
-         * the packet doesn't arrive, ack_sender is triggered
+         * if the received packet was as expected, 
+         * write to output file and send an ack. If 
+         * the packet doesn't arrive, just wait for it
          */
         if( recvpkt->hdr.seqno == needed_pkt )
         {
@@ -202,15 +199,8 @@ int main(int argc, char **argv) {
             fseek(fp, recvpkt->hdr.seqno, SEEK_SET);
             fwrite(recvpkt->data, 1, recvpkt->hdr.data_size, fp);
             
-            /* we are now expecting the second packet*/
-            
-            needed_pkt = recvpkt->hdr.seqno + recvpkt->hdr.data_size; /* specify which number the next packet should have*/
-            printf("after receipt needed_pkt has a value %d\n", needed_pkt );
-            
-            stop_timer();
-
             /*
-             * stopped the timer, so now make the ack and send
+             * send an ack for the packet you have recieved and written 
              */
             sndpkt = make_packet(0);
 	        sndpkt->hdr.ackno = needed_pkt;
@@ -219,13 +209,20 @@ int main(int argc, char **argv) {
 	                (struct sockaddr *) &clientaddr, clientlen) < 0) {
 	            error("ERROR in sendto");
 	        }
-	        printf("sending ack (1) number %d\n", needed_pkt );   
+	        printf("sending ack (1) number %d\n", needed_pkt );  
+
+            /* update the number of the expected packet */
+            
+            needed_pkt = recvpkt->hdr.seqno + recvpkt->hdr.data_size; /* specify which number the next packet should have*/
+            printf("after receipt needed_pkt has a value %d\n", needed_pkt );
+            
+                 
              
 
 
         /*
-         * send a duplicate ack when we are getting an out of order packet
-         * higher than what is needed
+         * if the packet is higher than what is needed
+         * send a duplicate ack 
          */
         
         } else if ( recvpkt->hdr.seqno > needed_pkt ) {
@@ -239,7 +236,7 @@ int main(int argc, char **argv) {
             }
             printf("sending duplicate ack (2) number %d\n", needed_pkt );
 
-            stop_timer();
+            // stop_timer();
         }
 
        
