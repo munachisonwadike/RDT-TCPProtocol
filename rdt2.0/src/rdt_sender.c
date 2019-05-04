@@ -29,7 +29,6 @@ int next_seqno;
 int sockfd;
 int serverlen;
 int shift;
-int window_base;
 int window_index;
 
 int last_packet = -1;
@@ -62,18 +61,18 @@ void resend_packets(int sig)
     if (sig == SIGALRM)
     {
         VLOG(DEBUG, "RESEND FUNCTION TRIGGERED");   
-        int i = 0;    
-        for (i = 0; i < WINDOW_SIZE; ++i)
+        window_index = 0;    
+        for (window_index = 0; window_index < WINDOW_SIZE; ++window_index)
         {
             /* 
              * resend all packets range between sendBase and nextSeqNum 
              */ 
-            if(sendto(sockfd, window[i], TCP_HDR_SIZE + get_data_size(window[i]), 0, 
+            if(sendto(sockfd, window[window_index], TCP_HDR_SIZE + get_data_size(window[window_index]), 0, 
                         ( const struct sockaddr *)&serveraddr, serverlen) < 0)
             {
                 error("sendto");
             }
-            printf("packet with seqno %d resent \n", window[i]->hdr.seqno);
+            printf("packet with seqno %d resent \n", window[window_index]->hdr.seqno);
 
         }
     }
@@ -168,12 +167,12 @@ int main (int argc, char **argv)
      * store pointer to packet i in window[i]
      */
     next_seqno = 0;
-	i = 0;
+	window_index = 0;
 	while ( i < WINDOW_SIZE )
 	{
 		len = fread(buffer, 1, DATA_SIZE, fp);
 		if (len<=0){
-            window[i] = make_packet(0);
+            window[window_index] = make_packet(0);
             if(len==0){
                 VLOG(INFO, "Empty file");
                 sndpkt = make_packet(0);
@@ -185,9 +184,9 @@ int main (int argc, char **argv)
 		else{ 
             pkt_base = next_seqno;
         	next_seqno = pkt_base + len;
-    		window[i] = make_packet(len);
-     		memcpy(window[i]->data, buffer, len);
-            window[i]->hdr.seqno = pkt_base;
+    		window[window_index] = make_packet(len);
+     		memcpy(window[window_index]->data, buffer, len);
+            window[window_index]->hdr.seqno = pkt_base;
             
         }
         i++;
@@ -196,16 +195,15 @@ int main (int argc, char **argv)
     /*
      * send the first ten packets  in the window
      */
-
-    for ( i = 0; i < WINDOW_SIZE; ++i)
+    for ( window_index = 0; window_index < WINDOW_SIZE; window_index++)
     {
 
-        if(sendto(sockfd, window[i], TCP_HDR_SIZE + get_data_size(window[i]), 0, 
+        if(sendto(sockfd, window[window_index], TCP_HDR_SIZE + get_data_size(window[window_index]), 0, 
                 ( const struct sockaddr *)&serveraddr, serverlen) < 0)
         {
             error("sendto error");
         }
-        printf("packet %d sent \n", window[i]->hdr.seqno);
+        printf("packet %d sent \n", window[window_index]->hdr.seqno);
 
     }
 
@@ -263,7 +261,6 @@ int main (int argc, char **argv)
              * check how much far ahead in window the recvd packet is than 
              * the base for needed acks and set new needed ack to the the received packet number 
              */           
-            window_base = (last_ack) / DATA_SIZE;
             shift = ( recvpkt->hdr.ackno - last_ack )/ DATA_SIZE;
             last_ack = recvpkt->hdr.ackno;
 
@@ -273,8 +270,8 @@ int main (int argc, char **argv)
 
 
             /* step 1: calculate the new window by simultaneously deleting and freeing 
-             * all packets in closed interval [base, base + shift], and secondly by copying all packets in 
-             * the closed interval [base + shift + 1, windowsize-1] to new respective positions shift steps 
+             * all packets in closed interval [0, shift], and secondly by copying all packets in 
+             * the closed interval [shift + 1, windowsize-1] to new respective positions shift steps 
              * behind them in the window. 
              */
 
@@ -282,7 +279,7 @@ int main (int argc, char **argv)
             while (window_index < WINDOW_SIZE)
             {
  
-                if ( window_index >= window_base + shift ){
+                if ( window_index >= shift ){
                     window[window_index-shift] = window[window_index];
 
                     VLOG(DEBUG, "generating window with index %d, window[window_index]->hdr.seqno %d shift %d ", window_index-shift, window[window_index-shift]->hdr.seqno, shift );
@@ -294,13 +291,13 @@ int main (int argc, char **argv)
             }
 
 
-            /* step 2: populate the interval [ (base + windowize - 1) - shift), base + windowsize -1] with
-             * the new packets. the "-1" is because base + windowsize - 1 gives index of the last element in window when full
+            /* step 2: populate the interval [windowize - shift, windowsize -1] with
+             * the new packets. concerning the left endpoint, windowsize - 1 gives index of the last element in window when full
              * and substracting shift gives us the index of last element when its not full, However, since a shift of one 
              * means replacing just the last element, two from second to last, etc., we substract shift + 1 so the 1's cancel
              */
             
-            for ( window_index = (window_base + WINDOW_SIZE) - shift; window_index < window_base + WINDOW_SIZE ; window_index ++ )
+            for ( window_index =  WINDOW_SIZE - shift; window_index < WINDOW_SIZE ; window_index ++ )
             {
                 len = fread(buffer, 1, DATA_SIZE, fp);
                 if ( len <=0 ){
@@ -365,9 +362,9 @@ int main (int argc, char **argv)
     * if you are at the end of the program, 
     * free the packets
     */
-    for ( i = 0; i < WINDOW_SIZE; ++i)
+    for ( window_index = 0; window_index < WINDOW_SIZE; window_index++)
     {
-        free(window[i]);
+        free(window[window_index]);
     }   
 
 
