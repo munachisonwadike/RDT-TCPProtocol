@@ -293,11 +293,11 @@ int main (int argc, char **argv)
                     window_index++;
                 }
                 /* option 1, step 2 - then populate the interval [windowize - shift, windowsize -1] with
-                 * the new packets. concerning the left endpoint, windowsize - 1 gives index of the last element in window when full
-                 * and substracting shift gives the first index to start repopulating from
+                 * the new packets. concerning the left endpoint, windowsize - shift==1 gives index of the last element in window
+                 * if shift is 0, the loop will not run becaause window_index will == windowsize
                  */
             
-                for ( window_index =  WINDOW_SIZE - 1 - shift; window_index < (WINDOW_SIZE - 1 - shift) + WINDOW_SIZE ; window_index ++ )
+                for ( window_index =  WINDOW_SIZE - shift; window_index < WINDOW_SIZE ; window_index ++ )
                 {
                     len = fread(buffer, 1, DATA_SIZE, fp);
                     if ( len <=0 ){
@@ -312,7 +312,7 @@ int main (int argc, char **argv)
                         memcpy(window[window_index]->data, buffer, len);
                         window[window_index]->hdr.seqno = pkt_base;
                         VLOG(DEBUG, "(2) generating window (size %d) with index %d, set to %d shift %d  ", 
-                            WINDOW_SIZE, window_index-shift, window[window_index-shift]->hdr.seqno, shift )
+                            WINDOW_SIZE, window_index, window[window_index]->hdr.seqno, shift )
 
                         // last_packet = next_seqno;
                     }
