@@ -168,7 +168,7 @@ int main (int argc, char **argv)
      */
     next_seqno = 0;
 	window_index = 0;
-	while ( i < WINDOW_SIZE )
+	while ( window_index < WINDOW_SIZE )
 	{
 		len = fread(buffer, 1, DATA_SIZE, fp);
 		if (len<=0){
@@ -189,7 +189,7 @@ int main (int argc, char **argv)
             window[window_index]->hdr.seqno = pkt_base;
             
         }
-        i++;
+        window_index++;
 	}
 
     /*
