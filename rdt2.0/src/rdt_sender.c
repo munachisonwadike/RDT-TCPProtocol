@@ -33,7 +33,7 @@ int window_base;
 int window_index;
 
 int last_packet = -1;
-int needed_ack = 0;
+int last_ack = 0;
 int next_seqno=0;
 int send_base=0;
        
@@ -233,7 +233,7 @@ int main (int argc, char **argv)
         
         recvpkt = (tcp_packet *)buffer;
 
-        printf(" ack receieved - %d | needed_ack - %d \n", recvpkt->hdr.ackno, needed_ack );
+        printf(" ack receieved - %d | last_ack - %d \n", recvpkt->hdr.ackno, last_ack );
         assert(get_data_size(recvpkt) <= DATA_SIZE);
 
 
@@ -249,9 +249,9 @@ int main (int argc, char **argv)
 
         /*
          * since the receiver only sends acks when a packet has been written,
-         * we can accept acks > than needed ack
+         * we can accept acks > than last ack
          */
-        if(recvpkt->hdr.ackno >= needed_ack)
+        if(recvpkt->hdr.ackno >= last_ack)
         {   
             /* 
              * if you get an ack, stop time to process it 
@@ -259,12 +259,12 @@ int main (int argc, char **argv)
             stop_timer();
 
             /*
-             * check how much bigger the recvd packet number is than the base for needed acks
-             * and set base to the the received packet number
+             * check how much far ahead in window the recvd packet is than 
+             * the base for needed acks and set new needed ack to the the received packet number 
              */           
-            window_base = needed_ack;
-            shift = recvpkt->hdr.ackno - needed_ack;
-            needed_ack = recvpkt->hdr.ackno;
+            window_base = (last_ack) / DATA_SIZE;
+            shift = ( recvpkt->hdr.ackno - last_ack )/ DATA_SIZE;
+            last_ack = recvpkt->hdr.ackno;
 
             /* 
              * if you received an ack, calculate the new window and populate the empty part of it
