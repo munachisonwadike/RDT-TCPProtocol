@@ -16,7 +16,7 @@
 
 #define STDIN_FD    0
 #define RESEND  1000 /* millisecond */ 
-#define WINDOW_SIZE 10
+
 
 
 char buffer[DATA_SIZE];
@@ -31,11 +31,14 @@ int serverlen;
 int shift;
 int window_index;
 
+
+int final_packet_reached = 0;
 int last_packet = -1;
 int last_ack = 0;
 int next_seqno=0;
 int send_base=0;
-       
+int WINDOW_SIZE = 10;
+
 struct sockaddr_in serveraddr;
 struct itimerval timer; 
 
@@ -269,59 +272,102 @@ int main (int argc, char **argv)
              */
 
 
-            /* step 1: calculate the new window by simultaneously deleting and freeing 
+            /* option 1, step 1 if we haven't reach last packet, calculate the new window by simultaneously deleting and freeing 
              * all packets in closed interval [0, shift], and secondly by copying all packets in 
              * the closed interval [shift + 1, windowsize-1] to new respective positions shift steps 
              * behind them in the window. 
              */
+            if (final_packet_reached == 0){
+                window_index = 0; 
+                while (window_index < WINDOW_SIZE)
+                {
+     
+                    if ( window_index >= shift ){
+                        window[window_index-shift] = window[window_index];
 
-            window_index = 0; 
-            while (window_index < WINDOW_SIZE)
-            {
- 
-                if ( window_index >= shift ){
-                    window[window_index-shift] = window[window_index];
-
-                    VLOG(DEBUG, "generating window with index %d, window[window_index]->hdr.seqno %d shift %d ", window_index-shift, window[window_index-shift]->hdr.seqno, shift );
-
-                }else{
-                    free(window[window_index]);
+                        VLOG(DEBUG, "generating window size %d with index %d, window[window_index]->hdr.seqno %d shift %d  ", 
+                            WINDOW_SIZE, window_index, window[window_index]->hdr.seqno, shift )
+                    }else{
+                        free(window[window_index]);
+                    }
+                    window_index++;
                 }
-                window_index++;
-            }
-
-
-            /* step 2: populate the interval [windowize - shift, windowsize -1] with
-             * the new packets. concerning the left endpoint, windowsize - 1 gives index of the last element in window when full
-             * and substracting shift gives us the index of last element when its not full, However, since a shift of one 
-             * means replacing just the last element, two from second to last, etc., we substract shift + 1 so the 1's cancel
-             */
+                /* option 1, step 2 - then populate the interval [windowize - shift, windowsize -1] with
+                 * the new packets. concerning the left endpoint, windowsize - 1 gives index of the last element in window when full
+                 * and substracting shift gives us the index of last element when its not full, However, since a shift of one 
+                 * means replacing just the last element, two from second to last, etc., we substract shift + 1 so the 1's cancel
+                 */
             
-            for ( window_index =  WINDOW_SIZE - shift; window_index < WINDOW_SIZE ; window_index ++ )
-            {
-                len = fread(buffer, 1, DATA_SIZE, fp);
-                if ( len <=0 ){
-                    VLOG(INFO, " End Of File ");
-                    window[window_index] = make_packet(1);
-                    break;
-                }else{
-                    pkt_base = next_seqno;
-                    next_seqno = pkt_base + len; 
-                    window[window_index] = make_packet(len);
-                    memcpy(window[window_index]->data, buffer, len);
-                    window[window_index]->hdr.seqno = pkt_base;
-                    VLOG(DEBUG, "generating window with index %d, window[window_index]->hdr.seqno %d shift %d  ", window_index, window[window_index]->hdr.seqno, shift )
+                for ( window_index =  WINDOW_SIZE - shift; window_index < WINDOW_SIZE ; window_index ++ )
+                {
+                    len = fread(buffer, 1, DATA_SIZE, fp);
+                    if ( len <=0 ){
+                        VLOG(INFO, " End Of File ");
+                        WINDOW_SIZE = window_index + 1;
+                        final_packet_reached = 1;
+                        break;
+                    }else{
+                        pkt_base = next_seqno;
+                        next_seqno = pkt_base + len; 
+                        window[window_index] = make_packet(len);
+                        memcpy(window[window_index]->data, buffer, len);
+                        window[window_index]->hdr.seqno = pkt_base;
+                        VLOG(DEBUG, "generating window size %d with index %d, window[window_index]->hdr.seqno %d shift %d  ", 
+                            WINDOW_SIZE, window_index, window[window_index]->hdr.seqno, shift )
 
-                    // last_packet = next_seqno;
+                        // last_packet = next_seqno;
+                    }
                 }
-                 
- 
+
+
+            }else{
+            
+            /* option 2, step 1 if we reach last packet, calculate the new window by simultaneously deleting and freeing 
+             * all packets in closed interval [0, shift], and secondly by copying all packets in 
+             * the closed interval [shift + 1, windowsize-1] to new respective positions shift steps 
+             * behind them in the window. 
+             */
+                window_index = 0; 
+                while (window_index < WINDOW_SIZE)
+                {
+     
+                    if ( window_index >= shift ){
+                        window[window_index-shift] = window[window_index];
+
+                        VLOG(DEBUG, "window is now size %d with index %d, window[window_index]->hdr.seqno %d shift %d  ", 
+                            WINDOW_SIZE, window_index, window[window_index]->hdr.seqno, shift )
+
+                    }else{
+                        free(window[window_index]);
+                    }
+                    window_index++;
+                }
+                /*
+                 * option 2, step 2 - reset the window size, such that only the 
+                 * half-open invterval [0, windowsize-shift ) is considered in future send-offs
+                 */            
+                WINDOW_SIZE = WINDOW_SIZE - shift;  
+                
+                /*
+                 *send 0 ack if nothing left to send in window and in closing
+                 */
+                if (WINDOW_SIZE == 0){
+                
+                    VLOG(INFO, "Empty file");
+                    sndpkt = make_packet(0);
+                    sendto(sockfd, sndpkt, TCP_HDR_SIZE,  0,
+                            (const struct sockaddr *)&serveraddr, serverlen);
+                    free(sndpkt); 
+                    break;
+                }
+
+
             }
 
             /*
-             * loop through the packet window that has just been made now and resend all the packets
+             * loop through the packet window and send all the packets
              */
-            VLOG(DEBUG, "sending window from base %d -> %s", 
+            VLOG(DEBUG, "sending window of size %d from base %d -> %s", WINDOW_SIZE,  
                 window[0]->hdr.seqno, inet_ntoa(serveraddr.sin_addr));       
 
             for (window_index = 0; window_index < WINDOW_SIZE; window_index++)
@@ -343,23 +389,8 @@ int main (int argc, char **argv)
 
     } while( 1 );
 
-    /*
-     *send 0 ack in closing
-     */
-    VLOG(INFO, "Empty file");
-    sndpkt = make_packet(0);
-    sendto(sockfd, sndpkt, TCP_HDR_SIZE,  0,
-            (const struct sockaddr *)&serveraddr, serverlen);
-    free(sndpkt); 
-
-   /* 
-    * if you are at the end of the program, 
-    * free the packets
-    */
-    for ( window_index = 0; window_index < WINDOW_SIZE; window_index++)
-    {
-        free(window[window_index]);
-    }   
+    
+    
 
 
 
