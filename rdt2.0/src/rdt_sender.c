@@ -348,13 +348,33 @@ int main (int argc, char **argv)
                 /*
                  *send 0 ack if nothing left to send in window and in closing
                  */
-                if (WINDOW_SIZE == 0){
+                if (WINDOW_SIZE == 1){
                 
                     VLOG(INFO, "Empty file");
-                    sndpkt = make_packet(0);
-                    sendto(sockfd, sndpkt, TCP_HDR_SIZE,  0,
-                            (const struct sockaddr *)&serveraddr, serverlen);
-                    free(sndpkt); 
+                    /* 
+                     * send the last packet 10 times just to 
+                     * be sure it makes it before closing out
+                     */
+                    for (int i = 0; i < 10; ++i)
+                    {
+                        if(sendto(sockfd, window[0], TCP_HDR_SIZE + get_data_size(window[0]), 0, 
+                        ( const struct sockaddr *)&serveraddr, serverlen) < 0)
+                        {
+                            error("sendto error");
+                        }
+                    }
+                    free(window[0]); 
+
+                    /* and then send a zero packet to be sure it closes*/
+                    for (int i = 0; i < 10; ++i)
+                    {
+                        sndpkt = make_packet(0);
+                        sendto(sockfd, sndpkt, TCP_HDR_SIZE,  0,
+                                (const struct sockaddr *)&serveraddr, serverlen);
+                        free(sndpkt); 
+                    }
+                    exit(1);
+                    
                 }
 
             }
