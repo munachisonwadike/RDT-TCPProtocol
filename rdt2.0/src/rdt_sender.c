@@ -334,7 +334,7 @@ int main (int argc, char **argv)
                         window[window_index-shift] = window[window_index];
 
                         VLOG(DEBUG, "window is now size %d with index %d, window[window_index]->hdr.seqno %d shift %d  ", 
-                            WINDOW_SIZE, window_index, window[window_index]->hdr.seqno, shift )
+                            WINDOW_SIZE, window_index-shift, window[window_index-shift]->hdr.seqno, shift )
 
                     }else{
                         free(window[window_index]);
