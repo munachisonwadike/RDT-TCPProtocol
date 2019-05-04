@@ -297,7 +297,7 @@ int main (int argc, char **argv)
                  * and substracting shift gives the first index to start repopulating from
                  */
             
-                for ( window_index =  WINDOW_SIZE - 1 - shift; window_index < WINDOW_SIZE ; window_index ++ )
+                for ( window_index =  WINDOW_SIZE - 1 - shift; window_index < (WINDOW_SIZE - 1 - shift) + WINDOW_SIZE ; window_index ++ )
                 {
                     len = fread(buffer, 1, DATA_SIZE, fp);
                     if ( len <=0 ){
