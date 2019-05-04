@@ -284,13 +284,15 @@ int main (int argc, char **argv)
                 if ( window_index > window_base + shift ){
                     window[window_index-shift] = window[window_index];
 
+                    VLOG(DEBUG, "generating window with index %d, window[window_index]->hdr.seqno %d ", window_index, window[window_index]->hdr.seqno )
+
                 }else{
                     free(window[window_index]);
                 }
                 window_index++;
             }
 
-            printf("%s\n", "GOT HERE");
+
             /* step 2: populate the interval [ (base + windowize - 1) - shift), base + windowsize -1] with
              * the new packets. the "-1" is because base + windowsize - 1 gives index of the last element in window when full
              * and substracting shift gives us the index of last element when its not full
@@ -308,6 +310,8 @@ int main (int argc, char **argv)
                     window[window_index] = make_packet(len);
                     memcpy(window[window_index]->data, buffer, len);
                     window[window_index]->hdr.seqno = pkt_base;
+                    VLOG(DEBUG, "generating window with index %d, window[window_index]->hdr.seqno %d ", window_index, window[window_index]->hdr.seqno )
+
                     // last_packet = next_seqno;
                 }
                  
