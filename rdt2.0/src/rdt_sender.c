@@ -295,10 +295,11 @@ int main (int argc, char **argv)
 
             /* step 2: populate the interval [ (base + windowize - 1) - shift), base + windowsize -1] with
              * the new packets. the "-1" is because base + windowsize - 1 gives index of the last element in window when full
-             * and substracting shift gives us the index of last element when its not full
+             * and substracting shift gives us the index of last element when its not full, However, since a shift of one 
+             * means replacing just the last element, two from second to last, etc., we substract shift + 1 so the 1's cancel
              */
             
-            for ( window_index = (window_base + WINDOW_SIZE -1) -shift; window_index < window_base + WINDOW_SIZE ; window_index ++ )
+            for ( window_index = (window_base + WINDOW_SIZE) - shift; window_index < window_base + WINDOW_SIZE ; window_index ++ )
             {
                 len = fread(buffer, 1, DATA_SIZE, fp);
                 if ( len <=0 ){
