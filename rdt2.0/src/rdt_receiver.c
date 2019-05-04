@@ -170,6 +170,7 @@ int main(int argc, char **argv) {
         assert(get_data_size(recvpkt) <= DATA_SIZE);
         if ( recvpkt->hdr.data_size == 0) { /* if it was empty packet, close the program */
             sndpkt = make_packet(0);
+            sndpkt->hdr.ackno = -1;
             if (sendto(sockfd, sndpkt, TCP_HDR_SIZE, 0, 
                     (struct sockaddr *) &clientaddr, clientlen) < 0) {
                 error("ERROR in sendto");

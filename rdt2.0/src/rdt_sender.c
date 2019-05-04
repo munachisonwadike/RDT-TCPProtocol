@@ -29,7 +29,8 @@ int next_seqno;
 int sockfd;
 int serverlen;
 int shift;
-
+int window_base;
+int window_index;
 
 int last_packet = -1;
 int needed_ack = 0;
@@ -40,7 +41,7 @@ struct sockaddr_in serveraddr;
 struct itimerval timer; 
 
 
-int j;
+int i; int j;
 volatile int k = -1;
 
 FILE *fp;
@@ -108,7 +109,7 @@ void init_timer(int delay, void (*sig_handler)(int))
     sigaddset(&sigmask, SIGALRM);
 }
 
-int i;
+
 int main (int argc, char **argv)
 {
  
@@ -173,7 +174,7 @@ int main (int argc, char **argv)
 		len = fread(buffer, 1, DATA_SIZE, fp);
 		if (len<=0){
             window[i] = make_packet(0);
-            if(i==0){
+            if(len==0){
                 VLOG(INFO, "Empty file");
                 sndpkt = make_packet(0);
                 sendto(sockfd, sndpkt, TCP_HDR_SIZE,  0,
@@ -192,6 +193,9 @@ int main (int argc, char **argv)
         i++;
 	}
 
+    /*
+     * send the first ten packets  in the window
+     */
 
     for ( i = 0; i < WINDOW_SIZE; ++i)
     {
@@ -205,7 +209,12 @@ int main (int argc, char **argv)
 
     }
 
+    /*
+     * start the timer to wait for the ack 
+     * for the first packet in the window
+     */
     start_timer();  
+
     /*
      * constantly send the packets, wait for acks, 
      * and slide the window up for the next iteration of this loop
@@ -213,9 +222,8 @@ int main (int argc, char **argv)
     do 
     {
 
-         /* 
-         * start the timer right after sending and while waiting for ACKS
-         * this is the only time that gets restarted every time we shift the window
+        /* 
+         * receive packets and see if they are the acks you expected 
          */
         if(recvfrom(sockfd, buffer, MSS_SIZE, 0,
                     (struct sockaddr *) &serveraddr, (socklen_t *)&serverlen) < 0)
@@ -229,6 +237,20 @@ int main (int argc, char **argv)
         assert(get_data_size(recvpkt) <= DATA_SIZE);
 
 
+        /*
+         * if we get a packet from the received saying is it closing, then the sender should close
+         * and exit
+         */
+        if( recvpkt->hdr.ackno == last_packet ){
+            printf("last_packet received %d, recvpkt->hdr.ackno %d\n", last_packet, recvpkt->hdr.ackno );
+            exit(1);
+        }
+
+
+        /*
+         * since the receiver only sends acks when a packet has been written,
+         * we can accept acks > than needed ack
+         */
         if(recvpkt->hdr.ackno >= needed_ack)
         {   
             /* 
@@ -236,57 +258,70 @@ int main (int argc, char **argv)
              */ 
             stop_timer();
 
+            /*
+             * check how much bigger the recvd packet number is than the base for needed acks
+             * and set base to the the received packet number
+             */           
+            window_base = needed_ack;
+            shift = recvpkt->hdr.ackno - needed_ack;
             needed_ack = recvpkt->hdr.ackno;
+
             /* 
-             * if you received an ack, calculate the new window 
+             * if you received an ack, calculate the new window and populate the empty part of it
              */
-            int i = 0; int shift = 0;
-            while (i < WINDOW_SIZE)
+
+
+            /* step 1: calculate the new window by simultaneously deleting and freeing 
+             * all packets in closed interval [base, base + shift], and secondly by copying all packets in 
+             * the closed interval [base + shift + 1, windowsize-1] to new respective positions shift steps 
+             * behind them in the window. 
+             */
+
+            window_index = 0; 
+            while (window_index < WINDOW_SIZE)
             {
  
-                if ( window[i]->hdr.seqno >= recvpkt->hdr.ackno ){
-                    window[i-shift] = window[i];
+                if ( window_index > window_base + shift ){
+                    window[window_index-shift] = window[window_index];
 
                 }else{
-                    free(window[i]);
-                    shift++;
+                    free(window[window_index]);
                 }
-                i++;
+                window_index++;
             }
-            /* 
-             * populate the empty part of the new window note you won't send
-             * out the content of the window till the next loop iteration 'next_seqno' becomes the seq number 
-             * for the last packet in new window 
+
+            /* step 2: populate the interval [ (base + windowize - 1) - shift), base + windowsize -1] with
+             * the new packets. the "-1" is because base + windowsize - 1 gives index of the last element in window when full
+             * and substracting shift gives us the index of last element when its not full
              */
             
-            for ( j =  WINDOW_SIZE - shift ; j < WINDOW_SIZE ; ++j )
+            for ( window_index = (window_base + WINDOW_SIZE -1) -shift; window_index < window_base + WINDOW_SIZE ; window_index ++ )
             {
                 len = fread(buffer, 1, DATA_SIZE, fp);
                 if ( len <=0 ){
                     VLOG(INFO, " End Of File ");
-                    window[j] = make_packet(1);
+                    window[window_index] = make_packet(1);
                 }else{
                     pkt_base = next_seqno;
                     next_seqno = pkt_base + len; 
-                    window[j] = make_packet(len);
-                    memcpy(window[j]->data, buffer, len);
-                    window[j]->hdr.seqno = pkt_base;
-                    last_packet = next_seqno;
+                    window[window_index] = make_packet(len);
+                    memcpy(window[window_index]->data, buffer, len);
+                    window[window_index]->hdr.seqno = pkt_base;
+                    // last_packet = next_seqno;
                 }
                  
  
             }
 
             /*
-             * since the i'th packet is stored in window[i], loop through 
-             * and attempt to send each packet should get an error based on the packet
+             * loop through the packet window that has just been made now and resend all the packets
              */
             VLOG(DEBUG, "sending window from base %d -> %s", 
                 window[0]->hdr.seqno, inet_ntoa(serveraddr.sin_addr));       
 
-            for (i = WINDOW_SIZE - shift; i < WINDOW_SIZE; ++i)
+            for (window_index = 0; window_index < WINDOW_SIZE; window_index++)
             {
-                if(sendto(sockfd, window[i], TCP_HDR_SIZE + get_data_size(window[i]), 0, 
+                if(sendto(sockfd, window[window_index], TCP_HDR_SIZE + get_data_size(window[window_index]), 0, 
                         ( const struct sockaddr *)&serveraddr, serverlen) < 0)
                 {
                     error("sendto error");
@@ -301,10 +336,6 @@ int main (int argc, char **argv)
         }
 
         
-        if( last_packet == recvpkt->hdr.ackno){
-            printf("last_packet %d, recvpkt->hdr.ackno %d\n", last_packet, recvpkt->hdr.ackno );
-            break;
-        }
 
         
 
@@ -334,6 +365,5 @@ int main (int argc, char **argv)
     return 0;
 
 }
-
 
 
