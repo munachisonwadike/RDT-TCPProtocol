@@ -302,7 +302,7 @@ int main (int argc, char **argv)
                     len = fread(buffer, 1, DATA_SIZE, fp);
                     if ( len <=0 ){
                         VLOG(INFO, " End Of File ");
-                        WINDOW_SIZE = window_index + 1;
+                        WINDOW_SIZE = window_index;
                         final_packet_reached = 1;
                         break;
                     }else{
