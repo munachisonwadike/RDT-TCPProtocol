@@ -217,6 +217,7 @@ int main (int argc, char **argv)
      * constantly send the packets, wait for acks, 
      * and slide the window up for the next iteration of this loop
      */
+
     do 
     {
 
@@ -339,6 +340,8 @@ int main (int argc, char **argv)
             start_timer(); 
         }
 
+
+    } while( 1 );
 
     /*
      *send 0 ack in closing
