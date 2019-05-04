@@ -22,6 +22,7 @@
 char buffer[DATA_SIZE];
 char *hostname;
     
+int final_loop;
 int pkt_base;
 int portno; 
 int len;
@@ -355,7 +356,8 @@ int main (int argc, char **argv)
                      * send the last packet 10 times just to 
                      * be sure it makes it before closing out
                      */
-                    for (int i = 0; i < 10; ++i)
+                    
+                    for (final_loop = 0; final_loop < 10; final_loop++)
                     {
                         if(sendto(sockfd, window[0], TCP_HDR_SIZE + get_data_size(window[0]), 0, 
                         ( const struct sockaddr *)&serveraddr, serverlen) < 0)
@@ -366,7 +368,7 @@ int main (int argc, char **argv)
                     free(window[0]); 
 
                     /* and then send a zero packet to be sure it closes*/
-                    for (int i = 0; i < 10; ++i)
+                    for (final_loop = 0; final_loop < 10; final_loop++)
                     {
                         sndpkt = make_packet(0);
                         sendto(sockfd, sndpkt, TCP_HDR_SIZE,  0,
