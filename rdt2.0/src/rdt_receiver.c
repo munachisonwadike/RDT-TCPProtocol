@@ -204,6 +204,9 @@ int main(int argc, char **argv) {
              * send an ack for the packet you have recieved and written 
              */
             sndpkt = make_packet(0);
+            needed_pkt = recvpkt->hdr.seqno + recvpkt->hdr.data_size; /* update the number of the expected packet */
+            printf("after receipt needed_pkt has a value %d\n", needed_pkt );
+
 	        sndpkt->hdr.ackno = needed_pkt;
 	        sndpkt ->hdr.ctr_flags = ACK;
 	        if (sendto(sockfd, sndpkt, TCP_HDR_SIZE, 0, 
@@ -212,10 +215,7 @@ int main(int argc, char **argv) {
 	        }
 	        printf("sending ack (1) number %d\n", needed_pkt );  
 
-            /* update the number of the expected packet */
             
-            needed_pkt = recvpkt->hdr.seqno + recvpkt->hdr.data_size; /* specify which number the next packet should have*/
-            printf("after receipt needed_pkt has a value %d\n", needed_pkt );
             
                  
              
