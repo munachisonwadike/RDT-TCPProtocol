@@ -332,7 +332,7 @@ int main (int argc, char **argv)
                 {
                     error("sendto error");
                 }
-                printf("packet %d sent \n", window[i]->hdr.seqno);
+                printf("packet %d sent \n", window[window_index]->hdr.seqno);
 
      
             }
