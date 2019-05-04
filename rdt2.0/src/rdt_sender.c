@@ -306,6 +306,7 @@ int main (int argc, char **argv)
                 if ( len <=0 ){
                     VLOG(INFO, " End Of File ");
                     window[window_index] = make_packet(1);
+                    break;
                 }else{
                     pkt_base = next_seqno;
                     next_seqno = pkt_base + len; 
