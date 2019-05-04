@@ -290,6 +290,7 @@ int main (int argc, char **argv)
                 window_index++;
             }
 
+            printf("%s\n", "GOT HERE");
             /* step 2: populate the interval [ (base + windowize - 1) - shift), base + windowsize -1] with
              * the new packets. the "-1" is because base + windowsize - 1 gives index of the last element in window when full
              * and substracting shift gives us the index of last element when its not full
