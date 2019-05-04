@@ -281,7 +281,7 @@ int main (int argc, char **argv)
             while (window_index < WINDOW_SIZE)
             {
  
-                if ( window_index > window_base + shift ){
+                if ( window_index >= window_base + shift ){
                     window[window_index-shift] = window[window_index];
 
                     VLOG(DEBUG, "generating window with index %d, window[window_index]->hdr.seqno %d shift %d ", window_index, window[window_index]->hdr.seqno, shift );
