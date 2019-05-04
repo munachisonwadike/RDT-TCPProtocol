@@ -285,8 +285,8 @@ int main (int argc, char **argv)
                     if ( window_index >= shift ){
                         window[window_index-shift] = window[window_index];
 
-                        VLOG(DEBUG, "generating window size %d with index %d, window[window_index]->hdr.seqno %d shift %d  ", 
-                            WINDOW_SIZE, window_index, window[window_index-shift]->hdr.seqno, shift )
+                        VLOG(DEBUG, "(1) generating window (size %d)with index %d set to %d shift %d  ", 
+                            WINDOW_SIZE, window_index-shift, window[window_index-shift]->hdr.seqno, shift )
                     }else{
                         free(window[window_index]);
                     }
@@ -312,8 +312,8 @@ int main (int argc, char **argv)
                         window[window_index] = make_packet(len);
                         memcpy(window[window_index]->data, buffer, len);
                         window[window_index]->hdr.seqno = pkt_base;
-                        VLOG(DEBUG, "generating window size %d with index %d, window[window_index]->hdr.seqno %d shift %d  ", 
-                            WINDOW_SIZE, window_index, window[window_index]->hdr.seqno, shift )
+                        VLOG(DEBUG, "(2) generating window (size %d) with index %d, set to %d shift %d  ", 
+                            WINDOW_SIZE, window_index-shift, window[window_index-shift]->hdr.seqno, shift )
 
                         // last_packet = next_seqno;
                     }
