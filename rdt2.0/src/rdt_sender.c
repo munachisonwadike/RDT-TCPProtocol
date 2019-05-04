@@ -318,9 +318,7 @@ int main (int argc, char **argv)
                     }
                 }
 
-
-            }else{
-            
+            }else{            
             /* option 2, step 1 if we reach last packet, calculate the new window by simultaneously deleting and freeing 
              * all packets in closed interval [0, shift], and secondly by copying all packets in 
              * the closed interval [shift + 1, windowsize-1] to new respective positions shift steps 
@@ -357,9 +355,7 @@ int main (int argc, char **argv)
                     sendto(sockfd, sndpkt, TCP_HDR_SIZE,  0,
                             (const struct sockaddr *)&serveraddr, serverlen);
                     free(sndpkt); 
-                    break;
                 }
-
 
             }
 
