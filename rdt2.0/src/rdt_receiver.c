@@ -252,13 +252,14 @@ int main(int argc, char **argv) {
             printf("sending duplicate ack (2) number %d\n", needed_pkt );
 
             // stop_timer();
-        }
-        /* 
+
+/* 
          * if you received the last packet but at the very end, 
          * exit the program
          */
+        }else if ( (recvpkt->hdr.seqno < needed_pkt) && ( recvpkt->hdr.ctr_flags == -2) ) {
+        
 
-        if ( recvpkt->hdr.ctr_flags == -2) { /* if it was empty packet, close the program */
             sndpkt = make_packet(0);
             sndpkt->hdr.ackno = -1;
             if (sendto(sockfd, sndpkt, TCP_HDR_SIZE, 0, 
@@ -269,9 +270,9 @@ int main(int argc, char **argv) {
             fclose(fp);
             free(sndpkt);
             exit(0);
-        }    
-        
-
+         
+            
+        }
        
 
 
