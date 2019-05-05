@@ -21,11 +21,7 @@ int sockfd; /* socket */
 int optval; /* flag value for setsockopt */
 int portno; /* port to listen on */
 
-int FINAL_SEND = 30; /* 
-* if you receive the last packet at the very end, 
-* send the ack for it a large, fixed number of times
-* since someone has to end the conversation and there is not gaurantee the message is recvd
-*/
+int FINAL_SEND = 30; /* number of times to send off the ack for last packet */
 
 volatile int needed_pkt = 0; /* int to ensure that we don't allow for out of order packets*/
 volatile int stop = 0;
@@ -233,10 +229,19 @@ int main(int argc, char **argv) {
              if ( recvpkt->hdr.ctr_flags == -2) {  
                 sndpkt = make_packet(0);
                 sndpkt->hdr.ackno = -1;
-                if (sendto(sockfd, sndpkt, TCP_HDR_SIZE, 0, 
-                        (struct sockaddr *) &clientaddr, clientlen) < 0) {
-                    error("ERROR in sendto");
-                }
+                /*
+                 * if you receive the last packet at the very end, send the ack for it a large, 
+                 * fixed number of times since someone has to end the conversation and there
+                 * is not gaurantee the message is recvd
+                 */
+                int fin = 0;            
+                for (fin = 0; fin < FINAL_SEND ; fin++)
+                {
+                    if (sendto(sockfd, sndpkt, TCP_HDR_SIZE, 0, 
+                            (struct sockaddr *) &clientaddr, clientlen) < 0) {
+                        error("ERROR in sendto");
+                    }
+                }   
                 VLOG(INFO, "Just receieved last packet (1), exiting program");
                 fclose(fp);
                 free(sndpkt);
@@ -270,6 +275,11 @@ int main(int argc, char **argv) {
             sndpkt = make_packet(0);
             sndpkt->hdr.ackno = -1;
             int fin = 0;            
+            /*
+             * if you receive the last packet at the very end, send the ack for it a large, 
+             * fixed number of times since someone has to end the conversation and there
+             * is not gaurantee the message is recvd
+             */
             for (fin = 0; fin < FINAL_SEND ; fin++)
             {
                 if (sendto(sockfd, sndpkt, TCP_HDR_SIZE, 0, 
