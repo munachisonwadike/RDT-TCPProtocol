@@ -191,23 +191,16 @@ int main (int argc, char **argv)
 	while ( window_index < WINDOW_SIZE )
 	{
 		len = fread(buffer, 1, DATA_SIZE, fp);
-		if (len<=0){
-            window[window_index] = make_packet(0);
- 
-            /* zero out the control flags since we will need them */
-            window[window_index]->hdr.ctr_flags = 0;
- 
-            if(len==0){
-                VLOG(INFO, "Empty file");
-                sndpkt = make_packet(0);
+		if (len<=0){ 
+            if( window_index > 0 ){  
+                WINDOW_SIZE = window_index;
+                VLOG(INFO, "End of file (1). windowsize %d", WINDOW_SIZE );
+                final_packet_reached = 1;               
+                window[window_index-1]->hdr.ctr_flags = -2; /* identify final packet with control flag set to -2 */
+                break;
+            }           
 
-                /* zero out the control flags since we will need them */
-                sndpkt->hdr.ctr_flags = 0;
 
-                sendto(sockfd, sndpkt, TCP_HDR_SIZE,  0,
-                        (const struct sockaddr *)&serveraddr, serverlen);
-                free(sndpkt); 
-            }
 		}
 		else{ 
             pkt_base = next_seqno;
@@ -248,8 +241,7 @@ int main (int argc, char **argv)
     /*
      * constantly send the packets, wait for acks, 
      * and slide the window up for the next iteration of this loop
-     */
-    // int x = 0;
+     */ 
     do 
     {
 
@@ -300,7 +292,6 @@ int main (int argc, char **argv)
              * if you received an ack, calculate the new window and populate the empty part of it
              */
 
-
             /* option 1, step 1 if we haven't reach last packet, calculate the new window by simultaneously deleting and freeing 
              * all packets in closed interval [0, shift], and secondly by copying all packets in 
              * the closed interval [shift + 1, windowsize-1] to new respective positions shift steps 
@@ -332,9 +323,9 @@ int main (int argc, char **argv)
                     if ( len <=0 ){
                         
                         WINDOW_SIZE = window_index;
-                        VLOG(INFO, " End Of File. Window size %d ", WINDOW_SIZE);
+                        VLOG(INFO, " End Of File (2). Window size %d ", WINDOW_SIZE);
                         final_packet_reached = 1;
-                        window[window_index-1]->hdr.ctr_flags = -2;
+                        window[window_index-1]->hdr.ctr_flags = -2; /* identify final packet with control flag set to -2 */
                         break;
                     }else{
                         pkt_base = next_seqno;
@@ -406,12 +397,7 @@ int main (int argc, char **argv)
               
             start_timer(); 
         }
-
-        // x ++;
-        // if (x==5)
-        //     break  ;
-
-
+ 
     } while( 1 );
 
     
