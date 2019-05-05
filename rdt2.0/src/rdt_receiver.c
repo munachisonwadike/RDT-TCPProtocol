@@ -182,7 +182,7 @@ int main(int argc, char **argv) {
             break;
         }
 
-        printf("JUST RECEIVED PACKET %d\n", recvpkt->hdr.seqno);
+        printf("JUST RECEIVED PACKET %d with flags %d \n", recvpkt->hdr.seqno, recvpkt->hdr.ctr_flags);
 
         /* 
          * sendto: ack back to the client 
@@ -219,8 +219,23 @@ int main(int argc, char **argv) {
 	        printf("sending ack (1) number %d\n", needed_pkt );  
 
             
+            /* 
+             * if the packet you receieved was the last packet, 
+             * exit the program
+             */
             
-                 
+             if ( recvpkt->hdr.ctr_flags == -2) { /* if it was empty packet, close the program */
+                sndpkt = make_packet(0);
+                sndpkt->hdr.ackno = -1;
+                if (sendto(sockfd, sndpkt, TCP_HDR_SIZE, 0, 
+                        (struct sockaddr *) &clientaddr, clientlen) < 0) {
+                    error("ERROR in sendto");
+                }
+                VLOG(INFO, "Just receieved last packet, exiting program");
+                fclose(fp);
+                free(sndpkt);
+                exit(0);
+            }    
              
 
 
