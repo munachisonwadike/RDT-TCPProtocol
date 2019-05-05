@@ -168,6 +168,7 @@ int main(int argc, char **argv) {
         }
         recvpkt = (tcp_packet *) buffer;
         assert(get_data_size(recvpkt) <= DATA_SIZE);
+
         if ( recvpkt->hdr.data_size == 0) { /* if it was empty packet, close the program */
             sndpkt = make_packet(0);
             sndpkt->hdr.ackno = -1;
@@ -180,6 +181,8 @@ int main(int argc, char **argv) {
             free(sndpkt);
             break;
         }
+
+        printf("JUST RECEIVED PACKET %d\n", recvpkt->hdr.seqno);
 
         /* 
          * sendto: ack back to the client 
