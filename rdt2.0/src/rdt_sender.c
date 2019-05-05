@@ -38,6 +38,9 @@ int last_packet = -1;
 int last_ack = 0;
 int next_seqno=0;
 int send_base=0;
+
+int FINAL_PACK_REPT = 15;
+int CLOSE_MESG_REPT = 10;
 int WINDOW_SIZE = 10;
 
 struct sockaddr_in serveraddr;
@@ -65,20 +68,67 @@ void resend_packets(int sig)
     if (sig == SIGALRM)
     {
         VLOG(DEBUG, "RESEND FUNCTION TRIGGERED");   
-        window_index = 0;    
-        for (window_index = 0; window_index < WINDOW_SIZE; ++window_index)
-        {
-            /* 
-             * resend all packets range between sendBase and nextSeqNum 
-             */ 
-            if(sendto(sockfd, window[window_index], TCP_HDR_SIZE + get_data_size(window[window_index]), 0, 
-                        ( const struct sockaddr *)&serveraddr, serverlen) < 0)
+        /* 
+         * send the last packet 10 times just to 
+         * be sure it makes it before closing out
+         */
+        if (WINDOW_SIZE == 1){
+                     
+            
+            for (final_loop = 0; final_loop < FINAL_PACK_REPT; final_loop++)
             {
-                error("sendto");
+                if(sendto(sockfd, window[0], TCP_HDR_SIZE + get_data_size(window[0]), 0, 
+                ( const struct sockaddr *)&serveraddr, serverlen) < 0)
+                {
+                    error("sendto error");
+                }
             }
-            printf("packet with seqno %d resent \n", window[window_index]->hdr.seqno);
+            free(window[0]); 
+
+            VLOG(INFO, "Window size is one, [RE]sending last packet ");
+            /*
+             * send 0 ack if nothing left to send in window 
+             * but send it 10 times just to be sure since there 
+             * is no way for receiver to know if it was recvd
+             */
+
+            for (final_loop = 0; final_loop < CLOSE_MESG_REPT; final_loop++)
+            {
+                sndpkt = make_packet(0);
+                sendto(sockfd, sndpkt, TCP_HDR_SIZE,  0,
+                        (const struct sockaddr *)&serveraddr, serverlen);
+                free(sndpkt); 
+            }
+            exit(1);
+            VLOG(INFO, "[RE]sending 0 ack to receiver so it know to close ");
+            
+        /*
+         * if there is more than one packet in the window, loop through 
+         * the packet window and send all the packets as usual
+         */
+        } else {
+
+            
+            VLOG(DEBUG, "[RE]sending window of size %d from base %d -> %s", WINDOW_SIZE,  
+                window[0]->hdr.seqno, inet_ntoa(serveraddr.sin_addr));  
+
+
+
+            for (window_index = 0; window_index < WINDOW_SIZE; window_index++)
+            {
+                if(sendto(sockfd, window[window_index], TCP_HDR_SIZE + get_data_size(window[window_index]), 0, 
+                        ( const struct sockaddr *)&serveraddr, serverlen) < 0)
+                {
+                    error("sendto error");
+                }
+                printf("packet %d [RE]sent \n", window[window_index]->hdr.seqno);
+
+     
+            }
 
         }
+
+
     }
 }
 
@@ -346,58 +396,71 @@ int main (int argc, char **argv)
                  */            
                 WINDOW_SIZE = WINDOW_SIZE - shift;  
                 
-                /*
-                 *send 0 ack if nothing left to send in window and in closing
-                 */
-                if (WINDOW_SIZE == 1){
                 
-                    VLOG(INFO, "Empty file");
-                    /* 
-                     * send the last packet 10 times just to 
-                     * be sure it makes it before closing out
-                     */
-                    
-                    for (final_loop = 0; final_loop < 10; final_loop++)
-                    {
-                        if(sendto(sockfd, window[0], TCP_HDR_SIZE + get_data_size(window[0]), 0, 
-                        ( const struct sockaddr *)&serveraddr, serverlen) < 0)
-                        {
-                            error("sendto error");
-                        }
-                    }
-                    free(window[0]); 
-
-                    /* and then send a zero packet to be sure it closes*/
-                    for (final_loop = 0; final_loop < 10; final_loop++)
-                    {
-                        sndpkt = make_packet(0);
-                        sendto(sockfd, sndpkt, TCP_HDR_SIZE,  0,
-                                (const struct sockaddr *)&serveraddr, serverlen);
-                        free(sndpkt); 
-                    }
-                    exit(1);
-                    
-                }
 
             }
 
-            /*
-             * loop through the packet window and send all the packets
+            
+
+
+            /* 
+             * send the last packet 10 times just to 
+             * be sure it makes it before closing out
              */
-            VLOG(DEBUG, "sending window of size %d from base %d -> %s", WINDOW_SIZE,  
-                window[0]->hdr.seqno, inet_ntoa(serveraddr.sin_addr));       
-
-            for (window_index = 0; window_index < WINDOW_SIZE; window_index++)
-            {
-                if(sendto(sockfd, window[window_index], TCP_HDR_SIZE + get_data_size(window[window_index]), 0, 
-                        ( const struct sockaddr *)&serveraddr, serverlen) < 0)
+            if (WINDOW_SIZE == 1){
+                         
+                
+                for (final_loop = 0; final_loop < FINAL_PACK_REPT; final_loop++)
                 {
-                    error("sendto error");
+                    if(sendto(sockfd, window[0], TCP_HDR_SIZE + get_data_size(window[0]), 0, 
+                    ( const struct sockaddr *)&serveraddr, serverlen) < 0)
+                    {
+                        error("sendto error");
+                    }
                 }
-                printf("packet %d sent \n", window[window_index]->hdr.seqno);
+                free(window[0]); 
 
-     
+                VLOG(INFO, "Window size is one, sending last packet ");
+                /*
+                 * send 0 ack if nothing left to send in window 
+                 * but send it 10 times just to be sure since there 
+                 * is no way for receiver to know if it was recvd
+                 */
+ 
+                for (final_loop = 0; final_loop < CLOSE_MESG_REPT; final_loop++)
+                {
+                    sndpkt = make_packet(0);
+                    sendto(sockfd, sndpkt, TCP_HDR_SIZE,  0,
+                            (const struct sockaddr *)&serveraddr, serverlen);
+                    free(sndpkt); 
+                }
+                exit(1);
+                VLOG(INFO, "sending 0 ack to receiver so it know to close ");
+                
+            /*
+             * if there is more than one packet in the window, loop through 
+             * the packet window and send all the packets as usual
+             */
+            } else {
+
+                
+                VLOG(DEBUG, "sending window of size %d from base %d -> %s", WINDOW_SIZE,  
+                    window[0]->hdr.seqno, inet_ntoa(serveraddr.sin_addr));       
+
+                for (window_index = 0; window_index < WINDOW_SIZE; window_index++)
+                {
+                    if(sendto(sockfd, window[window_index], TCP_HDR_SIZE + get_data_size(window[window_index]), 0, 
+                            ( const struct sockaddr *)&serveraddr, serverlen) < 0)
+                    {
+                        error("sendto error");
+                    }
+                    printf("packet %d sent \n", window[window_index]->hdr.seqno);
+
+         
+                }
+
             }
+
 
               
             start_timer(); 
