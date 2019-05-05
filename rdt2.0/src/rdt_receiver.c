@@ -237,7 +237,7 @@ int main(int argc, char **argv) {
                         (struct sockaddr *) &clientaddr, clientlen) < 0) {
                     error("ERROR in sendto");
                 }
-                VLOG(INFO, "Just receieved last packet, exiting program");
+                VLOG(INFO, "Just receieved last packet (1), exiting program");
                 fclose(fp);
                 free(sndpkt);
                 exit(0);
@@ -277,7 +277,7 @@ int main(int argc, char **argv) {
                     error("ERROR in sendto");
                 }
             }                
-            VLOG(INFO, "Just receieved last packet, exiting program");
+            VLOG(INFO, "Just receieved last packet (2), exiting program");
             fclose(fp);
             free(sndpkt);
             exit(0);
