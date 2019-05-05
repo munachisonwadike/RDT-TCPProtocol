@@ -20,6 +20,13 @@ int clientlen; /* byte size of client's address */
 int sockfd; /* socket */
 int optval; /* flag value for setsockopt */
 int portno; /* port to listen on */
+
+int FINAL_SEND = 30; /* 
+* if you receive the last packet at the very end, 
+* send the ack for it a large, fixed number of times
+* since someone has to end the conversation and there is not gaurantee the message is recvd
+*/
+
 volatile int needed_pkt = 0; /* int to ensure that we don't allow for out of order packets*/
 volatile int stop = 0;
 
@@ -262,10 +269,14 @@ int main(int argc, char **argv) {
 
             sndpkt = make_packet(0);
             sndpkt->hdr.ackno = -1;
-            if (sendto(sockfd, sndpkt, TCP_HDR_SIZE, 0, 
-                    (struct sockaddr *) &clientaddr, clientlen) < 0) {
-                error("ERROR in sendto");
-            }
+            int fin = 0;            
+            for (fin = 0; fin < FINAL_SEND ; fin++)
+            {
+                if (sendto(sockfd, sndpkt, TCP_HDR_SIZE, 0, 
+                        (struct sockaddr *) &clientaddr, clientlen) < 0) {
+                    error("ERROR in sendto");
+                }
+            }                
             VLOG(INFO, "Just receieved last packet, exiting program");
             fclose(fp);
             free(sndpkt);
