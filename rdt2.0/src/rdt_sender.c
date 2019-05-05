@@ -354,7 +354,7 @@ int main (int argc, char **argv)
                     if ( len <=0 ){
                         
                         WINDOW_SIZE = window_index;
-                        VLOG(INFO, " End Of File -- Window size == ", WINDOW_SIZE);
+                        VLOG(INFO, " End Of File. Window size %d ", WINDOW_SIZE);
                         final_packet_reached = 1;
                         break;
                     }else{
