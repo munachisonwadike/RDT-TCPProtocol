@@ -119,19 +119,19 @@ int main(int argc, char **argv) {
         recvpkt = (tcp_packet *) buffer;
         assert(get_data_size(recvpkt) <= DATA_SIZE);
 
-        if ( recvpkt->hdr.data_size == 0) { /* if it was empty packet, close the program */
-            sndpkt = make_packet(0);
-            sndpkt->hdr.ackno = -1;
-            sndpkt->hdr.ctr_flags = 0;/* type (0) ack - closure response */
-            if (sendto(sockfd, sndpkt, TCP_HDR_SIZE, 0, 
-                    (struct sockaddr *) &clientaddr, clientlen) < 0) {
-                error("ERROR in sendto");
-            }
-            VLOG(INFO, "End Of File has been reached. Sent closure ack (0)");
-            fclose(fp);
-            free(sndpkt);
-            break;
-        }
+        // if ( recvpkt->hdr.data_size == 0) { /* if it was empty packet, close the program */
+        //     sndpkt = make_packet(0);
+        //     sndpkt->hdr.ackno = -1;
+        //     sndpkt->hdr.ctr_flags = 0;/* type (0) ack - closure response */
+        //     if (sendto(sockfd, sndpkt, TCP_HDR_SIZE, 0, 
+        //             (struct sockaddr *) &clientaddr, clientlen) < 0) {
+        //         error("ERROR in sendto");
+        //     }
+        //     VLOG(INFO, "End Of File has been reached. Sent closure ack (0)");
+        //     fclose(fp);
+        //     free(sndpkt);
+        //     break;
+        // }
 
         printf("JUST RECEIVED PACKET %d with flags %d \n", recvpkt->hdr.seqno, recvpkt->hdr.ctr_flags);
 
@@ -213,23 +213,21 @@ int main(int argc, char **argv) {
             }
             printf("sending duplicate ack (2) number %d\n", needed_pkt );
 
-/* 
-         * if you received the last packet but at the very end, 
-         * exit the program. identified by setting control flag to -2
-         */
-        }else if ( recvpkt->hdr.seqno < needed_pkt ) {
-        
+
+            /*          
+             * if you received the last packet at the very end, 
+             * exit the program. identified by setting control flag to -2
+             * then send the ack for it a large, fixed number of times 
+             * since someone has to end the conversation and there is no gaurantee the message is recvd
+             */
+
             if ( recvpkt->hdr.ctr_flags == -2) {
 
                 sndpkt = make_packet(0);
                 sndpkt->hdr.ackno = -1;
                 sndpkt->hdr.ctr_flags = 3; /* type (3)/2 - last packet at  the very end */
                 int fin = 0;            
-                /*
-                 * if you receive the last packet at the very end, send the ack for it a large, 
-                 * fixed number of times since someone has to end the conversation and there
-                 * is not gaurantee the message is recvd
-                 */
+                
                 for (fin = 0; fin < FINAL_SEND ; fin++)
                 {
                     if (sendto(sockfd, sndpkt, TCP_HDR_SIZE, 0, 
@@ -237,11 +235,16 @@ int main(int argc, char **argv) {
                         error("ERROR in sendto");
                     }
                 }                
-                VLOG(INFO, "Just receieved last packet (2), exiting program. Send closure ack (3)/2");
+                VLOG(INFO, "Just receieved last packet (2), exiting program. Sent closure ack (3)/2");
                 fclose(fp);
                 free(sndpkt);
                 exit(0);
             }
+
+
+        }else if ( recvpkt->hdr.seqno < needed_pkt ) {
+        
+            
 
             /*
              * if it wasn't the final packet, then the number should be lower than needed
