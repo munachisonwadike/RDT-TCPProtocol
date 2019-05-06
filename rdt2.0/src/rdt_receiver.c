@@ -37,7 +37,7 @@ sigset_t sigmask;
 
 tcp_packet *recvpkt;
 tcp_packet *sndpkt;
-tcp_packet** rcv_window[10]; /* buffer for out of sequence packets */  
+tcp_packet *rcv_window[10]; /* buffer for out of sequence packets */  
 
 
 
@@ -48,14 +48,13 @@ int main(int argc, char **argv) {
     /*
      * set up the receiver buffer
      */
-    // int windex = 0;
-    // if (rcv_window)
-    // {
-    //   for (windex = 0; windex < 10; i++)
-    //   {
-    //     a[i] = malloc(sizeof *a[i] * M);
-    //   }
-    // }
+    int windex = 0;
+
+    for (windex = 0; windex < 10; windex++)
+    {
+        rcv_window[windex] = make_packet(MSS_SIZE);
+    }
+    
 
     /* 
      * check command line arguments 

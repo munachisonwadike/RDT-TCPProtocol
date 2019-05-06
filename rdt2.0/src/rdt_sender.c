@@ -207,8 +207,10 @@ int main (int argc, char **argv)
         	next_seqno = pkt_base + len;
     		window[window_index] = make_packet(len);
             
-            /* zero out the control flags since we will need them */
+            /* zero out the control flags since reciever needs it to tell if its the last packet */
             window[window_index]->hdr.ctr_flags = 0;
+            /* zero out the ack number for usage in fast retransmit */
+            window[window_index]->hdr.ackno = 0;
 
      		memcpy(window[window_index]->data, buffer, len);
             window[window_index]->hdr.seqno = pkt_base;
@@ -260,19 +262,17 @@ int main (int argc, char **argv)
         assert(get_data_size(recvpkt) <= DATA_SIZE);
 
 
-        /*
-         * if we get a packet from the received saying is it closing, then the sender should close
-         * and exit
-         */
+        
         if( recvpkt->hdr.ackno == last_packet ){
             printf("last_packet received %d, recvpkt->hdr.ackno %d\n", last_packet, recvpkt->hdr.ackno );
             exit(1);
         }
 
+        
 
         /*
-         * since the receiver only sends acks when a packet has been written,
-         * we can accept acks > than last ack
+         * since the receiver only sends acks to indicate which it needs,
+         * we can accept acks >= than last ack
          */
         if(recvpkt->hdr.ackno >= last_ack)
         {   
@@ -280,6 +280,11 @@ int main (int argc, char **argv)
              * if you get an ack, stop time to process it 
              */ 
             stop_timer();
+
+            /*
+             * if we get an ack for the timeout packet, i.e leading packet, three times, then 
+             *  
+             */
 
             /*
              * check how much far ahead in window the recvd packet is than 
@@ -334,6 +339,8 @@ int main (int argc, char **argv)
 
                         /* zero out the control flags since we will need them */
                         window[window_index]->hdr.ctr_flags = 0;
+                        /* zero out the ack number for usage in fast retransmit */
+                        window[window_index]->hdr.ackno = 0;
 
                         memcpy(window[window_index]->data, buffer, len);
                         window[window_index]->hdr.seqno = pkt_base;
@@ -377,24 +384,55 @@ int main (int argc, char **argv)
 
             
 
-                
-            VLOG(DEBUG, "sending window of size %d from base %d -> %s", WINDOW_SIZE,  
-                window[0]->hdr.seqno, inet_ntoa(serveraddr.sin_addr));       
 
-            for (window_index = 0; window_index < WINDOW_SIZE; window_index++)
-            {
-                if(sendto(sockfd, window[window_index], TCP_HDR_SIZE + get_data_size(window[window_index]), 0, 
-                        ( const struct sockaddr *)&serveraddr, serverlen) < 0)
+            /* 
+             * if the ack we got was the same as the last ack, increment its ack number 
+             * by 1 for fast retransmit and resend the window if the ack number == 3
+             *  
+             */
+
+            if ( shift == 0 ){
+                VLOG(DEBUG, "sending window of size %d from base %d -> %s", WINDOW_SIZE,  
+                    window[0]->hdr.seqno, inet_ntoa(serveraddr.sin_addr));       
+
+                for (window_index = 0; window_index < WINDOW_SIZE; window_index++)
                 {
-                    error("sendto error");
+                    if(sendto(sockfd, window[window_index], TCP_HDR_SIZE + get_data_size(window[window_index]), 0, 
+                            ( const struct sockaddr *)&serveraddr, serverlen) < 0)
+                    {
+                        error("sendto error");
+                    }
+                    printf("packet %d sent \n", window[window_index]->hdr.seqno);
+
+         
                 }
-                printf("packet %d sent \n", window[window_index]->hdr.seqno);
+            /* 
+             * if the ack we got was different from the last one, then we window slid up and we 
+             * only need to resend the whole window  
+             */
+            } else {
+                window[0]->hdr.ackno ++;
 
-     
+                if ( window[0]->hdr.ackno == 3 )
+                {
+                    VLOG(DEBUG, "sending window of size %d from base %d -> %s", WINDOW_SIZE,  
+                        window[0]->hdr.seqno, inet_ntoa(serveraddr.sin_addr));       
+
+                    for (window_index = 0; window_index < WINDOW_SIZE; window_index++)
+                    {
+                        if(sendto(sockfd, window[window_index], TCP_HDR_SIZE + get_data_size(window[window_index]), 0, 
+                                ( const struct sockaddr *)&serveraddr, serverlen) < 0)
+                        {
+                            error("sendto error");
+                        }
+                        printf("packet %d sent \n", window[window_index]->hdr.seqno);
+
+             
+                    }
+                }
             }
- 
 
-              
+
             start_timer(); 
         }
  
