@@ -21,7 +21,8 @@ int sockfd; /* socket */
 int optval; /* flag value for setsockopt */
 int portno; /* port to listen on */
 
-int FINAL_SEND = 30; /* number of times to send off the ack for last packet */
+int FINAL_SEND = 50; /* number of times to send off the ack for last packet */
+int WINDOW_SIZE = 10; /* receiver window */
 
 volatile int needed_pkt = 0; /* int to ensure that we don't allow for out of order packets*/
 volatile int stop = 0;
@@ -36,16 +37,25 @@ sigset_t sigmask;
 
 tcp_packet *recvpkt;
 tcp_packet *sndpkt;
+tcp_packet** rcv_window[10]; /* buffer for out of sequence packets */  
 
-
- 
 
 
 
 
 int main(int argc, char **argv) {
     VLOG(DEBUG, "VALUE OF DATA_SIZE! %lu",  DATA_SIZE);
-  
+    /*
+     * set up the receiver buffer
+     */
+    // int windex = 0;
+    // if (rcv_window)
+    // {
+    //   for (windex = 0; windex < 10; i++)
+    //   {
+    //     a[i] = malloc(sizeof *a[i] * M);
+    //   }
+    // }
 
     /* 
      * check command line arguments 
