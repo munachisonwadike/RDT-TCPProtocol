@@ -152,6 +152,7 @@ int main(int argc, char **argv) {
 
             /* write the packet*/
             fseek(fp, recvpkt->hdr.seqno, SEEK_SET);
+            printf("%s\n", "ABOUT TO USE FWRITE");
             fwrite(recvpkt->data, 1, recvpkt->hdr.data_size, fp);
             
             /*
