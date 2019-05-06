@@ -398,7 +398,6 @@ int main (int argc, char **argv)
                         VLOG(DEBUG, "(2) generating window (size %d) with index %d, set to %d shift %d  ", 
                             WINDOW_SIZE, window_index, window[window_index]->hdr.seqno, shift )
 
-                        // last_packet = next_seqno;
                     }
                 }
 
