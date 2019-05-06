@@ -304,7 +304,7 @@ int main (int argc, char **argv)
      
                     if ( window_index >= shift ){
                         window[window_index-shift] = window[window_index];
-
+                        free(window[window_index]);
                         VLOG(DEBUG, "(1) generating window (size %d)with index %d set to %d shift %d  ", 
                             WINDOW_SIZE, window_index-shift, window[window_index-shift]->hdr.seqno, shift )
                     }else{
