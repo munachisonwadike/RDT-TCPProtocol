@@ -35,5 +35,18 @@ placing a new packet at the end of it. Since there is only one timeout, we
 simply reset the timeout to start at the start of the first packet in the 
 window every time the window is shifted upwards.
 
-*Edit out*- still need to do the above, and note that you also chnage the
-values of next seq no and window base
+
+For task 2, the first task is to ensure that the receiver buffers out of sequence 
+packets, as well as to ensure that the sender does not send packets outside of 
+the window. Since we have already implemented the sliding window in part one,
+we only need to create a buffer where the receiver places out of sequence packets
+Whenever packets are received, we then simply check the buffer if we have received
+consecutive packets in the past and send a cumulative ack for all those packets.
+
+We also need to implement fast retransmit, whereby the sender knows a packet has
+been lost if it receives an ack for it three times, as well as congestion avoidance 
+and slowstart, where increase the size of the sending window when a packet has been
+received, and shrink the window when a packet has been lost. A csv file showing 
+the way the window size changes over time is included for visualisation.
+
+
