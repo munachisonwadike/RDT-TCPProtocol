@@ -197,15 +197,19 @@ int main (int argc, char **argv)
             final_packet_reached = 1;
 
             if (len > 0 ){
+                pkt_base = next_seqno; /* sequence number of the packet being sent */
+
                 WINDOW_SIZE = window_index + 1; /* since this packet counts, window size is just the index of this packet plus one */
                 window[window_index] = make_packet(len);
-                /* zero out the control flags since we will need them */
-                window[window_index]->hdr.ctr_flags = 0;
+                /* identify current as final packet with control flag set to -2 */
+                window[window_index]->hdr.ctr_flags = -2; 
                 /* zero out the ack number for usage in fast retransmit */
                 window[window_index]->hdr.ackno = 0;
+                /* copy data into the packet */
                 memcpy(window[window_index]->data, buffer, len);
+                /* stamp the sequence number on */
+                window[window_index]->hdr.seqno = pkt_base;
 
-                window[window_index]->hdr.ctr_flags = -2; /* identify current as final packet with control flag set to -2 */
                 VLOG(DEBUG, "Generated LAST packet in window (size %d) with index %d, set to %d shift %d  ", 
                 WINDOW_SIZE, window_index, window[window_index]->hdr.seqno, shift )
             /*
@@ -228,7 +232,9 @@ int main (int argc, char **argv)
             /* zero out the ack number for usage in fast retransmit */
             window[window_index]->hdr.ackno = 0;
 
-     		memcpy(window[window_index]->data, buffer, len);
+     		/* copy data into the packet */
+            memcpy(window[window_index]->data, buffer, len);
+            /* stamp the sequence number on */
             window[window_index]->hdr.seqno = pkt_base;
             
         }
@@ -348,15 +354,19 @@ int main (int argc, char **argv)
                         final_packet_reached = 1;
 
                         if (len > 0 ){
+                            pkt_base = next_seqno; /* sequence number of the packet being sent */
+
                             WINDOW_SIZE = window_index + 1; /* since this packet counts, window size is just the index of this packet plus one */
                             window[window_index] = make_packet(len);
-                            /* zero out the control flags since we will need them */
-                            window[window_index]->hdr.ctr_flags = 0;
+                            /* identify current as final packet with control flag set to -2 */
+                            window[window_index]->hdr.ctr_flags = -2; 
                             /* zero out the ack number for usage in fast retransmit */
                             window[window_index]->hdr.ackno = 0;
+                            /* copy data into the packet */
                             memcpy(window[window_index]->data, buffer, len);
-
-                            window[window_index]->hdr.ctr_flags = -2; /* identify current as final packet with control flag set to -2 */
+                            /* stamp the sequence number on */
+                            window[window_index]->hdr.seqno = pkt_base;
+                        
                             VLOG(DEBUG, "Generated LAST packet in window (size %d) with index %d, set to %d shift %d  ", 
                             WINDOW_SIZE, window_index, window[window_index]->hdr.seqno, shift )
                         /*
@@ -369,9 +379,10 @@ int main (int argc, char **argv)
                         }     
 
                         break;
-                        
+
                     }else{
-                        pkt_base = next_seqno;
+                        pkt_base = next_seqno; /* sequence number of the packet being sent */
+
                         next_seqno = pkt_base + len; 
                         window[window_index] = make_packet(len);
 
@@ -379,9 +390,11 @@ int main (int argc, char **argv)
                         window[window_index]->hdr.ctr_flags = 0;
                         /* zero out the ack number for usage in fast retransmit */
                         window[window_index]->hdr.ackno = 0;
-
+                        /* copy data into the packet */
                         memcpy(window[window_index]->data, buffer, len);
+                        /* stamp the sequence number on */
                         window[window_index]->hdr.seqno = pkt_base;
+
                         VLOG(DEBUG, "(2) generating window (size %d) with index %d, set to %d shift %d  ", 
                             WINDOW_SIZE, window_index, window[window_index]->hdr.seqno, shift )
 
