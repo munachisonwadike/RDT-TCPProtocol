@@ -24,8 +24,8 @@ int portno; /* port to listen on */
 int FINAL_SEND = 50; /* number of times to send off the ack for last packet */
 int WINDOW_SIZE = 10; /* receiver window */
 
-volatile int needed_pkt = 0; /* int to ensure that we don't allow for out of order packets*/
-volatile int stop = 0;
+int needed_pkt = 0; /* int to ensure that we don't allow for out of order packets*/
+int stop = 0;
 
 struct sockaddr_in serveraddr; /* server's addr */
 struct sockaddr_in clientaddr; /* client addr */
