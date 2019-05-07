@@ -222,6 +222,8 @@ int main(int argc, char **argv) {
              */
 
             printf(" 1.5------  last-buffered = %d ---------1.5 \n", last_buffered);
+
+
             window_index = 0; 
             while (window_index < RCV_WIND_SIZE)
             {   
@@ -230,7 +232,7 @@ int main(int argc, char **argv) {
                 if ( window_index > last_buffered ){
                         
                     rcv_window[window_index - (last_buffered + 1)] = rcv_window[window_index];
-                     rcv_window[window_index]->hdr.ackno = 0;
+                    rcv_window[window_index]->hdr.ackno = 0;
                     // VLOG(DEBUG, "copying index %d to index %d window size %d ", 
                         // window_index, window_index - (last_buffered + 1) , RCV_WIND_SIZE )
                 }else{
@@ -239,16 +241,16 @@ int main(int argc, char **argv) {
                 }
                 window_index++;
             }
-            /* test */
-            printf(" 2---------------2 \n");
-            window_index = 0;
-            do
-            {
-                printf("Iteration [%d], ackno %d\n", window_index, rcv_window[window_index]->hdr.ackno);
-                window_index++;
-            }while ( window_index < RCV_WIND_SIZE );
-            printf("2---------------2 \n");
-
+            
+            // /* test */
+            // printf(" 2---------------2 \n");
+            // window_index = 0;
+            // do
+            // {
+            //     printf("Iteration [%d], ackno %d\n", window_index, rcv_window[window_index]->hdr.ackno);
+            //     window_index++;
+            // }while ( window_index < RCV_WIND_SIZE );
+            // printf("2---------------2 \n");
 
             /*
              * send an ack for the next needed packet 
@@ -265,7 +267,17 @@ int main(int argc, char **argv) {
 	            error("ERROR in sendto");
 	        }
 	        printf("sending ack (1) number %d\n", needed_pkt );  
+            
 
+            /* test */
+            printf(" 2---------------2 \n");
+            window_index = 0;
+            do
+            {
+                printf("Iteration [%d], ackno %d\n", window_index, rcv_window[window_index]->hdr.ackno);
+                window_index++;
+            }while ( window_index < RCV_WIND_SIZE );
+            printf("2---------------2 \n");
             
                            
         /*
