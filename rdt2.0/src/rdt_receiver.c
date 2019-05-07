@@ -129,15 +129,7 @@ int main(int argc, char **argv) {
          * recvfrom: receive a udp datagram from a client
          */
         
-        /* test 3 */
-        printf(" 3---------------3 \n");
-        window_index = 0;
-        do
-        {
-            printf("Iteration [%d], ackno %d\n", window_index, rcv_window[window_index]->hdr.ackno);
-            window_index++;
-        }while ( window_index < RCV_WIND_SIZE );
-        printf("3---------------3 \n");
+
         
 
 
@@ -155,16 +147,6 @@ int main(int argc, char **argv) {
          * sendto: ack back to the client 
          */
 
-        /* test 4 */
-        printf(" 4---------------4 \n");
-        window_index = 0;
-        do
-        {
-            printf("Iteration [%d], ackno %d\n", window_index, rcv_window[window_index]->hdr.ackno);
-            window_index++;
-        }while ( window_index < RCV_WIND_SIZE );
-        printf("4---------------4 \n");
-            
 
         /* 
          * if the received packet was as expected, 
@@ -177,8 +159,22 @@ int main(int argc, char **argv) {
             gettimeofday(&tp, NULL);
             VLOG(DEBUG, " %lu, %d, %d", tp.tv_sec, recvpkt->hdr.data_size, recvpkt->hdr.seqno);
 
+              
+
             /* buffer the packet */
             memcpy(rcv_window[0], recvpkt, DATA_SIZE);
+
+            /* test 3 */
+            printf(" 3---------------3 \n");
+            window_index = 0;
+            do
+            {
+                printf("Iteration [%d], ackno %d\n", window_index, rcv_window[window_index]->hdr.ackno);
+                window_index++;
+            }while ( window_index < RCV_WIND_SIZE );
+            printf("3---------------3 \n");
+
+
             rcv_window[0]->hdr.ackno = 1; 
 
             VLOG(DEBUG, "size of packet buffered %d ", recvpkt->hdr.data_size );
