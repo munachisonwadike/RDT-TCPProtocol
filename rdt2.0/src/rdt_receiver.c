@@ -243,8 +243,8 @@ int main(int argc, char **argv) {
                     free(rcv_window[window_index]);
                     rcv_window[window_index] = make_packet(DATA_SIZE);
                     rcv_window[window_index]->hdr.ackno = 0;
-                    // VLOG(DEBUG, "copying index %d to index %d window size %d ", 
-                        // window_index, window_index - (last_buffered + 1) , RCV_WIND_SIZE )
+                    VLOG(DEBUG, "copying index %d to index %d window size %d ", 
+                        window_index, window_index - (last_buffered + 1) , RCV_WIND_SIZE )
                 // }else{
                     
                     // VLOG(DEBUG, "freeing index %d ", window_index )
