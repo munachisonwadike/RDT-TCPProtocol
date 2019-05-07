@@ -229,7 +229,7 @@ int main(int argc, char **argv) {
              *  making sure to have first freed what was last-buffered steps behind.
              */
 
-            printf(" 1.5------  last-buffered = %d ---------1.5 \n", last_buffered);
+            printf(" 1.5------  last-buffered = %d && RCV_WIND_SIZE = %d---------1.5 \n", last_buffered, RCV_WIND_SIZE);
 
 
             window_index = 0; 
