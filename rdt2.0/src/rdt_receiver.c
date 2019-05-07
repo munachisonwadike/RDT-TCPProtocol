@@ -177,7 +177,7 @@ int main(int argc, char **argv) {
             // printf("3---------------3 \n");
 
 
-            // rcv_window[0]->hdr.ackno = 1; 
+            rcv_window[0]->hdr.ackno = 1; 
 
             VLOG(DEBUG, "size of packet buffered %d ", recvpkt->hdr.data_size );
 
