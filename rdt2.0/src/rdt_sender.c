@@ -325,20 +325,20 @@ int main (int argc, char **argv)
              * behind them in the window. 
              */
             if (final_packet_reached == 0){
-                /* note the use of looping backwards below so as to make the freeing work */
-                window_index = WINDOW_SIZE - 1; 
-                while ( window_index >= 0 )
+                window_index = 0; 
+                while (window_index < WINDOW_SIZE)
                 {
      
                     if ( window_index >= shift ){
-                        VLOG(DEBUG, "SEG FAULT ABOUT TO HAPPEN?");
-                        memcpy(window[window_index-shift], window[window_index], TCP_HDR_SIZE + get_data_size(window[window_index]));
+                            
+                        window[window_index-shift] = window[window_index];
+
                         VLOG(DEBUG, "(1) generating window (size %d)with index %d set to %d shift %d  ", 
                             WINDOW_SIZE, window_index-shift, window[window_index-shift]->hdr.seqno, shift )
-                    // }else{
+                    }else{
                         free(window[window_index]);
                     }
-                    window_index--;
+                    window_index++;
                 }
                 /* option 1, step 2 - then populate the interval [windowize - shift, windowsize -1] with
                  * the new packets. concerning the left endpoint, windowsize - shift==1 gives index of the last element in window
@@ -404,26 +404,24 @@ int main (int argc, char **argv)
 
             }else{            
             /* option 2, step 1 if we reach last packet, calculate the new window by simultaneously deleting and freeing 
-             * all packets in closed interval [0, shift-1], and secondly by copying all packets in 
-             * the closed interval [shift, windowsize-1] to new respective positions shift steps 
+             * all packets in closed interval [0, shift], and secondly by copying all packets in 
+             * the closed interval [shift + 1, windowsize-1] to new respective positions shift steps 
              * behind them in the window. 
              */
-
-                /* note the use of looping backwards below so as to make the freeing work */
-                window_index = WINDOW_SIZE - 1; 
-                while ( window_index >= 0 )
+                window_index = 0; 
+                while (window_index < WINDOW_SIZE)
                 {
      
                     if ( window_index >= shift ){
-                        VLOG(DEBUG, "SEG FAULT ABOUT TO HAPPEN?");
-                        memcpy(window[window_index-shift], window[window_index], TCP_HDR_SIZE + get_data_size(window[window_index]) ); 
+                        window[window_index-shift] = window[window_index];
+
                         VLOG(DEBUG, "window is now size %d with index %d, window[window_index]->hdr.seqno %d shift %d  ", 
                             WINDOW_SIZE, window_index-shift, window[window_index-shift]->hdr.seqno, shift )
 
-                    // }else{
+                    }else{
                         free(window[window_index]);
                     }
-                    window_index--;
+                    window_index++;
                 }
                 /*
                  * option 2, step 2 - reset the window size, such that only the 
