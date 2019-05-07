@@ -156,6 +156,8 @@ int main(int argc, char **argv) {
             memcpy(rcv_window[0], recvpkt, recvpkt->hdr.data_size);
             rcv_window[0]->hdr.ackno = 1; 
 
+            VLOG(DEBUG, "size of packet buffered %d ", recvpkt->hdr.data_size );
+
             /*
              * write all contiguously buffered packets starting with the one just received to 
              * the output file. call the last one contiguously buffered "last buffered" 
