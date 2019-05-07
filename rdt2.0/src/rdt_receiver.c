@@ -174,7 +174,9 @@ int main(int argc, char **argv) {
 
             }while ( ( rcv_window[window_index]->hdr.ackno == 1 ) && ( window_index < RCV_WIND_SIZE ) );
             
-            VLOG(DEBUG, " packet to follow received packet (2) is %d and last_buffered packet is %d ", rcv_window[0]->hdr.seqno + rcv_window[0]->hdr.data_size, rcv_window[last_buffered]->hdr.seqno );
+             /* update the number of the expected packet */
+            needed_pkt = rcv_window[last_buffered]->hdr.seqno + rcv_window[last_buffered]->hdr.data_size;
+            VLOG(DEBUG, " packet to follow received packet (2) is %d and last_buffered packet is %d ", needed_pkt, rcv_window[last_buffered]->hdr.seqno );
 
             /* 
              * if the packet you receieved was the last packet, 
@@ -243,8 +245,7 @@ int main(int argc, char **argv) {
              * send an ack for the next needed packet 
              */
             sndpkt = make_packet(0);
-            /* update the number of the expected packet */
-            needed_pkt = rcv_window[0]->hdr.seqno + TCP_HDR_SIZE + get_data_size( rcv_window[0]) ;
+           
             sndpkt->hdr.ctr_flags = 1; /* type (1) ack  - send the next one naturally */
             sndpkt->hdr.ackno = needed_pkt;
             
