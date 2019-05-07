@@ -330,10 +330,11 @@ int main (int argc, char **argv)
                 {
      
                     if ( window_index >= shift ){
+                        VLOG(DEBUG, "SEG FAULT ABOUT TO HAPPEN?");
                         memcpy(window[window_index-shift], window[window_index], TCP_HDR_SIZE + get_data_size(window[window_index]));
                         VLOG(DEBUG, "(1) generating window (size %d)with index %d set to %d shift %d  ", 
                             WINDOW_SIZE, window_index-shift, window[window_index-shift]->hdr.seqno, shift )
-                    }else{
+                    // }else{
                         free(window[window_index]);
                     }
                     window_index++;
@@ -416,7 +417,7 @@ int main (int argc, char **argv)
                         VLOG(DEBUG, "window is now size %d with index %d, window[window_index]->hdr.seqno %d shift %d  ", 
                             WINDOW_SIZE, window_index-shift, window[window_index-shift]->hdr.seqno, shift )
 
-                    }else{
+                    // }else{
                         free(window[window_index]);
                     }
                     window_index++;
