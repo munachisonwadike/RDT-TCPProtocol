@@ -330,8 +330,7 @@ int main (int argc, char **argv)
                 {
      
                     if ( window_index >= shift ){
-                        window[window_index-shift] = window[window_index];
-
+                        memcpy(window[window_index-shift], window[window_index], len);
                         VLOG(DEBUG, "(1) generating window (size %d)with index %d set to %d shift %d  ", 
                             WINDOW_SIZE, window_index-shift, window[window_index-shift]->hdr.seqno, shift )
                     }else{
@@ -403,8 +402,8 @@ int main (int argc, char **argv)
 
             }else{            
             /* option 2, step 1 if we reach last packet, calculate the new window by simultaneously deleting and freeing 
-             * all packets in closed interval [0, shift], and secondly by copying all packets in 
-             * the closed interval [shift + 1, windowsize-1] to new respective positions shift steps 
+             * all packets in closed interval [0, shift-1], and secondly by copying all packets in 
+             * the closed interval [shift, windowsize-1] to new respective positions shift steps 
              * behind them in the window. 
              */
                 window_index = 0; 
@@ -412,8 +411,8 @@ int main (int argc, char **argv)
                 {
      
                     if ( window_index >= shift ){
-                        window[window_index-shift] = window[window_index];
 
+                        memcpy(window[window_index-shift], window[window_index], len); 
                         VLOG(DEBUG, "window is now size %d with index %d, window[window_index]->hdr.seqno %d shift %d  ", 
                             WINDOW_SIZE, window_index-shift, window[window_index-shift]->hdr.seqno, shift )
 
