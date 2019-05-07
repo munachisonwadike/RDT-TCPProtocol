@@ -128,6 +128,20 @@ int main(int argc, char **argv) {
         /*
          * recvfrom: receive a udp datagram from a client
          */
+        
+        /* test 3 */
+        printf(" 3---------------3 \n");
+        window_index = 0;
+        do
+        {
+            printf("Iteration [%d], ackno %d\n", window_index, rcv_window[window_index]->hdr.ackno);
+            window_index++;
+        }while ( window_index < RCV_WIND_SIZE );
+        printf("3---------------3 \n");
+        
+
+
+
         if (recvfrom(sockfd, buffer, MSS_SIZE, 0,
                 (struct sockaddr *) &clientaddr, (socklen_t *)&clientlen) < 0) {
             error("ERROR in recvfrom");
@@ -140,6 +154,17 @@ int main(int argc, char **argv) {
         /* 
          * sendto: ack back to the client 
          */
+
+        /* test 4 */
+        printf(" 4---------------4 \n");
+        window_index = 0;
+        do
+        {
+            printf("Iteration [%d], ackno %d\n", window_index, rcv_window[window_index]->hdr.ackno);
+            window_index++;
+        }while ( window_index < RCV_WIND_SIZE );
+        printf("4---------------4 \n");
+            
 
         /* 
          * if the received packet was as expected, 
