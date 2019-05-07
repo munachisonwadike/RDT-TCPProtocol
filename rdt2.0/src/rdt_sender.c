@@ -325,8 +325,9 @@ int main (int argc, char **argv)
              * behind them in the window. 
              */
             if (final_packet_reached == 0){
-                window_index = 0; 
-                while (window_index < WINDOW_SIZE)
+                /* note the use of looping backwards below so as to make the freeing work */
+                window_index = WINDOW_SIZE - 1; 
+                while ( window_index >= 0 )
                 {
      
                     if ( window_index >= shift ){
@@ -337,7 +338,7 @@ int main (int argc, char **argv)
                     // }else{
                         free(window[window_index]);
                     }
-                    window_index++;
+                    window_index--;
                 }
                 /* option 1, step 2 - then populate the interval [windowize - shift, windowsize -1] with
                  * the new packets. concerning the left endpoint, windowsize - shift==1 gives index of the last element in window
@@ -407,8 +408,10 @@ int main (int argc, char **argv)
              * the closed interval [shift, windowsize-1] to new respective positions shift steps 
              * behind them in the window. 
              */
-                window_index = 0; 
-                while (window_index < WINDOW_SIZE)
+
+                /* note the use of looping backwards below so as to make the freeing work */
+                window_index = WINDOW_SIZE - 1; 
+                while ( window_index >= 0 )
                 {
      
                     if ( window_index >= shift ){
@@ -420,7 +423,7 @@ int main (int argc, char **argv)
                     // }else{
                         free(window[window_index]);
                     }
-                    window_index++;
+                    window_index--;
                 }
                 /*
                  * option 2, step 2 - reset the window size, such that only the 
