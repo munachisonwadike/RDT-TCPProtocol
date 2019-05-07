@@ -172,6 +172,7 @@ int main(int argc, char **argv) {
 
             }while ( ( rcv_window[window_index]->hdr.ackno == 1 ) && ( window_index < RCV_WIND_SIZE ) );
             
+            printf("JUST OUTSIDE THE WHILE LOOP needed_pkt IS %d ", rcv_window[window_index]->hdr.seqno + TCP_HDR_SIZE + get_data_size(rcv_window[window_index])  );
 
             /* 
              * if the packet you receieved was the last packet, 
@@ -241,7 +242,7 @@ int main(int argc, char **argv) {
              */
             sndpkt = make_packet(0);
             /* update the number of the expected packet */
-            needed_pkt = rcv_window[last_buffered]->hdr.seqno + TCP_HDR_SIZE + get_data_size( rcv_window[last_buffered]) ;
+            needed_pkt = rcv_window[0]->hdr.seqno + TCP_HDR_SIZE + get_data_size( rcv_window[0]) ;
             sndpkt->hdr.ctr_flags = 1; /* type (1) ack  - send the next one naturally */
             sndpkt->hdr.ackno = needed_pkt;
             
