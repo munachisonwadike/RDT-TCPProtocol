@@ -120,7 +120,11 @@ int main(int argc, char **argv) {
         rcv_window[windex]->hdr.ackno = 0;
     }
 
+    int x = 0;
     while (1) {
+
+        if(x == 3)
+            break;
         /*
          * recvfrom: receive a udp datagram from a client
          */
@@ -297,7 +301,7 @@ int main(int argc, char **argv) {
             
         }
        
-
+        x++;
 
     }
 
