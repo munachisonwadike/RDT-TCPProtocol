@@ -269,16 +269,7 @@ int main(int argc, char **argv) {
 	        printf("sending ack (1) number %d\n", needed_pkt );  
             
 
-            /* test */
-            printf(" 2---------------2 \n");
-            window_index = 0;
-            do
-            {
-                printf("Iteration [%d], ackno %d\n", window_index, rcv_window[window_index]->hdr.ackno);
-                window_index++;
-            }while ( window_index < RCV_WIND_SIZE );
-            printf("2---------------2 \n");
-            
+
                            
         /*
          * if the packet is higher than what is needed
@@ -325,6 +316,16 @@ int main(int argc, char **argv) {
          
             
         }
+                    /* test */
+            printf(" 2---------------2 \n");
+            window_index = 0;
+            do
+            {
+                printf("Iteration [%d], ackno %d\n", window_index, rcv_window[window_index]->hdr.ackno);
+                window_index++;
+            }while ( window_index < RCV_WIND_SIZE );
+            printf("2---------------2 \n");
+            
        
         x++;
 
