@@ -221,6 +221,7 @@ int main(int argc, char **argv) {
              *  making sure to have first freed what was last-buffered steps behind.
              */
 
+            printf(" 1.5------  last-buffered = %d ---------1.5 \n", last_buffered);
             window_index = 0; 
             while (window_index < RCV_WIND_SIZE)
             {   
