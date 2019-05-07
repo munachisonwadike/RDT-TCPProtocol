@@ -162,25 +162,22 @@ int main(int argc, char **argv) {
               
 
             /* buffer the packet */
+            recvpkt->hdr.ackno = 1; 
             memcpy(rcv_window[0], recvpkt, DATA_SIZE);
 
-            
+            // /* test 3 */
+            // printf(" 3---------------3 \n");
+            // window_index = 0;
+            // do
+            // {
+            //     printf("Iteration [%d], ackno %d\n", window_index, rcv_window[window_index]->hdr.ackno);
+            //     window_index++;
+            // }while ( window_index < RCV_WIND_SIZE );
+            // printf("3---------------3 \n");
 
 
-            rcv_window[0]->hdr.ackno = 1; 
-
-            /* test 3 */
-            printf(" 3---------------3 \n");
-            window_index = 0;
-            do
-            {
-                printf("Iteration [%d], ackno %d\n", window_index, rcv_window[window_index]->hdr.ackno);
-                window_index++;
-            }while ( window_index < RCV_WIND_SIZE );
-            printf("3---------------3 \n");
 
 
-            
             VLOG(DEBUG, "size of packet buffered %d ", recvpkt->hdr.data_size );
 
             /* test 1*/
