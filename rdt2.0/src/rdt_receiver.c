@@ -165,7 +165,7 @@ int main(int argc, char **argv) {
             {
                 last_buffered = window_index;
                 fseek(fp, rcv_window[window_index]->hdr.seqno, SEEK_SET);
-                printf("Writing the buffered packets to the file - iteration [%d]", window_index);
+                printf("Writing the buffered packet to the file - iteration [%d], seqno %d", window_index, rcv_window[window_index]->hdr.seqno);
                 fwrite(rcv_window[window_index]->data, 1, rcv_window[window_index]->hdr.data_size, fp);
                 window_index++;
                 
@@ -241,7 +241,7 @@ int main(int argc, char **argv) {
              */
             sndpkt = make_packet(0);
             /* update the number of the expected packet */
-            needed_pkt = rcv_window[last_buffered]->hdr.seqno + TCP_HDR_SIZE + get_data_size(rcv_window[last_buffered]) ;
+            needed_pkt = rcv_window[last_buffered]->hdr.seqno + TCP_HDR_SIZE + get_data_size( rcv_window[last_buffered]) ;
             sndpkt->hdr.ctr_flags = 1; /* type (1) ack  - send the next one naturally */
             sndpkt->hdr.ackno = needed_pkt;
             
