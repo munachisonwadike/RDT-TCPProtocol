@@ -224,8 +224,6 @@ int main(int argc, char **argv) {
 
                 if ( window_index > last_buffered ){
                     memcpy(rcv_window[window_index - (last_buffered + 1)], rcv_window[window_index], DATA_SIZE);
-                    free(rcv_window[window_index]);
-                    rcv_window[window_index] = make_packet(DATA_SIZE);
                     rcv_window[window_index]->hdr.ackno = 0;
                     VLOG(DEBUG, "copying index %d to index %d window size %d ", 
                         window_index, window_index - (last_buffered + 1) , RCV_WIND_SIZE )
