@@ -153,7 +153,7 @@ int main(int argc, char **argv) {
             VLOG(DEBUG, " %lu, %d, %d", tp.tv_sec, recvpkt->hdr.data_size, recvpkt->hdr.seqno);
 
             /* buffer the packet */
-            memcpy(rcv_window[0], recvpkt, recvpkt->hdr.data_size);
+            memcpy(rcv_window[0], recvpkt, DATA_SIZE);
             rcv_window[0]->hdr.ackno = 1; 
 
             VLOG(DEBUG, "size of packet buffered %d ", recvpkt->hdr.data_size );
