@@ -153,8 +153,8 @@ int main(int argc, char **argv) {
             gettimeofday(&tp, NULL);
             VLOG(DEBUG, " %lu, %d, %d", tp.tv_sec, recvpkt->hdr.data_size, recvpkt->hdr.seqno);
             /* buffer the packet */
-            free(rcv_window[0]); 
-            rcv_window[0] = malloc(DATA_SIZE);
+            // free(rcv_window[0]); 
+            // rcv_window[0] = malloc(DATA_SIZE);
             memcpy(rcv_window[0], recvpkt, DATA_SIZE);
 
             rcv_window[0]->hdr.ackno = 1; 
