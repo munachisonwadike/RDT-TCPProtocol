@@ -164,6 +164,11 @@ int main(int argc, char **argv) {
             /* buffer the packet */
             memcpy(rcv_window[0], recvpkt, DATA_SIZE);
 
+            
+
+
+            rcv_window[0]->hdr.ackno = 1; 
+
             /* test 3 */
             printf(" 3---------------3 \n");
             window_index = 0;
@@ -175,8 +180,7 @@ int main(int argc, char **argv) {
             printf("3---------------3 \n");
 
 
-            rcv_window[0]->hdr.ackno = 1; 
-
+            
             VLOG(DEBUG, "size of packet buffered %d ", recvpkt->hdr.data_size );
 
             /* test 1*/
