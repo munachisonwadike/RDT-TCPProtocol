@@ -167,7 +167,7 @@ int main(int argc, char **argv) {
             {
                 last_buffered = window_index;
                 fseek(fp, rcv_window[window_index]->hdr.seqno, SEEK_SET);
-                printf("Writing the buffered packet to the file - iteration [%d], seqno %d", window_index, rcv_window[window_index]->hdr.seqno);
+                printf("Writing the buffered packet to the file - iteration [%d], seqno %d\n", window_index, rcv_window[window_index]->hdr.seqno);
                 fwrite(rcv_window[window_index]->data, 1, rcv_window[window_index]->hdr.data_size, fp);
                 window_index++;
                 
