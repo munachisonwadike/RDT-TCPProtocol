@@ -241,7 +241,7 @@ int main(int argc, char **argv) {
              */
             sndpkt = make_packet(0);
             /* update the number of the expected packet */
-            needed_pkt = rcv_window[last_buffered]->hdr.seqno + rcv_window[last_buffered]->hdr.data_size; 
+            needed_pkt = rcv_window[last_buffered]->hdr.seqno + TCP_HDR_SIZE + get_data_size(rcv_window[last_buffered]) ;
             sndpkt->hdr.ctr_flags = 1; /* type (1) ack  - send the next one naturally */
             sndpkt->hdr.ackno = needed_pkt;
             
