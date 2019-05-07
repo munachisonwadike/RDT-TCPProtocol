@@ -172,7 +172,7 @@ int main(int argc, char **argv) {
 
             }while ( ( rcv_window[window_index]->hdr.ackno == 1 ) && ( window_index < RCV_WIND_SIZE ) );
             
-            printf("JUST OUTSIDE THE WHILE LOOP needed_pkt IS %d ", rcv_window[window_index]->hdr.seqno + TCP_HDR_SIZE + get_data_size(rcv_window[window_index])  );
+            VLOG(DEBUG, "JUST OUTSIDE THE WHILE LOOP needed_pkt IS %d ", rcv_window[window_index]->hdr.seqno + rcv_window[window_index]->hdr.data_size );
 
             /* 
              * if the packet you receieved was the last packet, 
