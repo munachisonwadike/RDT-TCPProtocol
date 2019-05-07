@@ -163,7 +163,7 @@ int main(int argc, char **argv) {
             window_index = 0;
             do
             {
-                printf("Iteration [%d], seqno %d\n", window_index, rcv_window[window_index]->hdr.seqno);
+                printf("Iteration [%d], ackno %d\n", window_index, rcv_window[window_index]->hdr.ackno);
                 window_index++;
             }while ( window_index < RCV_WIND_SIZE );
             printf(" --------------- \n");
