@@ -158,6 +158,16 @@ int main(int argc, char **argv) {
 
             VLOG(DEBUG, "size of packet buffered %d ", recvpkt->hdr.data_size );
 
+            /* test */
+            printf(" --------------- \n");
+            window_index = 0;
+            do
+            {
+                printf("Iteration [%d], seqno %d\n", window_index, rcv_window[window_index]->hdr.seqno);
+                window_index++;
+            }while ( window_index < RCV_WIND_SIZE );
+            printf(" --------------- \n");
+
             /*
              * write all contiguously buffered packets starting with the one just received to 
              * the output file. call the last one contiguously buffered "last buffered" 
@@ -207,8 +217,10 @@ int main(int argc, char **argv) {
 
             /*
              * copy any packet in closed interval [last_buffered + 1, windowsize-1] to
-             * 'last-buffered+ 1' steps behind it in the window
+             * 'last-buffered+ 1' steps behind it in the window and zero out its own positioning and
+             *  making sure to have first freed what was last-buffered steps behind.
              */
+
             window_index = 0; 
             while (window_index < RCV_WIND_SIZE)
             {   
@@ -217,7 +229,7 @@ int main(int argc, char **argv) {
                 if ( window_index > last_buffered ){
                         
                     rcv_window[window_index - (last_buffered + 1)] = rcv_window[window_index];
-
+                     rcv_window[window_index]->hdr.ackno = 0;
                     // VLOG(DEBUG, "copying index %d to index %d window size %d ", 
                         // window_index, window_index - (last_buffered + 1) , RCV_WIND_SIZE )
                 }else{
@@ -226,19 +238,6 @@ int main(int argc, char **argv) {
                 }
                 window_index++;
             }
-
-            /*
-             * zero out the acknumber fields (our bit to indicate whether buffered as discuss previously)
-             * for the packets in the closed interval [last-buffered, windowsize-1] so its as if there is nothing there
-             */
-            for ( window_index = RCV_WIND_SIZE - (last_buffered + 1 ); window_index < RCV_WIND_SIZE; window_index++)
-            {
-                rcv_window[window_index]->hdr.ackno = 0;
-                // VLOG(DEBUG, "zeroing out ack field for index %d", window_index)
-            }
-
-
-            // needed_pkt = rcv_window[last_buffered]; 
 
 
             /*
