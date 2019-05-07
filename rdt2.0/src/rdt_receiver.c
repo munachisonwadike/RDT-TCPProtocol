@@ -218,11 +218,11 @@ int main(int argc, char **argv) {
                         
                     rcv_window[window_index - (last_buffered + 1)] = rcv_window[window_index];
 
-                    VLOG(DEBUG, "copying index %d to index %d window size %d ", 
-                        window_index, window_index - (last_buffered + 1) , RCV_WIND_SIZE )
+                    // VLOG(DEBUG, "copying index %d to index %d window size %d ", 
+                        // window_index, window_index - (last_buffered + 1) , RCV_WIND_SIZE )
                 }else{
                     free(rcv_window[window_index]);
-                    VLOG(DEBUG, "freeing index %d ", window_index )
+                    // VLOG(DEBUG, "freeing index %d ", window_index )
                 }
                 window_index++;
             }
@@ -234,7 +234,7 @@ int main(int argc, char **argv) {
             for ( window_index = RCV_WIND_SIZE - (last_buffered + 1 ); window_index < RCV_WIND_SIZE; window_index++)
             {
                 rcv_window[window_index]->hdr.ackno = 0;
-                VLOG(DEBUG, "zeroing out ack field for index %d", window_index)
+                // VLOG(DEBUG, "zeroing out ack field for index %d", window_index)
             }
 
 
@@ -249,7 +249,7 @@ int main(int argc, char **argv) {
             sndpkt->hdr.ctr_flags = 1; /* type (1) ack  - send the next one naturally */
             sndpkt->hdr.ackno = needed_pkt;
             
-            printf("after receipt needed_pkt has a value %d\n", needed_pkt );
+            VLOG(DEBUG, "after receipt needed_pkt has a value %d\n", needed_pkt );
 
 	        if (sendto(sockfd, sndpkt, TCP_HDR_SIZE, 0, 
 	                (struct sockaddr *) &clientaddr, clientlen) < 0) {
