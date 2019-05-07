@@ -158,15 +158,15 @@ int main(int argc, char **argv) {
 
             VLOG(DEBUG, "size of packet buffered %d ", recvpkt->hdr.data_size );
 
-            /* test */
-            printf(" --------------- \n");
+            /* test 1*/
+            printf(" 1---------------1 \n");
             window_index = 0;
             do
             {
                 printf("Iteration [%d], ackno %d\n", window_index, rcv_window[window_index]->hdr.ackno);
                 window_index++;
             }while ( window_index < RCV_WIND_SIZE );
-            printf(" --------------- \n");
+            printf(" 1---------------1 \n");
 
             /*
              * write all contiguously buffered packets starting with the one just received to 
@@ -238,6 +238,15 @@ int main(int argc, char **argv) {
                 }
                 window_index++;
             }
+            /* test */
+            printf(" 2---------------2 \n");
+            window_index = 0;
+            do
+            {
+                printf("Iteration [%d], ackno %d\n", window_index, rcv_window[window_index]->hdr.ackno);
+                window_index++;
+            }while ( window_index < RCV_WIND_SIZE );
+            printf("2---------------2 \n");
 
 
             /*
