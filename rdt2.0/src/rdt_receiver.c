@@ -162,6 +162,8 @@ int main(int argc, char **argv) {
               
 
             /* buffer the packet */
+            free(rcv_window[0]); 
+            rcv_window[0] = malloc(DATA_SIZE);
             memcpy(rcv_window[0], recvpkt, DATA_SIZE);
 
             // /* test 3 */
