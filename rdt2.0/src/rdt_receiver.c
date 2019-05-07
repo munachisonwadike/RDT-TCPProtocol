@@ -120,20 +120,14 @@ int main(int argc, char **argv) {
         rcv_window[windex]->hdr.ackno = 0;
     }
 
-    int x = 0;
+
     while (1) {
 
-        // if(x == 3)
-        //     break;
+ 
         /*
          * recvfrom: receive a udp datagram from a client
          */
         
-
-        
-
-
-
         if (recvfrom(sockfd, buffer, MSS_SIZE, 0,
                 (struct sockaddr *) &clientaddr, (socklen_t *)&clientlen) < 0) {
             error("ERROR in recvfrom");
@@ -244,9 +238,6 @@ int main(int argc, char **argv) {
                     rcv_window[window_index]->hdr.ackno = 0;
                     VLOG(DEBUG, "copying index %d to index %d window size %d ", 
                         window_index, window_index - (last_buffered + 1) , RCV_WIND_SIZE )
-                // }else{
-                    
-                    // VLOG(DEBUG, "freeing index %d ", window_index )
                 }
                 window_index++;
             }
@@ -315,19 +306,7 @@ int main(int argc, char **argv) {
          
             
         }
-        //             /* test */
-        //     printf(" 2---------------2 \n");
-        //     window_index = 0;
-        //     do
-        //     {
-        //         printf("Iteration [%d], ackno %d\n", window_index, rcv_window[window_index]->hdr.ackno);
-        //         window_index++;
-        //     }while ( window_index < RCV_WIND_SIZE );
-        //     printf("2---------------2 \n");
-            
-       
-        // // x++;
-
+ 
     }
 
 
