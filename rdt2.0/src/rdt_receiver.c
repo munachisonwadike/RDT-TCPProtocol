@@ -174,7 +174,7 @@ int main(int argc, char **argv) {
 
             }while ( ( rcv_window[window_index]->hdr.ackno == 1 ) && ( window_index < RCV_WIND_SIZE ) );
             
-            VLOG(DEBUG, "JUST OUTSIDE THE WHILE LOOP needed_pkt IS %d ", rcv_window[window_index]->hdr.seqno + rcv_window[window_index]->hdr.data_size );
+            VLOG(DEBUG, " packet to follow received packet (2) is %d and last_buffered packet is %d ", rcv_window[0]->hdr.seqno + rcv_window[0]->hdr.data_size, rcv_window[last_buffered]->hdr.seqno );
 
             /* 
              * if the packet you receieved was the last packet, 
