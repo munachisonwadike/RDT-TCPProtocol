@@ -238,8 +238,7 @@ int main(int argc, char **argv) {
                 
 
                 if ( window_index > last_buffered ){
-                    free(rcv_window[window_index - (last_buffered + 1)]);
-                    rcv_window[window_index - (last_buffered + 1)] = rcv_window[window_index];
+                    memcpy(rcv_window[window_index - (last_buffered + 1)], rcv_window[window_index], DATA_SIZE);
                     free(rcv_window[window_index]);
                     rcv_window[window_index] = make_packet(DATA_SIZE);
                     rcv_window[window_index]->hdr.ackno = 0;
