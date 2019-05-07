@@ -411,7 +411,7 @@ int main (int argc, char **argv)
                 {
      
                     if ( window_index >= shift ){
-
+                        VLOG(DEBUG, "SEG FAULT ABOUT TO HAPPEN?");
                         memcpy(window[window_index-shift], window[window_index], len); 
                         VLOG(DEBUG, "window is now size %d with index %d, window[window_index]->hdr.seqno %d shift %d  ", 
                             WINDOW_SIZE, window_index-shift, window[window_index-shift]->hdr.seqno, shift )
