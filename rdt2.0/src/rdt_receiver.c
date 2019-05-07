@@ -162,7 +162,6 @@ int main(int argc, char **argv) {
               
 
             /* buffer the packet */
-            recvpkt->hdr.ackno = -1; 
             memcpy(rcv_window[0], recvpkt, DATA_SIZE);
 
             // /* test 3 */
@@ -176,7 +175,7 @@ int main(int argc, char **argv) {
             // printf("3---------------3 \n");
 
 
-
+            // rcv_window[0]->hdr.ackno = 1; 
 
             VLOG(DEBUG, "size of packet buffered %d ", recvpkt->hdr.data_size );
 
@@ -204,7 +203,7 @@ int main(int argc, char **argv) {
                 window_index++;
                 
 
-            }while ( ( rcv_window[window_index]->hdr.ackno == -1 ) && ( window_index < RCV_WIND_SIZE ) );
+            }while ( ( rcv_window[window_index]->hdr.ackno == 1 ) && ( window_index < RCV_WIND_SIZE ) );
             
              /* update the number of the expected packet */
             needed_pkt = rcv_window[last_buffered]->hdr.seqno + rcv_window[last_buffered]->hdr.data_size;
