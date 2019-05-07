@@ -160,15 +160,16 @@ int main(int argc, char **argv) {
             VLOG(DEBUG, " %lu, %d, %d", tp.tv_sec, recvpkt->hdr.data_size, recvpkt->hdr.seqno);
 
               
-
+            printf(" HERE 1\n");
             /* buffer the packet */
             free(rcv_window[0]); 
-            printf(" HERE 1\n");
+            
             printf(" HERE 2\n");
-            printf(" HERE 3\n");
+           
 
 
             rcv_window[0] = malloc(DATA_SIZE);
+            printf(" HERE 3\n");
             memcpy(rcv_window[0], recvpkt, DATA_SIZE);
 
             rcv_window[0]->hdr.ackno = 1; 
