@@ -123,8 +123,8 @@ int main(int argc, char **argv) {
     int x = 0;
     while (1) {
 
-        if(x == 3)
-            break;
+        // if(x == 3)
+        //     break;
         /*
          * recvfrom: receive a udp datagram from a client
          */
