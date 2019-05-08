@@ -202,7 +202,7 @@ int main(int argc, char **argv) {
                 last_buffered = window_index;
                 fseek(fp, rcv_window[window_index]->hdr.seqno, SEEK_SET);
                 printf("Writing the buffered packet to the file - iteration [%d], seqno %d\n", window_index, rcv_window[window_index]->hdr.seqno);
-                fwrite(rcv_window[window_index]->data, 1, rcv_window[window_index]->hdr.data_size, fp);
+                fwrite(rcv_window[window_index] , 1, rcv_window[window_index]->hdr.data_size, fp);
                 window_index++;
                 
 
@@ -288,7 +288,7 @@ int main(int argc, char **argv) {
             
 
             /*
-             * if it wasn't the final packet, then the number should be lower than needed
+             * the number shouldn't be lower than needed
              * so send duplicate ack to specify the one you needed 
              */     
 
