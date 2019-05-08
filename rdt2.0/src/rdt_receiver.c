@@ -159,27 +159,6 @@ int main(int argc, char **argv) {
 
             rcv_window[0]->hdr.ackno = 1;
 
-            /*
-             * write all contiguously buffered packets starting with the one just received to 
-             * the output file. call the last one contiguously buffered "last buffered" 
-             */
-            window_index = 0;
-            do
-            {
-                last_buffered = window_index;
-                fseek(fp, rcv_window[window_index]->hdr.seqno, SEEK_SET);
-                printf("Writing the buffered packet to the file - iteration [%d], seqno %d\n", window_index, rcv_window[window_index]->hdr.seqno);
-                fwrite(rcv_window[window_index]->data, 1, rcv_window[window_index]->hdr.data_size, fp);
-                window_index++;
-                
-
-            }while ( ( rcv_window[window_index]->hdr.ackno == 1 ) && ( window_index < RCV_WIND_SIZE ) );
-            
-            printf("last-buffered = %d\n", last_buffered);
-             /* update the number of the expected packet */
-            needed_pkt = rcv_window[last_buffered]->hdr.seqno + rcv_window[last_buffered]->hdr.data_size;
-            printf("packet to follow received packet (2) is %d and last_buffered packet is %d ", needed_pkt, rcv_window[last_buffered]->hdr.seqno );
-
             /* 
              * if the packet you receieved was the last packet, 
              * exit the program
@@ -205,7 +184,30 @@ int main(int argc, char **argv) {
                 fclose(fp);
                 free(sndpkt);
                 exit(0);
-            }        
+            }       
+
+            /*
+             * write all contiguously buffered packets starting with the one just received to 
+             * the output file. call the last one contiguously buffered "last buffered" 
+             */
+            window_index = 0;
+            do
+            {
+                last_buffered = window_index;
+                fseek(fp, rcv_window[window_index]->hdr.seqno, SEEK_SET);
+                printf("Writing the buffered packet to the file - iteration [%d], seqno %d\n", window_index, rcv_window[window_index]->hdr.seqno);
+                fwrite(rcv_window[window_index]->data, 1, rcv_window[window_index]->hdr.data_size, fp);
+                window_index++;
+                
+
+            }while ( ( rcv_window[window_index]->hdr.ackno == 1 ) && ( window_index < RCV_WIND_SIZE ) );
+            
+            printf("last-buffered = %d\n", last_buffered);
+             /* update the number of the expected packet */
+            needed_pkt = rcv_window[last_buffered]->hdr.seqno + rcv_window[last_buffered]->hdr.data_size;
+            printf("packet to follow received packet (2) is %d and last_buffered packet is %d ", needed_pkt, rcv_window[last_buffered]->hdr.seqno );
+
+             
 
             /*
              * copy any packet in closed interval [last_buffered + 1, windowsize-1] to
