@@ -201,7 +201,7 @@ int main(int argc, char **argv) {
              * the output file. call the last one contiguously buffered "last buffered" 
              */
             window_index = 1;
-            while ( ( rcv_window[window_index]->hdr.ackno == 1 ) && ( window_index < RCV_WIND_SIZE ) )
+            do
             {
                 last_buffered = window_index;
                 fseek(fp, rcv_window[window_index]->hdr.seqno, SEEK_SET);
@@ -210,7 +210,7 @@ int main(int argc, char **argv) {
                 window_index++;
                 
 
-            };
+            }while ( ( rcv_window[window_index]->hdr.ackno == 1 ) && ( window_index < RCV_WIND_SIZE ) );
             
             printf("last-buffered after the writing loop has value %d\n", last_buffered);
              /* update the number of the expected packet */
