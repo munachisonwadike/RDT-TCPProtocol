@@ -154,7 +154,7 @@ int main(int argc, char **argv) {
             gettimeofday(&tp, NULL);
             VLOG(DEBUG, " %lu, %d, %d", tp.tv_sec, recvpkt->hdr.data_size, recvpkt->hdr.seqno);
             // memset ( rcv_window[0], 0, TCP_HDR_SIZE+DATA_SIZE );
-            memcpy(rcv_window[0], recvpkt, TCP_HDR_SIZE + DATA_SIZE);
+            memcpy(rcv_window[0], recvpkt, TCP_HDR_SIZE + recvpkt->hdr.data_size);
 
             /* 
              * if the packet you receieved was the last packet, 
@@ -235,7 +235,7 @@ int main(int argc, char **argv) {
 
                 if ( window_index > last_buffered ){
                     // memset ( rcv_window[0], 0, TCP_HDR_SIZE + DATA_SIZE );
-                    memcpy(rcv_window[window_index - (last_buffered + 1)], rcv_window[window_index], TCP_HDR_SIZE + DATA_SIZE);
+                    memcpy(rcv_window[window_index - (last_buffered + 1)], rcv_window[window_index], TCP_HDR_SIZE + rcv_window[window_index]->hdr.data_size);
                     rcv_window[window_index]->hdr.ackno = -1;
                     // VLOG(DEBUG, "copying index %d to index %d window size %d ", 
                     //     window_index, window_index - (last_buffered + 1) , RCV_WIND_SIZE )
