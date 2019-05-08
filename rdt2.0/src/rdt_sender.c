@@ -39,9 +39,11 @@ int last_ack = 0;
 int next_seqno=0;
 int send_base=0;
 
+int CWND = 0;
 int FINAL_PACK_REPT = 15;
 int CLOSE_MESG_REPT = 10;
 int WINDOW_SIZE = 10;
+int SSTHRESH = 0;
 
 struct sockaddr_in serveraddr;
 struct itimerval timer; 
@@ -258,7 +260,7 @@ int main (int argc, char **argv)
 	}
 
     /*
-     * send the first ten packets  in the window
+     * send the first set of packet in the window
      */
     for ( window_index = 0; window_index < WINDOW_SIZE; window_index++)
     {

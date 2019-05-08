@@ -27,8 +27,10 @@ int window_index;
 int needed_pkt = 0; /* int to ensure that we don't allow for out of order packets*/
 int stop = 0;
 
+int CWND = 0;
 int FINAL_SEND = 50; /* number of times to send off the ack for last packet */
 int RCV_WIND_SIZE = 10; /* receiver window */
+int SSTHRESH = 0;
 
 struct sockaddr_in serveraddr; /* server's addr */
 struct sockaddr_in clientaddr; /* client addr */
@@ -260,6 +262,9 @@ int main(int argc, char **argv) {
             
             /* used ( x + y - 1 ) / y to get ceiling of x/y in C - trying to get the right index value */
             window_index = ( (recvpkt->hdr.seqno - needed_pkt ) + DATA_SIZE - 1 ) / DATA_SIZE;
+
+            if (window_index > 9)
+                continue;
 
             /* buffer the received out of order packet */
             memcpy(rcv_window[window_index], recvpkt, TCP_HDR_SIZE + DATA_SIZE);
