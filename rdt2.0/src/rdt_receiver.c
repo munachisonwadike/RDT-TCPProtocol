@@ -177,6 +177,7 @@ int main(int argc, char **argv) {
 
             }while ( ( rcv_window[window_index]->hdr.ackno == 1 ) && ( window_index < RCV_WIND_SIZE ) );
             
+            printf("last-buffered = %d\n", last_buffered);
              /* update the number of the expected packet */
             needed_pkt = rcv_window[last_buffered]->hdr.seqno + rcv_window[last_buffered]->hdr.data_size;
             VLOG(DEBUG, " packet to follow received packet (2) is %d and last_buffered packet is %d ", needed_pkt, rcv_window[last_buffered]->hdr.seqno );
