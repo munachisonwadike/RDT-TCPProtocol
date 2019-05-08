@@ -50,7 +50,9 @@ struct itimerval timer;
 int i; int j;
 volatile int k = -1;
 
+FILE *csv_file;
 FILE *fp;
+
 
 sigset_t sigmask;  
 
@@ -182,6 +184,20 @@ int main (int argc, char **argv)
      */
     init_timer(RESEND, resend_packets);
 
+
+    /*
+     * intialise the csv file where you will output the size of the window
+     */
+
+    csv_file = fopen("CWND", "a");
+    if(csv_file == NULL){
+        printf("Couldn't open CSV file\n");
+        exit(1);
+    }
+    
+    
+
+
     /*
      * set the initial value of window base loop 10 times to make 10 packets
      * store pointer to packet i in window[i]
@@ -268,6 +284,8 @@ int main (int argc, char **argv)
      */ 
     do 
     {
+        /* send the value of window size to the csv before receiving a packet */
+        fprintf(csv_file, "%d", WINDOW_SIZE);
 
         /* 
          * receive packets and see if they are the acks you expected 
@@ -495,7 +513,7 @@ int main (int argc, char **argv)
     
 
 
-
+    fclose(csv_file);
 
     return 0;
 
