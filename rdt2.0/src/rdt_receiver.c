@@ -167,7 +167,7 @@ int main(int argc, char **argv) {
 
                 fseek(fp, rcv_window[0]->hdr.seqno, SEEK_SET);
                 printf("Writing last packet to output file with seqno %d\n", rcv_window[0]->hdr.seqno);
-                fwrite(rcv_window[0] , 1, rcv_window[0]->hdr.data_size, fp);
+                fwrite(rcv_window[0]->data, 1, rcv_window[0]->hdr.data_size, fp);
 
 
                 sndpkt = make_packet(0);
@@ -202,18 +202,18 @@ int main(int argc, char **argv) {
                 last_buffered = window_index;
                 fseek(fp, rcv_window[window_index]->hdr.seqno, SEEK_SET);
                 printf("Writing the buffered packet to the file - iteration [%d], seqno %d\n", window_index, rcv_window[window_index]->hdr.seqno);
-                fwrite(rcv_window[window_index] , 1, rcv_window[window_index]->hdr.data_size, fp);
+                fwrite(rcv_window[window_index]->data, 1, rcv_window[window_index]->hdr.data_size, fp);
                 window_index++;
                 
 
             }while ( ( rcv_window[window_index]->hdr.ackno == 1 ) && ( window_index < RCV_WIND_SIZE ) );
             
-            printf("last-buffered = %d\n", last_buffered);
+            printf("last-buffered after the writing loop has value %d\n", last_buffered);
              /* update the number of the expected packet */
             needed_pkt = rcv_window[last_buffered]->hdr.seqno + rcv_window[last_buffered]->hdr.data_size;
             printf("NEEDED PACKET HAS A VALUE OF %d \n", needed_pkt);
 
-            printf("packet to follow received packet (2) is %d and last_buffered packet is %d ", needed_pkt, rcv_window[last_buffered]->hdr.seqno );
+            printf("Last_buffered packet is %d ", rcv_window[last_buffered]->hdr.seqno );
 
              
 
@@ -222,9 +222,6 @@ int main(int argc, char **argv) {
              * 'last-buffered+ 1' steps behind it in the window and zero out its own positioning and
              *  making sure to have first freed what was last-buffered steps behind.
              */
-
-            printf("last-buffered = %d \n", last_buffered);
-
 
             window_index = 0; 
             while (window_index < RCV_WIND_SIZE)
