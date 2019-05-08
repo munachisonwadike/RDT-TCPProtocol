@@ -156,38 +156,7 @@ int main(int argc, char **argv) {
             // memset ( rcv_window[0], 0, TCP_HDR_SIZE+DATA_SIZE );
             memcpy(rcv_window[0], recvpkt, TCP_HDR_SIZE + DATA_SIZE);
 
-            /* 
-             * if the packet you receieved was the last packet, 
-             * exit the program
-             */
-             if ( rcv_window[0]->hdr.ctr_flags == -2) {  
-
-                fseek(fp, rcv_window[0]->hdr.seqno, SEEK_SET);
-                printf("Writing (3) last packet to output file with seqno %d\n", rcv_window[0]->hdr.seqno);
-                fwrite(rcv_window[0]->data, 1, rcv_window[0]->hdr.data_size, fp);
-
-
-                sndpkt = make_packet(0);
-                sndpkt->hdr.ackno = -1;
-                sndpkt->hdr.ctr_flags = 3; /* type (3)/1 - last packet at  the very end */
-                /*
-                 * if you receive the last packet at the very end, send the ack for it a large, 
-                 * fixed number of times since someone has to end the conversation and there
-                 * is not gaurantee the message is recvd
-                 */
-                int fin = 0;            
-                for (fin = 0; fin < FINAL_SEND ; fin++)
-                {
-                    if (sendto(sockfd, sndpkt, TCP_HDR_SIZE, 0, 
-                            (struct sockaddr *) &clientaddr, clientlen) < 0) {
-                        error("ERROR in sendto");
-                    }
-                }   
-                VLOG(INFO, "Receieved last packet (1), exiting program. Sent closure ack (3)/1. Please be patient!");
-                fclose(fp);
-                free(sndpkt);
-                exit(0);
-            }       
+                 
 
             /*
              * write all contiguously buffered packets starting with the one just received to 
@@ -201,7 +170,36 @@ int main(int argc, char **argv) {
                 fseek(fp, rcv_window[window_index]->hdr.seqno, SEEK_SET);
                 printf("\nWriting (2) contiguous packets to the file - iteration [%d], seqno %d\n", window_index, rcv_window[window_index]->hdr.seqno);
                 fwrite(rcv_window[window_index]->data, 1, rcv_window[window_index]->hdr.data_size, fp);
+                                
+                /* 
+                * if any packet received was the last packet, 
+                * exit the program
+                */
+                if ( rcv_window[window_index]->hdr.ctr_flags == -2) {  
+                    sndpkt = make_packet(0);
+                    sndpkt->hdr.ackno = -1;
+                    sndpkt->hdr.ctr_flags = 3; /* type (3)/1 - last packet at  the very end */
+                    /*
+                     * send the ack a larged, fixed number of times since someone 
+                     * has to end the conversation and there is no gaurantee the message is recvd
+                     */
+                    int fin = 0;            
+                    for (fin = 0; fin < FINAL_SEND ; fin++)
+                    {
+                        if (sendto(sockfd, sndpkt, TCP_HDR_SIZE, 0, 
+                                (struct sockaddr *) &clientaddr, clientlen) < 0) {
+                            error("ERROR in sendto");
+                        }
+                    }   
+                    VLOG(INFO, "Receieved last packet (1), exiting program. Sent closure ack (3)/1. Please be patient!");
+                    fclose(fp);
+                    free(sndpkt);
+                    exit(0);
+                }  
+
                 window_index++;
+
+
 
             }while ( ( rcv_window[window_index-1]->hdr.ackno != -1 ) && ( window_index < RCV_WIND_SIZE ) );
             
