@@ -193,25 +193,25 @@ int main(int argc, char **argv) {
              * write all contiguously buffered packets starting with the one just received to 
              * the output file. call the last one contiguously buffered "last buffered" 
              */
-            // window_index = 0;
-            // do
-            // {   
-            //     if(window_index==0){
-            //         last_buffered = window_index;
+            window_index = 0;
+            do
+            {   
+                if(window_index==0){
+                    last_buffered = window_index;
                     fseek(fp, recvpkt->hdr.seqno, SEEK_SET);
                     printf("\nWriting (2) contiguous packets to the file - iteration [%d], seqno %d\n", window_index, recvpkt->hdr.seqno);
                     fwrite(recvpkt->data, 1, recvpkt->hdr.data_size, fp);
-            //         window_index++;
-            //     }else{
-            //         last_buffered = window_index;
-            //         fseek(fp, rcv_window[window_index]->hdr.seqno, SEEK_SET);
-            //         printf("\nWriting (2) contiguous packets to the file - iteration [%d], seqno %d\n", window_index, rcv_window[window_index]->hdr.seqno);
-            //         fwrite(rcv_window[window_index]->data, 1, rcv_window[window_index]->hdr.data_size, fp);
-            //         window_index++;
-            //     }
+                    window_index++;
+                }else{
+                    last_buffered = window_index;
+                    fseek(fp, rcv_window[window_index]->hdr.seqno, SEEK_SET);
+                    printf("\nWriting (2) contiguous packets to the file - iteration [%d], seqno %d\n", window_index, rcv_window[window_index]->hdr.seqno);
+                    fwrite(rcv_window[window_index]->data, 1, rcv_window[window_index]->hdr.data_size, fp);
+                    window_index++;
+                }
                 
 
-            // }while ( ( rcv_window[window_index]->hdr.ackno != -1 ) && ( window_index < RCV_WIND_SIZE ) );
+            }while ( ( rcv_window[window_index]->hdr.ackno != -1 ) && ( window_index < RCV_WIND_SIZE ) );
             
             // printf("last-buffered after the writing loop has value %d\n", last_buffered);
              /* update the number of the expected packet */
@@ -233,20 +233,20 @@ int main(int argc, char **argv) {
              *  making sure to have first freed what was last-buffered steps behind.
              */
 
-            // window_index = 0; 
-            // while (window_index < RCV_WIND_SIZE)
-            // {   
+            window_index = 0; 
+            while (window_index < RCV_WIND_SIZE)
+            {   
                 
 
-            //     if ( window_index > last_buffered ){
-            //         // memset ( rcv_window[0], 0, TCP_HDR_SIZE + DATA_SIZE );
-            //         memcpy(rcv_window[window_index - (last_buffered + 1)], rcv_window[window_index], TCP_HDR_SIZE + DATA_SIZE);
-            //         rcv_window[window_index]->hdr.ackno = -1;
-            //         // VLOG(DEBUG, "copying index %d to index %d window size %d ", 
-            //         //     window_index, window_index - (last_buffered + 1) , RCV_WIND_SIZE )
-            //     }
-            //     window_index++;
-            // }
+                if ( window_index > last_buffered ){
+                    // memset ( rcv_window[0], 0, TCP_HDR_SIZE + DATA_SIZE );
+                    memcpy(rcv_window[window_index - (last_buffered + 1)], rcv_window[window_index], TCP_HDR_SIZE + DATA_SIZE);
+                    rcv_window[window_index]->hdr.ackno = -1;
+                    // VLOG(DEBUG, "copying index %d to index %d window size %d ", 
+                    //     window_index, window_index - (last_buffered + 1) , RCV_WIND_SIZE )
+                }
+                window_index++;
+            }
 
             /*
              * send an ack for the next needed packet 
