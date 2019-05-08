@@ -156,11 +156,6 @@ int main(int argc, char **argv) {
             gettimeofday(&tp, NULL);
             VLOG(DEBUG, " %lu, %d, %d", tp.tv_sec, recvpkt->hdr.data_size, recvpkt->hdr.seqno);
             memcpy(rcv_window[0], recvpkt, DATA_SIZE);
-
-            fseek(fp, rcv_window[0]->hdr.seqno, SEEK_SET);
-            printf("\nWriting (1) rcvd packet %d to the file\n", rcv_window[0]->hdr.seqno);
-            fwrite(rcv_window[0]->data, 1, rcv_window[0]->hdr.data_size, fp);
-                
             rcv_window[0]->hdr.ackno = 1;
 
             /* 
@@ -200,7 +195,7 @@ int main(int argc, char **argv) {
              * write all contiguously buffered packets starting with the one just received to 
              * the output file. call the last one contiguously buffered "last buffered" 
              */
-            window_index = 1;
+            window_index = 0;
             do
             {
                 last_buffered = window_index;
