@@ -111,13 +111,11 @@ int main(int argc, char **argv) {
     for (windex = 0; windex < RCV_WIND_SIZE ; windex++)
     {
         /* 
-         * fill receive window with empty packets where the 
-         * ack number is 0. If we buffere a packet in a given
-         * slot in the window (by copying it from a socket), then change its ack number to 1 
-         * to distinguish buffered packets from empty slots
+         * fill receive window with empty packets where the ack number is -1. If we buffer a packet in a given
+         * slot in the window (by copying it from a socket), then its ack number 0 or greater already
          */        
         rcv_window[windex] = make_packet(MSS_SIZE);
-        rcv_window[windex]->hdr.ackno = 0;
+        rcv_window[windex]->hdr.ackno = -1;
     }
 
 
@@ -156,7 +154,6 @@ int main(int argc, char **argv) {
             gettimeofday(&tp, NULL);
             VLOG(DEBUG, " %lu, %d, %d", tp.tv_sec, recvpkt->hdr.data_size, recvpkt->hdr.seqno);
             memcpy(rcv_window[0], recvpkt, DATA_SIZE);
-            rcv_window[0]->hdr.ackno = 1;
 
             /* 
              * if the packet you receieved was the last packet, 
@@ -206,7 +203,6 @@ int main(int argc, char **argv) {
                 //     window_index++;
                 // }else{
                     last_buffered = window_index;
-                    rcv_window[0]->hdr.ackno = 0;
                     fseek(fp, rcv_window[window_index]->hdr.seqno, SEEK_SET);
                     printf("\nWriting (2) contiquous packets to the file - iteration [%d], seqno %d\n", window_index, rcv_window[window_index]->hdr.seqno);
                     fwrite(rcv_window[window_index]->data, 1, rcv_window[window_index]->hdr.data_size, fp);
@@ -214,7 +210,7 @@ int main(int argc, char **argv) {
                 // }
                 
 
-            }while ( ( rcv_window[window_index]->hdr.ackno == 1 ) && ( window_index < RCV_WIND_SIZE ) );
+            }while ( ( rcv_window[window_index]->hdr.ackno >= 0 ) && ( window_index < RCV_WIND_SIZE ) );
             
             printf("last-buffered after the writing loop has value %d\n", last_buffered);
              /* update the number of the expected packet */
@@ -238,7 +234,7 @@ int main(int argc, char **argv) {
 
                 if ( window_index > last_buffered ){
                     memcpy(rcv_window[window_index - (last_buffered + 1)], rcv_window[window_index], DATA_SIZE);
-                    rcv_window[window_index]->hdr.ackno = 0;
+                    rcv_window[window_index]->hdr.ackno = -1;
                     // VLOG(DEBUG, "copying index %d to index %d window size %d ", 
                     //     window_index, window_index - (last_buffered + 1) , RCV_WIND_SIZE )
                 }
@@ -276,7 +272,6 @@ int main(int argc, char **argv) {
 
 
             memcpy(rcv_window[window_index], recvpkt, rcv_window[window_index]->hdr.data_size);
-            rcv_window[window_index]->hdr.ackno = 1;
 
             sndpkt = make_packet(0);
             sndpkt->hdr.ackno = needed_pkt;
