@@ -135,7 +135,7 @@ int main(int argc, char **argv) {
         recvpkt = (tcp_packet *) buffer;
         assert(get_data_size(recvpkt) <= DATA_SIZE);
 
-        printf("JUST RECEIVED PACKET %d with flags %d ", recvpkt->hdr.seqno, recvpkt->hdr.ctr_flags);
+        // printf("JUST RECEIVED PACKET %d with flags %d ", recvpkt->hdr.seqno, recvpkt->hdr.ctr_flags);
 
         /* 
          * sendto: ack back to the client 
@@ -149,6 +149,9 @@ int main(int argc, char **argv) {
          */
         if( recvpkt->hdr.seqno == needed_pkt )
         {
+
+            printf("JUST RECEIVED (NEEDED) PACKET %d with flags %d ", recvpkt->hdr.seqno, recvpkt->hdr.ctr_flags);
+
 
             gettimeofday(&tp, NULL);
             VLOG(DEBUG, " %lu, %d, %d", tp.tv_sec, recvpkt->hdr.data_size, recvpkt->hdr.seqno);
