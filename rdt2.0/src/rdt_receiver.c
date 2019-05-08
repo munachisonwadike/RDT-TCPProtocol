@@ -280,14 +280,14 @@ int main(int argc, char **argv) {
 
             memcpy(rcv_window[window_index], recvpkt, rcv_window[window_index]->hdr.data_size);
 
-            sndpkt = make_packet(0);
-            sndpkt->hdr.ackno = needed_pkt;
-            sndpkt ->hdr.ctr_flags = 2; /* type (2) ack - packet is higher than needed out of order */
-            if (sendto(sockfd, sndpkt, TCP_HDR_SIZE, 0, 
-                    (struct sockaddr *) &clientaddr, clientlen) < 0) {
-                error("ERROR in sendto");
-            }
-            printf("sending duplicate ack (2) number %d\n", needed_pkt );
+            // sndpkt = make_packet(0);
+            // sndpkt->hdr.ackno = needed_pkt;
+            // sndpkt ->hdr.ctr_flags = 2; /* type (2) ack - packet is higher than needed out of order */
+            // if (sendto(sockfd, sndpkt, TCP_HDR_SIZE, 0, 
+            //         (struct sockaddr *) &clientaddr, clientlen) < 0) {
+            //     error("ERROR in sendto");
+            // }
+            // printf("sending duplicate ack (2) number %d\n", needed_pkt );
 
 
         }else if ( recvpkt->hdr.seqno < needed_pkt ) {
@@ -311,7 +311,7 @@ int main(int argc, char **argv) {
          
             
         }
-        // printf("\n\n");
+        printf("\n");
  
     }
 
