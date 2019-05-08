@@ -114,7 +114,7 @@ int main(int argc, char **argv) {
          * fill receive window with empty packets where the ack number is -1. If we buffer a packet in a given
          * slot in the window (by copying it from a socket), then its ack number 0 or greater already
          */        
-        rcv_window[windex] = make_packet(DATA_SIZE);
+        rcv_window[windex] = make_packet(DATA_SIZE + TCP_HDR_SIZE);
         rcv_window[windex]->hdr.ackno = -1;
     }
 
