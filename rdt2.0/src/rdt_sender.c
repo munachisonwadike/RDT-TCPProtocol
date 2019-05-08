@@ -285,7 +285,7 @@ int main (int argc, char **argv)
     do 
     {
         /* send the value of window size to the csv before receiving a packet */
-        fprintf(csv_file, "%d", WINDOW_SIZE);
+        fprintf(csv_file, "%d\n", WINDOW_SIZE);
 
         /* 
          * receive packets and see if they are the acks you expected 
