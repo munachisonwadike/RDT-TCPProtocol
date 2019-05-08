@@ -153,7 +153,7 @@ int main(int argc, char **argv) {
 
             gettimeofday(&tp, NULL);
             VLOG(DEBUG, " %lu, %d, %d", tp.tv_sec, recvpkt->hdr.data_size, recvpkt->hdr.seqno);
-            memset ( rcv_window[0], 0, TCP_HDR_SIZE+DATA_SIZE );
+            // memset ( rcv_window[0], 0, TCP_HDR_SIZE+DATA_SIZE );
             memcpy(rcv_window[0], recvpkt, TCP_HDR_SIZE + DATA_SIZE);
 
             /* 
@@ -234,7 +234,7 @@ int main(int argc, char **argv) {
                 
 
                 if ( window_index > last_buffered ){
-                    memset ( rcv_window[0], 0, TCP_HDR_SIZE+DATA_SIZE );
+                    // memset ( rcv_window[0], 0, TCP_HDR_SIZE + DATA_SIZE );
                     memcpy(rcv_window[window_index - (last_buffered + 1)], rcv_window[window_index], TCP_HDR_SIZE + DATA_SIZE);
                     rcv_window[window_index]->hdr.ackno = -1;
                     // VLOG(DEBUG, "copying index %d to index %d window size %d ", 
@@ -294,14 +294,14 @@ int main(int argc, char **argv) {
              * so send duplicate ack to specify the one you needed 
              */     
 
-            sndpkt = make_packet(0);
-            sndpkt->hdr.ackno = needed_pkt;
-            sndpkt->hdr.ctr_flags = 4; /* type (4) ack - lower than expected */
-            if (sendto(sockfd, sndpkt, TCP_HDR_SIZE, 0, 
-                    (struct sockaddr *) &clientaddr, clientlen) < 0) {
-                error("ERROR in sendto");
-            }
-            printf("sending duplicate ack (4) number %d\n", needed_pkt );
+            // sndpkt = make_packet(0);
+            // sndpkt->hdr.ackno = needed_pkt;
+            // sndpkt->hdr.ctr_flags = 4; /* type (4) ack - lower than expected */
+            // if (sendto(sockfd, sndpkt, TCP_HDR_SIZE, 0, 
+            //         (struct sockaddr *) &clientaddr, clientlen) < 0) {
+            //     error("ERROR in sendto");
+            // }
+            // printf("sending duplicate ack (4) number %d\n", needed_pkt );
 
          
             
