@@ -267,11 +267,11 @@ int main(int argc, char **argv) {
         } else if ( recvpkt->hdr.seqno > needed_pkt ) {
             
             /* used ( x + y - 1 ) / y to get ceiling of x/y in C - trying to get the right index value */
-            // window_index = ( (recvpkt->hdr.seqno - needed_pkt ) + DATA_SIZE - 1 ) / DATA_SIZE;
+            window_index = ( (recvpkt->hdr.seqno - needed_pkt ) + DATA_SIZE - 1 ) / DATA_SIZE;
 
 
-            // memcpy(rcv_window[window_index], recvpkt, TCP_HDR_SIZE + get_data_size(recvpkt));
-            // rcv_window[window_index]->hdr.ackno = 1;
+            memcpy(rcv_window[window_index], recvpkt, rcv_window[window_index]->hdr.data_size);
+            rcv_window[window_index]->hdr.ackno = 1;
 
             sndpkt = make_packet(0);
             sndpkt->hdr.ackno = needed_pkt;
