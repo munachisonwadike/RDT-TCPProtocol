@@ -203,7 +203,7 @@ int main(int argc, char **argv) {
                 fwrite(rcv_window[window_index]->data, 1, rcv_window[window_index]->hdr.data_size, fp);
                 window_index++;
 
-            }while ( ( rcv_window[window_index]->hdr.ackno != -1 ) && ( window_index < RCV_WIND_SIZE ) );
+            }while ( ( rcv_window[window_index-1]->hdr.ackno != -1 ) && ( window_index < RCV_WIND_SIZE ) );
             
             printf("last-buffered after the writing loop has value %d\n", last_buffered);
              /* update the number of the expected packet */
