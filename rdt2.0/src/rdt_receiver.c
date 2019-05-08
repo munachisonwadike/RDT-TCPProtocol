@@ -286,14 +286,14 @@ int main(int argc, char **argv) {
              * so send duplicate ack to specify the one you needed 
              */     
 
-            // sndpkt = make_packet(0);
-            // sndpkt->hdr.ackno = needed_pkt;
-            // sndpkt->hdr.ctr_flags = 4; /* type (4) ack - lower than expected */
-            // if (sendto(sockfd, sndpkt, TCP_HDR_SIZE, 0, 
-            //         (struct sockaddr *) &clientaddr, clientlen) < 0) {
-            //     error("ERROR in sendto");
-            // }
-            // printf("sending duplicate ack (4) number %d\n", needed_pkt );
+            sndpkt = make_packet(0);
+            sndpkt->hdr.ackno = needed_pkt;
+            sndpkt->hdr.ctr_flags = 4; /* type (4) ack - lower than expected */
+            if (sendto(sockfd, sndpkt, TCP_HDR_SIZE, 0, 
+                    (struct sockaddr *) &clientaddr, clientlen) < 0) {
+                error("ERROR in sendto");
+            }
+            printf("sending duplicate ack (4) number %d\n", needed_pkt );
 
          
             
