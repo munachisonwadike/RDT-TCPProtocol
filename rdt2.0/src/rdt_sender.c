@@ -189,7 +189,7 @@ int main (int argc, char **argv)
      * intialise the csv file where you will output the size of the window
      */
 
-    csv_file = fopen("CWND", "a");
+    csv_file = fopen("CWND", "w");
     if(csv_file == NULL){
         printf("Couldn't open CSV file\n");
         exit(1);
