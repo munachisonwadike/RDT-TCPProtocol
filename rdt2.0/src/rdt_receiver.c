@@ -133,7 +133,7 @@ int main(int argc, char **argv) {
         recvpkt = (tcp_packet *) buffer;
         assert(get_data_size(recvpkt) <= DATA_SIZE);
 
-        // printf("JUST RECEIVED PACKET %d with flags %d ", recvpkt->hdr.seqno, recvpkt->hdr.ctr_flags);
+        printf("JUST RECEIVED PACKET %d with flags %d ", recvpkt->hdr.seqno, recvpkt->hdr.ctr_flags);
 
         /* 
          * sendto: ack back to the client 
@@ -195,11 +195,13 @@ int main(int argc, char **argv) {
                     free(sndpkt);
                     exit(0);
                 }  
+                memset ( rcv_window[window_index], 0, TCP_HDR_SIZE + DATA_SIZE );
 
                 window_index++;
 
                 if(window_index >= RCV_WIND_SIZE){
                     break;
+                    printf("BROKE AT IF STATEMENT\n");
                 }
 
             }while ( ( rcv_window[window_index]->hdr.ackno != -1 ) );
