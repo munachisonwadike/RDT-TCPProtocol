@@ -167,7 +167,7 @@ int main(int argc, char **argv) {
 
                 fseek(fp, rcv_window[0]->hdr.seqno, SEEK_SET);
                 printf("Writing last packet to output file with seqno %d\n", rcv_window[0]->hdr.seqno);
-                fwrite(rcv_window[0]->data, 1, rcv_window[0]->hdr.data_size, fp);
+                fwrite(rcv_window[0] , 1, rcv_window[0]->hdr.data_size, fp);
 
 
                 sndpkt = make_packet(0);
