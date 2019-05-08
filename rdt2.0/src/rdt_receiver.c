@@ -180,7 +180,7 @@ int main(int argc, char **argv) {
             printf("last-buffered = %d\n", last_buffered);
              /* update the number of the expected packet */
             needed_pkt = rcv_window[last_buffered]->hdr.seqno + rcv_window[last_buffered]->hdr.data_size;
-            VLOG(DEBUG, " packet to follow received packet (2) is %d and last_buffered packet is %d ", needed_pkt, rcv_window[last_buffered]->hdr.seqno );
+            printf("packet to follow received packet (2) is %d and last_buffered packet is %d ", needed_pkt, rcv_window[last_buffered]->hdr.seqno );
 
             /* 
              * if the packet you receieved was the last packet, 
@@ -203,7 +203,7 @@ int main(int argc, char **argv) {
                         error("ERROR in sendto");
                     }
                 }   
-                printf("Just receieved last packet (1), exiting program. Sent closure ack (3)/1. Please be patient!");
+                VLOG(INFO, "Just receieved last packet (1), exiting program. Sent closure ack (3)/1. Please be patient!");
                 fclose(fp);
                 free(sndpkt);
                 exit(0);
