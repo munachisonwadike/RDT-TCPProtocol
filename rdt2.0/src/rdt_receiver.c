@@ -155,10 +155,7 @@ int main(int argc, char **argv) {
 
             gettimeofday(&tp, NULL);
             VLOG(DEBUG, " %lu, %d, %d", tp.tv_sec, recvpkt->hdr.data_size, recvpkt->hdr.seqno);
-            /* buffer the packet */
-            // free(rcv_window[0]); 
-            // rcv_window[0] = malloc(DATA_SIZE);
-            memcpy(rcv_window[0], recvpkt, DATA_SIZE);
+            memcpy(rcv_window[0], recvpkt, sizeof(recvpkt));
 
             rcv_window[0]->hdr.ackno = 1;
 
@@ -204,7 +201,7 @@ int main(int argc, char **argv) {
             {
                 last_buffered = window_index;
                 fseek(fp, rcv_window[window_index]->hdr.seqno, SEEK_SET);
-                printf("Writing the buffered packet to the file - iteration [%d], seqno %d\n", window_index, rcv_window[window_index]->hdr.seqno);
+                printf("\nWriting the buffered packet to the file - iteration [%d], seqno %d\n", window_index, rcv_window[window_index]->hdr.seqno);
                 fwrite(rcv_window[window_index]->data, 1, rcv_window[window_index]->hdr.data_size, fp);
                 window_index++;
                 
