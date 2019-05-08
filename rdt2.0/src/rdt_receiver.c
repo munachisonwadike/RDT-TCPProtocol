@@ -226,9 +226,10 @@ int main(int argc, char **argv) {
             {   
                 
 
-                if ( window_index > last_buffered ){
-                    memcpy(rcv_window[window_index - (last_buffered + 1)], rcv_window[window_index], TCP_HDR_SIZE + DATA_SIZE);
-                    memset ( rcv_window[window_index], 0, TCP_HDR_SIZE + DATA_SIZE );
+                if ( window_index + last_buffered + 1 < RCV_WIND_SIZE ){
+                    memcpy(rcv_window[window_index], rcv_window[window_index + last_buffered + 1], TCP_HDR_SIZE + DATA_SIZE);
+                }else{
+                    // memset ( rcv_window[window_index + last_buffered + 1], 0, TCP_HDR_SIZE + DATA_SIZE );
                     rcv_window[window_index]->hdr.ackno = -1;
                     // VLOG(DEBUG, "copying index %d to index %d window size %d ", 
                     //     window_index, window_index - (last_buffered + 1) , RCV_WIND_SIZE )
