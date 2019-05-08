@@ -157,9 +157,7 @@ int main(int argc, char **argv) {
             // rcv_window[0] = malloc(DATA_SIZE);
             memcpy(rcv_window[0], recvpkt, DATA_SIZE);
 
-            rcv_window[0]->hdr.ackno = 1; 
-
-            VLOG(DEBUG, "size of packet buffered %d ", recvpkt->hdr.data_size );
+            rcv_window[0]->hdr.ackno = 1;
 
             /*
              * write all contiguously buffered packets starting with the one just received to 
