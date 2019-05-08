@@ -203,7 +203,7 @@ int main(int argc, char **argv) {
                         error("ERROR in sendto");
                     }
                 }   
-                VLOG(INFO, "Just receieved last packet (1), exiting program. Sent closure ack (3)/1. Please be patient!");
+                printf("Just receieved last packet (1), exiting program. Sent closure ack (3)/1. Please be patient!");
                 fclose(fp);
                 free(sndpkt);
                 exit(0);
