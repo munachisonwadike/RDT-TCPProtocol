@@ -210,7 +210,7 @@ int main(int argc, char **argv) {
                     window_index++;
                 }
                 
-                break;
+                // break;
             }while ( ( rcv_window[window_index]->hdr.ackno != -1 ) && ( window_index < RCV_WIND_SIZE ) );
             
             // printf("last-buffered after the writing loop has value %d\n", last_buffered);
