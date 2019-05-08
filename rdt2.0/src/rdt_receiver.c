@@ -260,13 +260,15 @@ int main(int argc, char **argv) {
          */
         
         } else if ( recvpkt->hdr.seqno > needed_pkt ) {
+
+            if ( ( recvpkt->hdr.seqno - needed_pkt )  % DATA_SIZE == 0){
+                /* used ( x + y - 1 ) / y to get ceiling of x/y in C - trying to get the right index value */
+                window_index = ( (recvpkt->hdr.seqno - needed_pkt ) ) / DATA_SIZE;
+
+                /* buffer the received out of order packet */
+                memcpy(rcv_window[window_index], recvpkt, TCP_HDR_SIZE + DATA_SIZE);
+            }            
             
-            /* used ( x + y - 1 ) / y to get ceiling of x/y in C - trying to get the right index value */
-            window_index = ( (recvpkt->hdr.seqno - needed_pkt ) + DATA_SIZE - 1 ) / DATA_SIZE;
-
-            /* buffer the received out of order packet */
-            memcpy(rcv_window[window_index], recvpkt, TCP_HDR_SIZE + DATA_SIZE);
-
             /* still let the sender know it never got the needed one */
             sndpkt = make_packet(0);
             sndpkt->hdr.ackno = needed_pkt;
