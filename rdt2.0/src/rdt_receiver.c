@@ -114,7 +114,7 @@ int main(int argc, char **argv) {
          * fill receive window with empty packets where the ack number is -1. If we buffer a packet in a given
          * slot in the window (by copying it from a socket), then its ack number 0 or greater already
          */        
-        rcv_window[windex] = make_packet(MSS_SIZE);
+        rcv_window[windex] = make_packet(TCP_HDR_SIZE + DATA_SIZE);
         rcv_window[windex]->hdr.ackno = -1;
     }
 
@@ -195,19 +195,19 @@ int main(int argc, char **argv) {
             window_index = 0;
             do
             {   
-                if(window_index==0){
-                    last_buffered = window_index;
-                    fseek(fp, recvpkt->hdr.seqno, SEEK_SET);
-                    printf("\nWriting (2) contiquous packets to the file - iteration [%d], seqno %d\n", window_index, recvpkt->hdr.seqno);
-                    fwrite(recvpkt->data, 1, recvpkt->hdr.data_size, fp);
-                    window_index++;
-                }else{
+                // if(window_index==0){
+                //     last_buffered = window_index;
+                //     fseek(fp, recvpkt->hdr.seqno, SEEK_SET);
+                //     printf("\nWriting (2) contiquous packets to the file - iteration [%d], seqno %d\n", window_index, recvpkt->hdr.seqno);
+                //     fwrite(recvpkt->data, 1, recvpkt->hdr.data_size, fp);
+                //     window_index++;
+                // }else{
                     last_buffered = window_index;
                     fseek(fp, rcv_window[window_index]->hdr.seqno, SEEK_SET);
                     printf("\nWriting (2) contiquous packets to the file - iteration [%d], seqno %d\n", window_index, rcv_window[window_index]->hdr.seqno);
                     fwrite(rcv_window[window_index]->data, 1, rcv_window[window_index]->hdr.data_size, fp);
                     window_index++;
-                }
+                // }
                 
 
             }while ( ( rcv_window[window_index]->hdr.ackno >= 0 ) && ( window_index < RCV_WIND_SIZE ) );
