@@ -153,7 +153,7 @@ int main(int argc, char **argv) {
 
             gettimeofday(&tp, NULL);
             VLOG(DEBUG, " %lu, %d, %d", tp.tv_sec, recvpkt->hdr.data_size, recvpkt->hdr.seqno);
-            // memset ( rcv_window, 0, TCP_HDR_SIZE );
+            memset ( rcv_window[0], 0, TCP_HDR_SIZE+DATA_SIZE );
             memcpy(rcv_window[0], recvpkt, TCP_HDR_SIZE + DATA_SIZE);
 
             /* 
@@ -199,13 +199,13 @@ int main(int argc, char **argv) {
                 if(window_index==0){
                     last_buffered = window_index;
                     fseek(fp, recvpkt->hdr.seqno, SEEK_SET);
-                    printf("\nWriting (2) contiquous packets to the file - iteration [%d], seqno %d\n", window_index, recvpkt->hdr.seqno);
+                    printf("\nWriting (2) contiguous packets to the file - iteration [%d], seqno %d\n", window_index, recvpkt->hdr.seqno);
                     fwrite(recvpkt->data, 1, recvpkt->hdr.data_size, fp);
                     window_index++;
                 }else{
                     last_buffered = window_index;
                     fseek(fp, rcv_window[window_index]->hdr.seqno, SEEK_SET);
-                    printf("\nWriting (2) contiquous packets to the file - iteration [%d], seqno %d\n", window_index, rcv_window[window_index]->hdr.seqno);
+                    printf("\nWriting (2) contiguous packets to the file - iteration [%d], seqno %d\n", window_index, rcv_window[window_index]->hdr.seqno);
                     fwrite(rcv_window[window_index]->data, 1, rcv_window[window_index]->hdr.data_size, fp);
                     window_index++;
                 }
@@ -218,7 +218,7 @@ int main(int argc, char **argv) {
             needed_pkt = rcv_window[last_buffered]->hdr.seqno + rcv_window[last_buffered]->hdr.data_size;
             printf("NEEDED PACKET HAS A VALUE OF %d \n", needed_pkt);
 
-            printf("Last_buffered packet is %d ", rcv_window[last_buffered]->hdr.seqno );
+            printf("Last buffered packet is %d ", rcv_window[last_buffered]->hdr.seqno );
 
              
 
@@ -234,6 +234,7 @@ int main(int argc, char **argv) {
                 
 
                 if ( window_index > last_buffered ){
+                    memset ( rcv_window[0], 0, TCP_HDR_SIZE+DATA_SIZE );
                     memcpy(rcv_window[window_index - (last_buffered + 1)], rcv_window[window_index], TCP_HDR_SIZE + DATA_SIZE);
                     rcv_window[window_index]->hdr.ackno = -1;
                     // VLOG(DEBUG, "copying index %d to index %d window size %d ", 
@@ -250,7 +251,7 @@ int main(int argc, char **argv) {
             sndpkt->hdr.ctr_flags = 1; /* type (1) ack  - send the next one naturally */
             sndpkt->hdr.ackno = needed_pkt;
             
-            VLOG(DEBUG, "after receipt needed_pkt has a value %d", needed_pkt );
+            VLOG(DEBUG, "after receipt needed_pkt has a value %d\n", needed_pkt );
 
 	        if (sendto(sockfd, sndpkt, TCP_HDR_SIZE, 0, 
 	                (struct sockaddr *) &clientaddr, clientlen) < 0) {
