@@ -195,7 +195,7 @@ int main(int argc, char **argv) {
                     free(sndpkt);
                     exit(0);
                 }  
-                memset ( rcv_window[window_index], 0, TCP_HDR_SIZE + DATA_SIZE );
+                // memset ( rcv_window[window_index], 0, TCP_HDR_SIZE + DATA_SIZE );
 
                 window_index++;
 
