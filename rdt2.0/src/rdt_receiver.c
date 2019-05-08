@@ -157,9 +157,9 @@ int main(int argc, char **argv) {
             VLOG(DEBUG, " %lu, %d, %d", tp.tv_sec, recvpkt->hdr.data_size, recvpkt->hdr.seqno);
             memcpy(rcv_window[0], recvpkt, DATA_SIZE);
 
-            fseek(fp, rcv_window[0]->hdr.seqno, SEEK_SET);
+            fseek(fp, recvpkt->hdr.seqno, SEEK_SET);
             printf("\nWriting (1) rcvd packet %d to the file\n", rcv_window[0]->hdr.seqno);
-            fwrite(rcv_window[0]->data, 1, rcv_window[0]->hdr.data_size, fp);
+            fwrite(recvpkt->data, 1, recvpkt->hdr.data_size, fp);
                 
             rcv_window[0]->hdr.ackno = 1;
 
