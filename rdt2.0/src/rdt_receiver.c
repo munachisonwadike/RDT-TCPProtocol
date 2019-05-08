@@ -196,34 +196,34 @@ int main(int argc, char **argv) {
             window_index = 0;
             do
             {   
-                if(window_index==0){
-                    last_buffered = window_index;
-                    fseek(fp, recvpkt->hdr.seqno, SEEK_SET);
-                    printf("\nWriting (2) contiguous packets to the file - iteration [%d], seqno %d\n", window_index, recvpkt->hdr.seqno);
-                    fwrite(recvpkt->data, 1, recvpkt->hdr.data_size, fp);
-                    window_index++;
-                }else{
+                // if(window_index==0){
+                //     last_buffered = window_index;
+                //     fseek(fp, recvpkt->hdr.seqno, SEEK_SET);
+                //     printf("\nWriting (2) contiguous packets to the file - iteration [%d], seqno %d\n", window_index, recvpkt->hdr.seqno);
+                //     fwrite(recvpkt->data, 1, recvpkt->hdr.data_size, fp);
+                //     window_index++;
+                // }else{
                     last_buffered = window_index;
                     fseek(fp, rcv_window[window_index]->hdr.seqno, SEEK_SET);
                     printf("\nWriting (2) contiguous packets to the file - iteration [%d], seqno %d\n", window_index, rcv_window[window_index]->hdr.seqno);
                     fwrite(rcv_window[window_index]->data, 1, rcv_window[window_index]->hdr.data_size, fp);
                     window_index++;
-                }
+                // }
                 
                 // break;
             }while ( ( rcv_window[window_index]->hdr.ackno != -1 ) && ( window_index < RCV_WIND_SIZE ) );
             
-            // printf("last-buffered after the writing loop has value %d\n", last_buffered);
+            printf("last-buffered after the writing loop has value %d\n", last_buffered);
              /* update the number of the expected packet */
-            // needed_pkt = rcv_window[last_buffered]->hdr.seqno + rcv_window[last_buffered]->hdr.data_size;
-            // VLOG(DEBUG, "NEEDED PACKET HAS A VALUE OF %d", needed_pkt);
-
-            // VLOG(DEBUG, "Last buffered packet is %d", rcv_window[last_buffered]->hdr.seqno );
-
-            needed_pkt = recvpkt->hdr.seqno + recvpkt->hdr.data_size;
+            needed_pkt = rcv_window[last_buffered]->hdr.seqno + rcv_window[last_buffered]->hdr.data_size;
             VLOG(DEBUG, "NEEDED PACKET HAS A VALUE OF %d", needed_pkt);
 
-            VLOG(DEBUG, "Last buffered packet is %d", recvpkt->hdr.seqno );
+            VLOG(DEBUG, "Last buffered packet is %d", rcv_window[last_buffered]->hdr.seqno );
+
+            // needed_pkt = recvpkt->hdr.seqno + recvpkt->hdr.data_size;
+            // VLOG(DEBUG, "NEEDED PACKET HAS A VALUE OF %d", needed_pkt);
+
+            // VLOG(DEBUG, "Last buffered packet is %d", recvpkt->hdr.seqno );
 
              
 
