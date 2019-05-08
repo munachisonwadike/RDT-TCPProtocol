@@ -330,7 +330,7 @@ int main (int argc, char **argv)
                 {
      
                     if ( window_index >= shift ){
-                            
+
                         window[window_index-shift] = window[window_index];
 
                         VLOG(DEBUG, "(1) generating window (size %d)with index %d set to %d shift %d  ", 
@@ -443,25 +443,6 @@ int main (int argc, char **argv)
              */
 
             if ( shift == 0 ){
-                VLOG(DEBUG, "sending window of size %d from base %d -> %s", WINDOW_SIZE,  
-                    window[0]->hdr.seqno, inet_ntoa(serveraddr.sin_addr));       
-
-                for (window_index = 0; window_index < WINDOW_SIZE; window_index++)
-                {
-                    if(sendto(sockfd, window[window_index], TCP_HDR_SIZE + get_data_size(window[window_index]), 0, 
-                            ( const struct sockaddr *)&serveraddr, serverlen) < 0)
-                    {
-                        error("sendto error");
-                    }
-                    printf("packet %d sent \n", window[window_index]->hdr.seqno);
-
-         
-                }
-            /* 
-             * if the ack we got was different from the last one, then we window slid up and we 
-             * only need to resend the whole window  
-             */
-            } else {
                 window[0]->hdr.ackno ++;
 
                 if ( window[0]->hdr.ackno == 3 )
@@ -480,6 +461,27 @@ int main (int argc, char **argv)
 
              
                     }
+                }
+                
+                
+            /* 
+             * if the ack we got was different from the last one, then we window slid up and we 
+             * only need to resend the whole window 
+             */
+            } else {
+                VLOG(DEBUG, "sending window of size %d from base %d -> %s", WINDOW_SIZE,  
+                    window[0]->hdr.seqno, inet_ntoa(serveraddr.sin_addr));       
+
+                for (window_index = 0; window_index < WINDOW_SIZE; window_index++)
+                {
+                    if(sendto(sockfd, window[window_index], TCP_HDR_SIZE + get_data_size(window[window_index]), 0, 
+                            ( const struct sockaddr *)&serveraddr, serverlen) < 0)
+                    {
+                        error("sendto error");
+                    }
+                    printf("packet %d sent \n", window[window_index]->hdr.seqno);
+
+         
                 }
             }
 
