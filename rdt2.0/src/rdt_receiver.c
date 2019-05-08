@@ -216,9 +216,9 @@ int main(int argc, char **argv) {
             printf("last-buffered after the writing loop has value %d\n", last_buffered);
              /* update the number of the expected packet */
             needed_pkt = rcv_window[last_buffered]->hdr.seqno + rcv_window[last_buffered]->hdr.data_size;
-            printf("NEEDED PACKET HAS A VALUE OF %d \n", needed_pkt);
+            VLOG(DEBUG, "NEEDED PACKET HAS A VALUE OF %d", needed_pkt);
 
-            printf("Last buffered packet is %d ", rcv_window[last_buffered]->hdr.seqno );
+            VLOG(DEBUG, "Last buffered packet is %d", rcv_window[last_buffered]->hdr.seqno );
 
              
 
@@ -251,13 +251,13 @@ int main(int argc, char **argv) {
             sndpkt->hdr.ctr_flags = 1; /* type (1) ack  - send the next one naturally */
             sndpkt->hdr.ackno = needed_pkt;
             
-            VLOG(DEBUG, "after receipt needed_pkt has a value %d\n", needed_pkt );
+            VLOG(DEBUG, "after receipt needed_pkt has a value %d", needed_pkt );
 
 	        if (sendto(sockfd, sndpkt, TCP_HDR_SIZE, 0, 
 	                (struct sockaddr *) &clientaddr, clientlen) < 0) {
 	            error("ERROR in sendto");
 	        }
-	        printf("sending ack (1) number %d\n", needed_pkt );  
+	        VLOG( DEBUG, "sending ack (1) number %d", needed_pkt );  
             
 
 
