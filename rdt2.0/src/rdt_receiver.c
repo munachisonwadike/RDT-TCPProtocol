@@ -210,7 +210,7 @@ int main(int argc, char **argv) {
                     window_index++;
                 }
                 
-
+                break;
             }while ( ( rcv_window[window_index]->hdr.ackno != -1 ) && ( window_index < RCV_WIND_SIZE ) );
             
             // printf("last-buffered after the writing loop has value %d\n", last_buffered);
@@ -246,6 +246,7 @@ int main(int argc, char **argv) {
                     //     window_index, window_index - (last_buffered + 1) , RCV_WIND_SIZE )
                 }
                 window_index++;
+
             }
 
             /*
@@ -278,7 +279,7 @@ int main(int argc, char **argv) {
             window_index = ( (recvpkt->hdr.seqno - needed_pkt ) + DATA_SIZE - 1 ) / DATA_SIZE;
 
 
-            memcpy(rcv_window[window_index], recvpkt, recvpkt->hdr.data_size);
+            memcpy(rcv_window[window_index], recvpkt, TCP_HDR_SIZE + DATA_SIZE);
 
             // sndpkt = make_packet(0);
             // sndpkt->hdr.ackno = needed_pkt;
