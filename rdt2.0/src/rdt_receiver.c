@@ -196,21 +196,13 @@ int main(int argc, char **argv) {
             window_index = 0;
             do
             {   
-                // if(window_index==0){
-                //     last_buffered = window_index;
-                //     fseek(fp, recvpkt->hdr.seqno, SEEK_SET);
-                //     printf("\nWriting (2) contiguous packets to the file - iteration [%d], seqno %d\n", window_index, recvpkt->hdr.seqno);
-                //     fwrite(recvpkt->data, 1, recvpkt->hdr.data_size, fp);
-                //     window_index++;
-                // }else{
-                    last_buffered = window_index;
-                    fseek(fp, rcv_window[window_index]->hdr.seqno, SEEK_SET);
-                    printf("\nWriting (2) contiguous packets to the file - iteration [%d], seqno %d\n", window_index, rcv_window[window_index]->hdr.seqno);
-                    fwrite(rcv_window[window_index]->data, 1, rcv_window[window_index]->hdr.data_size, fp);
-                    window_index++;
-                // }
-                
-                // break;
+               
+                last_buffered = window_index;
+                fseek(fp, rcv_window[window_index]->hdr.seqno, SEEK_SET);
+                printf("\nWriting (2) contiguous packets to the file - iteration [%d], seqno %d\n", window_index, rcv_window[window_index]->hdr.seqno);
+                fwrite(rcv_window[window_index]->data, 1, rcv_window[window_index]->hdr.data_size, fp);
+                window_index++;
+
             }while ( ( rcv_window[window_index]->hdr.ackno != -1 ) && ( window_index < RCV_WIND_SIZE ) );
             
             printf("last-buffered after the writing loop has value %d\n", last_buffered);
@@ -219,11 +211,6 @@ int main(int argc, char **argv) {
             VLOG(DEBUG, "NEEDED PACKET HAS A VALUE OF %d", needed_pkt);
 
             VLOG(DEBUG, "Last buffered packet is %d", rcv_window[last_buffered]->hdr.seqno );
-
-            // needed_pkt = recvpkt->hdr.seqno + recvpkt->hdr.data_size;
-            // VLOG(DEBUG, "NEEDED PACKET HAS A VALUE OF %d", needed_pkt);
-
-            // VLOG(DEBUG, "Last buffered packet is %d", recvpkt->hdr.seqno );
 
              
 
@@ -239,7 +226,6 @@ int main(int argc, char **argv) {
                 
 
                 if ( window_index > last_buffered ){
-                    // memset ( rcv_window[0], 0, TCP_HDR_SIZE + DATA_SIZE );
                     memcpy(rcv_window[window_index - (last_buffered + 1)], rcv_window[window_index], TCP_HDR_SIZE + DATA_SIZE);
                     rcv_window[window_index]->hdr.ackno = -1;
                     // VLOG(DEBUG, "copying index %d to index %d window size %d ", 
@@ -278,17 +264,18 @@ int main(int argc, char **argv) {
             /* used ( x + y - 1 ) / y to get ceiling of x/y in C - trying to get the right index value */
             window_index = ( (recvpkt->hdr.seqno - needed_pkt ) + DATA_SIZE - 1 ) / DATA_SIZE;
 
-
+            /* buffer the received out of order packet */
             memcpy(rcv_window[window_index], recvpkt, TCP_HDR_SIZE + DATA_SIZE);
 
-            // sndpkt = make_packet(0);
-            // sndpkt->hdr.ackno = needed_pkt;
-            // sndpkt ->hdr.ctr_flags = 2; /* type (2) ack - packet is higher than needed out of order */
-            // if (sendto(sockfd, sndpkt, TCP_HDR_SIZE, 0, 
-            //         (struct sockaddr *) &clientaddr, clientlen) < 0) {
-            //     error("ERROR in sendto");
-            // }
-            // printf("sending duplicate ack (2) number %d\n", needed_pkt );
+            /* still let the sender know it never got the needed one */
+            sndpkt = make_packet(0);
+            sndpkt->hdr.ackno = needed_pkt;
+            sndpkt ->hdr.ctr_flags = 2; /* type (2) ack - packet is higher than needed out of order */
+            if (sendto(sockfd, sndpkt, TCP_HDR_SIZE, 0, 
+                    (struct sockaddr *) &clientaddr, clientlen) < 0) {
+                error("ERROR in sendto");
+            }
+            printf("sending duplicate ack (2) number %d\n", needed_pkt );
 
 
         }else if ( recvpkt->hdr.seqno < needed_pkt ) {
@@ -300,14 +287,14 @@ int main(int argc, char **argv) {
              * so send duplicate ack to specify the one you needed 
              */     
 
-            // sndpkt = make_packet(0);
-            // sndpkt->hdr.ackno = needed_pkt;
-            // sndpkt->hdr.ctr_flags = 4; /* type (4) ack - lower than expected */
-            // if (sendto(sockfd, sndpkt, TCP_HDR_SIZE, 0, 
-            //         (struct sockaddr *) &clientaddr, clientlen) < 0) {
-            //     error("ERROR in sendto");
-            // }
-            // printf("sending duplicate ack (4) number %d\n", needed_pkt );
+            sndpkt = make_packet(0);
+            sndpkt->hdr.ackno = needed_pkt;
+            sndpkt->hdr.ctr_flags = 4; /* type (4) ack - lower than expected */
+            if (sendto(sockfd, sndpkt, TCP_HDR_SIZE, 0, 
+                    (struct sockaddr *) &clientaddr, clientlen) < 0) {
+                error("ERROR in sendto");
+            }
+            printf("sending duplicate ack (4) number %d\n", needed_pkt );
 
          
             
