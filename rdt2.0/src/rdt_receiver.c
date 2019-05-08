@@ -114,7 +114,7 @@ int main(int argc, char **argv) {
          * fill receive window with empty packets where the ack number is -1. If we buffer a packet in a given
          * slot in the window (by copying it from a socket), then its ack number 0 or greater already
          */        
-        rcv_window[windex] = make_packet(TCP_HDR_SIZE + DATA_SIZE);
+        rcv_window[windex] = make_packet(DATA_SIZE);
         rcv_window[windex]->hdr.ackno = -1;
     }
 
@@ -153,7 +153,8 @@ int main(int argc, char **argv) {
 
             gettimeofday(&tp, NULL);
             VLOG(DEBUG, " %lu, %d, %d", tp.tv_sec, recvpkt->hdr.data_size, recvpkt->hdr.seqno);
-            memcpy(rcv_window[0], recvpkt, DATA_SIZE);
+            // memset ( rcv_window, 0, TCP_HDR_SIZE );
+            memcpy(rcv_window[0], recvpkt, TCP_HDR_SIZE + DATA_SIZE);
 
             /* 
              * if the packet you receieved was the last packet, 
