@@ -239,7 +239,7 @@ int main(int argc, char **argv) {
             sndpkt->hdr.ctr_flags = 1; /* type (1) ack  - send the next one naturally */
             sndpkt->hdr.ackno = needed_pkt;
             
-            VLOG(DEBUG, "after receipt needed_pkt has a value %d\n", needed_pkt );
+            VLOG(DEBUG, "after receipt needed_pkt has a value %d", needed_pkt );
 
 	        if (sendto(sockfd, sndpkt, TCP_HDR_SIZE, 0, 
 	                (struct sockaddr *) &clientaddr, clientlen) < 0) {
@@ -295,6 +295,7 @@ int main(int argc, char **argv) {
          
             
         }
+        printf("\n\n");
  
     }
 
