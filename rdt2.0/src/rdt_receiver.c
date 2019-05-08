@@ -135,7 +135,7 @@ int main(int argc, char **argv) {
         recvpkt = (tcp_packet *) buffer;
         assert(get_data_size(recvpkt) <= DATA_SIZE);
 
-        printf("JUST RECEIVED PACKET %d with flags %d | needed_pkt has a value of %d \n", recvpkt->hdr.seqno, recvpkt->hdr.ctr_flags, needed_pkt);
+        printf("JUST RECEIVED PACKET %d with flags %d ", recvpkt->hdr.seqno, recvpkt->hdr.ctr_flags);
 
         /* 
          * sendto: ack back to the client 
@@ -186,7 +186,7 @@ int main(int argc, char **argv) {
                         error("ERROR in sendto");
                     }
                 }   
-                VLOG(INFO, "Just receieved last packet (1), exiting program. Sent closure ack (3)/1. Please be patient!");
+                VLOG(INFO, "Receieved last packet (1), exiting program. Sent closure ack (3)/1. Please be patient!");
                 fclose(fp);
                 free(sndpkt);
                 exit(0);
@@ -211,6 +211,8 @@ int main(int argc, char **argv) {
             printf("last-buffered = %d\n", last_buffered);
              /* update the number of the expected packet */
             needed_pkt = rcv_window[last_buffered]->hdr.seqno + rcv_window[last_buffered]->hdr.data_size;
+            printf("NEEDED PACKET HAS A VALUE OF %d \n", needed_pkt);
+
             printf("packet to follow received packet (2) is %d and last_buffered packet is %d ", needed_pkt, rcv_window[last_buffered]->hdr.seqno );
 
              
