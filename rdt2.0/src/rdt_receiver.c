@@ -23,6 +23,7 @@ int portno; /* port to listen on */
 int sockfd; /* socket */
 int windex;
 int window_index;
+int written;
 
 int needed_pkt = 0; /* int to ensure that we don't allow for out of order packets*/
 int stop = 0;
@@ -200,7 +201,7 @@ int main(int argc, char **argv) {
                     last_buffered = window_index;
                     fseek(fp, recvpkt->hdr.seqno, SEEK_SET);
                     printf("\nWriting (2) contiguous packets to the file - iteration [%d], seqno %d\n", window_index, recvpkt->hdr.seqno);
-                    fwrite(recvpkt->data, 1, recvpkt->hdr.data_size, fp);
+                    written = fwrite(recvpkt->data, 1, recvpkt->hdr.data_size, fp);
                     window_index++;
                 }else{
                     last_buffered = window_index;
@@ -213,6 +214,9 @@ int main(int argc, char **argv) {
 
             }while ( ( rcv_window[window_index]->hdr.ackno >= 0 ) && ( window_index < RCV_WIND_SIZE ) );
             
+            if (written!= DATA_SIZE)    
+                break;
+
             printf("last-buffered after the writing loop has value %d\n", last_buffered);
              /* update the number of the expected packet */
             needed_pkt = rcv_window[last_buffered]->hdr.seqno + rcv_window[last_buffered]->hdr.data_size;
