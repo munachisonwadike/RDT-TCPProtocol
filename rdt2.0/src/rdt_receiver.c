@@ -153,7 +153,6 @@ int main(int argc, char **argv) {
 
             gettimeofday(&tp, NULL);
             VLOG(DEBUG, " %lu, %d, %d", tp.tv_sec, recvpkt->hdr.data_size, recvpkt->hdr.seqno);
-            // memset ( rcv_window[0], 0, TCP_HDR_SIZE+DATA_SIZE );
             memcpy(rcv_window[0], recvpkt, TCP_HDR_SIZE + DATA_SIZE);
                  
 
@@ -195,8 +194,6 @@ int main(int argc, char **argv) {
                     free(sndpkt);
                     exit(0);
                 }  
-                // memset ( rcv_window[window_index], 0, TCP_HDR_SIZE + DATA_SIZE );
-
                 window_index++;
 
                 if(window_index >= RCV_WIND_SIZE){
@@ -229,10 +226,7 @@ int main(int argc, char **argv) {
                 if ( window_index + last_buffered + 1 < RCV_WIND_SIZE ){
                     memcpy(rcv_window[window_index], rcv_window[window_index + last_buffered + 1], TCP_HDR_SIZE + DATA_SIZE);
                 }else{
-                    // memset ( rcv_window[window_index + last_buffered + 1], 0, TCP_HDR_SIZE + DATA_SIZE );
                     rcv_window[window_index]->hdr.ackno = -1;
-                    // VLOG(DEBUG, "copying index %d to index %d window size %d ", 
-                    //     window_index, window_index - (last_buffered + 1) , RCV_WIND_SIZE )
                 }
                 window_index++;
 
