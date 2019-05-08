@@ -278,7 +278,7 @@ int main(int argc, char **argv) {
             window_index = ( (recvpkt->hdr.seqno - needed_pkt ) + DATA_SIZE - 1 ) / DATA_SIZE;
 
 
-            memcpy(rcv_window[window_index], recvpkt, rcv_window[window_index]->hdr.data_size);
+            memcpy(rcv_window[window_index], recvpkt, recvpkt->hdr.data_size);
 
             // sndpkt = make_packet(0);
             // sndpkt->hdr.ackno = needed_pkt;
