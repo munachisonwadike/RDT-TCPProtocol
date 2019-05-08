@@ -199,9 +199,10 @@ int main(int argc, char **argv) {
 
                 window_index++;
 
+                if(window_index >= RCV_WIND_SIZE)
+                    break;
 
-
-            }while ( ( rcv_window[window_index-1]->hdr.ackno != -1 ) && ( window_index < RCV_WIND_SIZE ) );
+            }while ( ( rcv_window[window_index]->hdr.ackno != -1 ) );
             
             printf("last-buffered after the writing loop has value %d\n", last_buffered);
              /* update the number of the expected packet */
