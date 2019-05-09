@@ -43,7 +43,7 @@ int CWND = 1;
 int FINAL_PACK_REPT = 15;
 int CLOSE_MESG_REPT = 10;
 int WINDOW_SIZE = 30; 
-int SSTHRESH = WINDOW_SIZE; /* set the initial value of SSTHRESH finite due to memory constraints */
+int SSTHRESH = 30; /* set the initial value of SSTHRESH finite due to memory constraints */
 
 struct sockaddr_in serveraddr;
 struct itimerval timer; 
