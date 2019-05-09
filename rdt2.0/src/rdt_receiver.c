@@ -27,7 +27,7 @@ int window_index;
 int needed_pkt = 0; /* int to ensure that we don't allow for out of order packets*/
 
 int FINAL_SEND = 50; /* number of times to send off the ack for last packet */
-int RCV_WIND_SIZE = 10; /* receiver window */
+int RCV_WIND_SIZE = 100; /* receiver window */
 
 struct sockaddr_in serveraddr; /* server's addr */
 struct sockaddr_in clientaddr; /* client addr */
