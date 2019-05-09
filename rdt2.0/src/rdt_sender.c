@@ -42,8 +42,8 @@ int send_base=0;
 
 
 int CWND_SIZE = 1; /* actual value of effective window which we change in slow start and congestion avoidance - use plot.py to visualise*/
-int WINDOW_SIZE = 50; 
-int SSTHRESH = 50; /* set the initial value of SSTHRESH finite due to memory constraints */
+int WINDOW_SIZE = 100; 
+int SSTHRESH = 100; /* set the initial value of SSTHRESH finite due to memory constraints */
 
 struct sockaddr_in serveraddr;
 struct itimerval timer; 
@@ -60,7 +60,7 @@ sigset_t sigmask;
 
 tcp_packet *sndpkt;
 tcp_packet *recvpkt;
-tcp_packet* window[50]; /* array to store packet window */  
+tcp_packet* window[100]; /* array to store packet window */  
 
      
 
