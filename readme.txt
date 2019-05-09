@@ -22,7 +22,7 @@ the one just received, in the past, and sends a cumulative ack for all those pac
 Following the relevant RFCs, we also implement TCP  slowstart, and congestion avoidance
 A csv file showing the way the window size changes over time is included for visualisation
 purposes. Note that in order to allow all the packets to fit in memory, we set a max value
-for ssthresh to be initially fixed, but large, this way, if there is no loss on the 
+for ssthresh to be initially fixed, but large. This way, if there is no loss on the 
 network, the value of the window of packets will not be too large. Also, we distinguish
 between the maximum value size of the window (which is the same as the initial value of
 ssthresh or the maximum amount of packets initially sent) and the size of the congestion 
