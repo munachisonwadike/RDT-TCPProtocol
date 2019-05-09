@@ -65,7 +65,7 @@ tcp_packet* window[50]; /* array to store packet window */
      
 
 /*
- * if the resend function is triggered, resend the entire current window
+ * resend function for when a TCP timeout is triggered - resend the entire current window
  */
 void resend_packets(int sig)
 {
@@ -73,8 +73,9 @@ void resend_packets(int sig)
     {
         VLOG(DEBUG, "RESEND FUNCTION TRIGGERED");   
         /*
-         * if we are doing a timeout triggered resend, then we a packet was lost as we need to decrease window
-         * if the congestion window exceeds the threshold, reset the former and halve the latter
+         * if timeout triggered, then a packet's lost
+         * we need to decrease window, reset CWND and 
+         * halve SSTHRESH
          */
         if( avoidance == 0){
             CWND_SIZE = 1;
@@ -91,7 +92,7 @@ void resend_packets(int sig)
             window[0]->hdr.seqno, inet_ntoa(serveraddr.sin_addr));  
 
         /*
-         * resend the packets in the congestion window as usual
+         * then resend the packets in the congestion window 
          */
 
         for (window_index = 0; window_index < CWND_SIZE; window_index++)
@@ -211,7 +212,7 @@ int main (int argc, char **argv)
 
 
     /*
-     * set the initial value of window base, loop fill the window with packets
+     * set the initial value of window base, fill window with packets
      * store pointer to packet i in window[i]
      */
     next_seqno = 0;
@@ -293,7 +294,7 @@ int main (int argc, char **argv)
 
     /*
      * constantly send the packets, wait for acks, 
-     * and slide the window up for the next iteration of this loop
+     * and slide the window up for the next iteration of do-while loop
      */ 
     do 
     {
@@ -325,7 +326,7 @@ int main (int argc, char **argv)
 
         /*
          * since the receiver only sends acks to indicate which it needs,
-         * we can accept acks >= than last ack
+         * we can accept acks >= last ack
          */
         if(recvpkt->hdr.ackno >= last_ack)
         {   
