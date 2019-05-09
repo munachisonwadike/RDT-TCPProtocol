@@ -72,9 +72,9 @@ void resend_packets(int sig)
     if (sig == SIGALRM)
     {
         VLOG(DEBUG, "RESEND FUNCTION TRIGGERED");   
-        /* 
-         * send the last packet 10 times just to 
-         * be sure it makes it before closing out
+        /*
+         * if we are doing a timeout triggered resend, then we a packet was lost as we need to decrease window
+         * if the congestion window exceeds the threshold, reset the former and halve the latter
          */
         if( avoidance == 0){
             CWND_SIZE = 1;
@@ -90,7 +90,9 @@ void resend_packets(int sig)
         VLOG(DEBUG, "[RE]sending window of size %d from base %d -> %s", WINDOW_SIZE,  
             window[0]->hdr.seqno, inet_ntoa(serveraddr.sin_addr));  
 
-
+        /*
+         * resend the packets in the congestion window as usual
+         */
 
         for (window_index = 0; window_index < CWND_SIZE; window_index++)
         {
@@ -512,6 +514,11 @@ int main (int argc, char **argv)
              */
             } else {
 
+                /*
+                 * if we are sending a new window, it means a packet was successfully received,
+                 * so increase the congestion window, and decrease it accordingly if it exceeds 
+                 * ssthresh  
+                 */
 
                 if( avoidance == 0){
 
@@ -533,7 +540,7 @@ int main (int argc, char **argv)
                     }
 
                 }
-                
+
                 VLOG(DEBUG, "sending window of size %d from base %d -> %s", WINDOW_SIZE,  
                     window[0]->hdr.seqno, inet_ntoa(serveraddr.sin_addr));       
 
