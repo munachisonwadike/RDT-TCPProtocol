@@ -32,12 +32,14 @@ int serverlen;
 int shift;
 int window_index;
 
-int drop_count = 0; /* changes to one before we move from slow start to congestion avoidance */
+
+int avoidance = 0; /* moves protocol from slow start to congestion avoidance */
 int final_packet_reached = 0;
 int last_packet = -1;
 int last_ack = 0;
 int next_seqno=0;
 int send_base=0;
+
 
 int CWND_SIZE = 1; /* actual value of effective window which we change in slow start and congestion avoidance - use plot.py to visualise*/
 int WINDOW_SIZE = 50; 
@@ -82,7 +84,7 @@ void resend_packets(int sig)
 
 
 
-        for (window_index = 0; window_index < WINDOW_SIZE; window_index++)
+        for (window_index = 0; window_index < CWND_SIZE; window_index++)
         {
             if(sendto(sockfd, window[window_index], TCP_HDR_SIZE + get_data_size(window[window_index]), 0, 
                     ( const struct sockaddr *)&serveraddr, serverlen) < 0)
@@ -261,7 +263,7 @@ int main (int argc, char **argv)
     /*
      * send the first set of packet in the window
      */
-    for ( window_index = 0; window_index < WINDOW_SIZE; window_index++)
+    for ( window_index = 0; window_index < CWND_SIZE; window_index++)
     {
 
         if(sendto(sockfd, window[window_index], TCP_HDR_SIZE + get_data_size(window[window_index]), 0, 
@@ -286,7 +288,7 @@ int main (int argc, char **argv)
     do 
     {
         /* send the value of window size to the csv before receiving a packet */
-        fprintf(csv_file, "%d\n", WINDOW_SIZE);
+        fprintf(csv_file, "%d\n", CWND_SIZE);
 
         /* 
          * receive packets and see if they are the acks you expected 
@@ -325,8 +327,28 @@ int main (int argc, char **argv)
             /*
              * due to receipt of successful packet, if we are in slow start, double congestion window
              * otherwise, in congestion avoidance increase the congestion window by one packet
+             * if the congestion window exceeds the threshold, reset the former and halve the latter
              */
+            if( avoidance == 0){
 
+                CWND_SIZE  = CWND_SIZE * 2;
+
+                if (CWND_SIZE >= SSTHRESH){
+                    CWND_SIZE = 1;
+                    SSTHRESH = CWND_SIZE / 2;
+                    avoidance = 1;
+                }
+
+            }else{
+
+                CWND_SIZE++;
+
+                if (CWND_SIZE >= SSTHRESH){
+                    CWND_SIZE = 1;
+                    SSTHRESH = (CWND_SIZE / 2) + 3;
+                }
+
+            }
             /*
              * check how much far ahead in window the recvd packet is than 
              * the base for needed acks and set new needed ack to the the received packet number 
@@ -469,7 +491,7 @@ int main (int argc, char **argv)
                     VLOG(DEBUG, "sending window of size %d from base %d -> %s", WINDOW_SIZE,  
                         window[0]->hdr.seqno, inet_ntoa(serveraddr.sin_addr));       
 
-                    for (window_index = 0; window_index < WINDOW_SIZE; window_index++)
+                    for (window_index = 0; window_index < CWND_SIZE; window_index++)
                     {
                         if(sendto(sockfd, window[window_index], TCP_HDR_SIZE + get_data_size(window[window_index]), 0, 
                                 ( const struct sockaddr *)&serveraddr, serverlen) < 0)
@@ -491,7 +513,7 @@ int main (int argc, char **argv)
                 VLOG(DEBUG, "sending window of size %d from base %d -> %s", WINDOW_SIZE,  
                     window[0]->hdr.seqno, inet_ntoa(serveraddr.sin_addr));       
 
-                for (window_index = 0; window_index < WINDOW_SIZE; window_index++)
+                for (window_index = 0; window_index < CWND_SIZE; window_index++)
                 {
                     if(sendto(sockfd, window[window_index], TCP_HDR_SIZE + get_data_size(window[window_index]), 0, 
                             ( const struct sockaddr *)&serveraddr, serverlen) < 0)
