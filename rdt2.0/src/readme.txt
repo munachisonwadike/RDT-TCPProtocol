@@ -49,4 +49,11 @@ and slowstart, where increase the size of the sending window when a packet has b
 received, and shrink the window when a packet has been lost. A csv file showing 
 the way the window size changes over time is included for visualisation.
 
+Note that in order to allow all the packets to fit in memory, we set a max value
+for ssthresh to be initially fixed, but large, this way, if there is no loss on the 
+network, the value of the window of packets will not be too large. Also, we distinguish
+between the maximum value size of the window (which is the same as the initial value of
+ssthresh or the maximum amount of packets initially sent) and the size of the congestion 
+window. For modularity, we make the latter a second variable called cwnd. It is this variable
+which we change, and which can be visualised using the python script.
 
