@@ -39,7 +39,7 @@ int last_ack = 0;
 int next_seqno=0;
 int send_base=0;
 
-int CWND = 1; /* actual value of effective window which we change in slow start and congestion avoidance - use plot.py to visualise*/
+int CWND_SIZE = 1; /* actual value of effective window which we change in slow start and congestion avoidance - use plot.py to visualise*/
 int WINDOW_SIZE = 50; 
 int SSTHRESH = 50; /* set the initial value of SSTHRESH finite due to memory constraints */
 
@@ -261,7 +261,7 @@ int main (int argc, char **argv)
     /*
      * send the first set of packet in the window
      */
-    for ( window_index = 0; window_index < CWND; window_index++)
+    for ( window_index = 0; window_index < WINDOW_SIZE; window_index++)
     {
 
         if(sendto(sockfd, window[window_index], TCP_HDR_SIZE + get_data_size(window[window_index]), 0, 
