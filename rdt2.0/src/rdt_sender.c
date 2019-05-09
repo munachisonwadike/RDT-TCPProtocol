@@ -32,7 +32,7 @@ int serverlen;
 int shift;
 int window_index;
 
-int drop_count = 0 /* changes to one before we move from slow start to congestion avoidance */
+int drop_count = 0; /* changes to one before we move from slow start to congestion avoidance */
 int final_packet_reached = 0;
 int last_packet = -1;
 int last_ack = 0;
