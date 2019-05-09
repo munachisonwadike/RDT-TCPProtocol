@@ -46,7 +46,7 @@ tcp_packet *rcv_window[10]; /* buffer for out of sequence packets */
 
 
 int main(int argc, char **argv) {
-    
+
     /* 
      * check command line arguments 
      */
@@ -241,7 +241,7 @@ int main(int argc, char **argv) {
         
         } else if ( recvpkt->hdr.seqno > needed_pkt ) {
             
-            /* used ( x + y - 1 ) / y to get ceiling of x/y in C - trying to get the right index value */
+            /* used ( x + y - 1 ) / y to get ceiling of x/y in C - to get the right index value */
             window_index = ( (recvpkt->hdr.seqno - needed_pkt ) + DATA_SIZE - 1 ) / DATA_SIZE;
 
             if (window_index > 9)

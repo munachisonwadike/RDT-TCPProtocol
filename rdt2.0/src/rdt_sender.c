@@ -289,7 +289,8 @@ int main (int argc, char **argv)
 
     /*
      * constantly send the packets, wait for acks, 
-     * and slide the window up for the next iteration of do-while loop
+     * and slide the window up for the next 
+     * iteration of do-while loop
      */ 
     do 
     {
@@ -320,8 +321,8 @@ int main (int argc, char **argv)
         
 
         /*
-         * since the receiver only sends acks to indicate which it needs,
-         * we can accept acks >= last ack
+         * since the receiver only sends acks to indicate 
+         * which it needs, we can accept acks >= last ack
          */
         if(recvpkt->hdr.ackno >= last_ack)
         {   
@@ -332,8 +333,10 @@ int main (int argc, char **argv)
 
             
             /*
-             * check how much far ahead in window the recvd packet is than 
-             * the base for needed acks and set new needed ack to the the received packet number 
+             * check how much far ahead in window the 
+             * recvd packet is than the base for needed 
+             * acks and set new needed ack to the the 
+             * received packet number 
              */           
             shift = ( recvpkt->hdr.ackno - last_ack )/ DATA_SIZE;
             last_ack = recvpkt->hdr.ackno;
@@ -342,9 +345,10 @@ int main (int argc, char **argv)
              * if you received an ack, calculate the new window and populate the empty part of it
              */
 
-            /* option 1, step 1 if we haven't reach last packet, calculate the new window by simultaneously deleting and freeing 
-             * all packets in closed interval [0, shift], and secondly by copying all packets in 
-             * the closed interval [shift + 1, windowsize-1] to new respective positions shift steps 
+            /* option 1, step 1 if we haven't reach last packet, calculate the new 
+             * window by simultaneously deleting and freeing all packets in closed 
+             * interval [0, shift], and secondly by copying all packets in the closed 
+             * interval [shift + 1, windowsize-1] to new respective positions shift steps 
              * behind them in the window. 
              */
             if (final_packet_reached == 0){
@@ -362,8 +366,8 @@ int main (int argc, char **argv)
                     window_index++;
                 }
                 /* option 1, step 2 - then populate the interval [windowize - shift, windowsize -1] with
-                 * the new packets. concerning the left endpoint, windowsize - shift==1 gives index of the last element in window
-                 * if shift is 0, the loop will not run becaause window_index will == windowsize
+                 * the new packets. concerning the left endpoint, windowsize - shift==1 gives index of the 
+                 * last element in window if shift is 0, the loop will not run becaause window_index will == windowsize
                  */
             
                 for ( window_index =  WINDOW_SIZE - shift; window_index < WINDOW_SIZE ; window_index ++ )
@@ -416,8 +420,8 @@ int main (int argc, char **argv)
                 }
 
             }else{            
-            /* option 2, step 1 if we reach last packet, calculate the new window by simultaneously deleting and freeing 
-             * all packets in closed interval [0, shift], and secondly by copying all packets in 
+            /* option 2, step 1 if we reach last packet, calculate the new window by simultaneously deleting 
+             * and freeing all packets in closed interval [0, shift], and secondly by copying all packets in 
              * the closed interval [shift + 1, windowsize-1] to new respective positions shift steps 
              * behind them in the window. 
              */
