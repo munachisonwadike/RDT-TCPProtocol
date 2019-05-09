@@ -32,18 +32,18 @@ int serverlen;
 int shift;
 int window_index;
 
-
+int drop_count = 0 /* changes to one before we move from slow start to congestion avoidance */
 int final_packet_reached = 0;
 int last_packet = -1;
 int last_ack = 0;
 int next_seqno=0;
 int send_base=0;
 
-int CWND = 0;
+int CWND = 1;
 int FINAL_PACK_REPT = 15;
 int CLOSE_MESG_REPT = 10;
-int WINDOW_SIZE = 10;
-int SSTHRESH = 0;
+int WINDOW_SIZE = 30; 
+int SSTHRESH = WINDOW_SIZE; /* set the initial value of SSTHRESH finite due to memory constraints */
 
 struct sockaddr_in serveraddr;
 struct itimerval timer; 
@@ -182,7 +182,7 @@ int main (int argc, char **argv)
     assert(MSS_SIZE - TCP_HDR_SIZE > 0);
 
     /* 
-     * stop and wait protocol 
+     * initialise timer 
      */
     init_timer(RESEND, resend_packets);
 
@@ -201,7 +201,7 @@ int main (int argc, char **argv)
 
 
     /*
-     * set the initial value of window base loop 10 times to make 10 packets
+     * set the initial value of window base, loop fill the window with packets
      * store pointer to packet i in window[i]
      */
     next_seqno = 0;
@@ -262,7 +262,7 @@ int main (int argc, char **argv)
     /*
      * send the first set of packet in the window
      */
-    for ( window_index = 0; window_index < WINDOW_SIZE; window_index++)
+    for ( window_index = 0; window_index < CWND; window_index++)
     {
 
         if(sendto(sockfd, window[window_index], TCP_HDR_SIZE + get_data_size(window[window_index]), 0, 
@@ -324,8 +324,8 @@ int main (int argc, char **argv)
             stop_timer();
 
             /*
-             * if we get an ack for the timeout packet, i.e leading packet, three times, then 
-             *  
+             * due to receipt of successful packet, if we are in slow start, double congestion window
+             * otherwise, in congestion avoidance increase the congestion window by one packet
              */
 
             /*
@@ -486,7 +486,7 @@ int main (int argc, char **argv)
                 
             /* 
              * if the ack we got was different from the last one, then we window slid up and we 
-             * only need to resend the whole window 
+             * only need to send the whole window 
              */
             } else {
                 VLOG(DEBUG, "sending window of size %d from base %d -> %s", WINDOW_SIZE,  
