@@ -87,7 +87,7 @@ void resend_packets(int sig)
 
 
         
-        VLOG(DEBUG, "[RE]sending window of size %d from base %d -> %s", WINDOW_SIZE,  
+        VLOG(DEBUG, "[RE]sending window of size %d/%d from base %d -> %s", CWND_SIZE, WINDOW_SIZE,  
             window[0]->hdr.seqno, inet_ntoa(serveraddr.sin_addr));  
 
         /*
@@ -491,7 +491,7 @@ int main (int argc, char **argv)
                     }
 
 
-                    VLOG(DEBUG, "sending window of size %d from base %d -> %s", WINDOW_SIZE,  
+                    VLOG(DEBUG, "sending window of size %d/%d from base %d -> %s", CWND_SIZE, WINDOW_SIZE,  
                         window[0]->hdr.seqno, inet_ntoa(serveraddr.sin_addr));       
 
                     for (window_index = 0; window_index < CWND_SIZE; window_index++)
@@ -541,7 +541,7 @@ int main (int argc, char **argv)
 
                 }
 
-                VLOG(DEBUG, "sending window of size %d from base %d -> %s", WINDOW_SIZE,  
+                VLOG(DEBUG, "sending window of size %d/%d from base %d -> %s", CWND_SIZE, WINDOW_SIZE,  
                     window[0]->hdr.seqno, inet_ntoa(serveraddr.sin_addr));       
 
                 for (window_index = 0; window_index < CWND_SIZE; window_index++)
