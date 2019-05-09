@@ -76,7 +76,15 @@ void resend_packets(int sig)
          * send the last packet 10 times just to 
          * be sure it makes it before closing out
          */
-          
+        if( avoidance == 0){
+            CWND_SIZE = 1;
+            SSTHRESH = CWND_SIZE / 2;
+            avoidance = 1;
+        }else{
+            CWND_SIZE = 1;
+            SSTHRESH = (CWND_SIZE / 2) + 3;
+        }
+
 
         
         VLOG(DEBUG, "[RE]sending window of size %d from base %d -> %s", WINDOW_SIZE,  
@@ -324,31 +332,7 @@ int main (int argc, char **argv)
              */ 
             stop_timer();
 
-            /*
-             * due to receipt of successful packet, if we are in slow start, double congestion window
-             * otherwise, in congestion avoidance increase the congestion window by one packet
-             * if the congestion window exceeds the threshold, reset the former and halve the latter
-             */
-            if( avoidance == 0){
-
-                CWND_SIZE  = CWND_SIZE * 2;
-
-                if (CWND_SIZE >= SSTHRESH){
-                    CWND_SIZE = 1;
-                    SSTHRESH = CWND_SIZE / 2;
-                    avoidance = 1;
-                }
-
-            }else{
-
-                CWND_SIZE++;
-
-                if (CWND_SIZE >= SSTHRESH){
-                    CWND_SIZE = 1;
-                    SSTHRESH = (CWND_SIZE / 2) + 3;
-                }
-
-            }
+            
             /*
              * check how much far ahead in window the recvd packet is than 
              * the base for needed acks and set new needed ack to the the received packet number 
@@ -488,6 +472,23 @@ int main (int argc, char **argv)
 
                 if ( window[0]->hdr.ackno == 3 )
                 {
+
+
+                    /*
+                     * if we are doing a retransmit, then we a packet was lost as we need to decrease window
+                     * if the congestion window exceeds the threshold, reset the former and halve the latter
+                     */
+
+                    if( avoidance == 0){
+                        CWND_SIZE = 1;
+                        SSTHRESH = CWND_SIZE / 2;
+                        avoidance = 1;
+                    }else{
+                        CWND_SIZE = 1;
+                        SSTHRESH = (CWND_SIZE / 2) + 3;
+                    }
+
+
                     VLOG(DEBUG, "sending window of size %d from base %d -> %s", WINDOW_SIZE,  
                         window[0]->hdr.seqno, inet_ntoa(serveraddr.sin_addr));       
 
@@ -510,6 +511,29 @@ int main (int argc, char **argv)
              * only need to send the whole window 
              */
             } else {
+
+
+                if( avoidance == 0){
+
+                    CWND_SIZE  = CWND_SIZE * 2;
+
+                    if (CWND_SIZE >= SSTHRESH){
+                        CWND_SIZE = 1;
+                        SSTHRESH = CWND_SIZE / 2;
+                        avoidance = 1;
+                    }
+
+                }else{
+
+                    CWND_SIZE++;
+
+                    if (CWND_SIZE >= SSTHRESH){
+                        CWND_SIZE = 1;
+                        SSTHRESH = (CWND_SIZE / 2) + 3;
+                    }
+
+                }
+                
                 VLOG(DEBUG, "sending window of size %d from base %d -> %s", WINDOW_SIZE,  
                     window[0]->hdr.seqno, inet_ntoa(serveraddr.sin_addr));       
 
