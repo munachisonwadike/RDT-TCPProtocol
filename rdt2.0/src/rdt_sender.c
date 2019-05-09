@@ -39,9 +39,9 @@ int last_ack = 0;
 int next_seqno=0;
 int send_base=0;
 
-int CWND = 1;
-int WINDOW_SIZE = 30; 
-int SSTHRESH = 30; /* set the initial value of SSTHRESH finite due to memory constraints */
+int CWND = 1; /* actual value of effective window which we change in slow start and congestion avoidance - use plot.py to visualise*/
+int WINDOW_SIZE = 50; 
+int SSTHRESH = 50; /* set the initial value of SSTHRESH finite due to memory constraints */
 
 struct sockaddr_in serveraddr;
 struct itimerval timer; 
@@ -58,7 +58,7 @@ sigset_t sigmask;
 
 tcp_packet *sndpkt;
 tcp_packet *recvpkt;
-tcp_packet* window[30]; /* array to store packet window */  
+tcp_packet* window[50]; /* array to store packet window */  
 
      
 
