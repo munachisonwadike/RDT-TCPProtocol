@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
  
 
 y = np.genfromtxt('CWND')
-x = [ i*4 for i in range(np.shape(y)[0]) ]
+x = [ i for i in range(np.shape(y)[0]) ]
 
  
 plt.title('Example')
