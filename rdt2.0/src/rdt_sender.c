@@ -40,8 +40,6 @@ int next_seqno=0;
 int send_base=0;
 
 int CWND = 1;
-int FINAL_PACK_REPT = 15;
-int CLOSE_MESG_REPT = 10;
 int WINDOW_SIZE = 30; 
 int SSTHRESH = 30; /* set the initial value of SSTHRESH finite due to memory constraints */
 
@@ -60,7 +58,7 @@ sigset_t sigmask;
 
 tcp_packet *sndpkt;
 tcp_packet *recvpkt;
-tcp_packet* window[10]; /* array to store packet window */  
+tcp_packet* window[30]; /* array to store packet window */  
 
      
 
