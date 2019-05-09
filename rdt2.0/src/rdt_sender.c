@@ -208,6 +208,7 @@ int main (int argc, char **argv)
 	window_index = 0;
 	while ( window_index < WINDOW_SIZE )
 	{
+        VLOG(INFO, " LOOP %d ", window_index);
 		len = fread(buffer, 1, DATA_SIZE, fp);
 		if (len <  DATA_SIZE){ 
             VLOG(INFO, " End Of File (1). Window size %d ", WINDOW_SIZE);
