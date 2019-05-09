@@ -39,7 +39,7 @@ sigset_t sigmask;
 
 tcp_packet *recvpkt;
 tcp_packet *sndpkt;
-tcp_packet *rcv_window[10]; /* buffer for out of sequence packets */  
+tcp_packet *rcv_window[100]; /* buffer for out of sequence packets */  
 
 
 
