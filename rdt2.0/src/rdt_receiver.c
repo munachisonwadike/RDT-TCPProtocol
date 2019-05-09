@@ -14,7 +14,7 @@
 #include "common.h"
 #include "packet.h"
 
-char buffer[MSS_SIZE]; /* buffer to store any received packets */
+char buffer[MSS_SIZE]; /* initial buffer to store received packets */
 
 int clientlen; /* byte size of client's address */
 int last_buffered; /* to note the last byte buffered in receiver window */
@@ -25,12 +25,9 @@ int windex;
 int window_index;
 
 int needed_pkt = 0; /* int to ensure that we don't allow for out of order packets*/
-int stop = 0;
 
-int CWND = 0;
 int FINAL_SEND = 50; /* number of times to send off the ack for last packet */
 int RCV_WIND_SIZE = 10; /* receiver window */
-int SSTHRESH = 0;
 
 struct sockaddr_in serveraddr; /* server's addr */
 struct sockaddr_in clientaddr; /* client addr */
@@ -49,9 +46,7 @@ tcp_packet *rcv_window[10]; /* buffer for out of sequence packets */
 
 
 int main(int argc, char **argv) {
-    VLOG(DEBUG, "VALUE OF DATA_SIZE! %lu",  DATA_SIZE);
-       
-
+    
     /* 
      * check command line arguments 
      */
@@ -135,8 +130,6 @@ int main(int argc, char **argv) {
         recvpkt = (tcp_packet *) buffer;
         assert(get_data_size(recvpkt) <= DATA_SIZE);
 
-        printf("JUST RECEIVED PACKET %d with flags %d ", recvpkt->hdr.seqno, recvpkt->hdr.ctr_flags);
-
         /* 
          * sendto: ack back to the client 
          */
@@ -149,9 +142,6 @@ int main(int argc, char **argv) {
          */
         if( recvpkt->hdr.seqno == needed_pkt )
         {
-
-            printf("JUST RECEIVED (NEEDED) PACKET %d with flags %d ", recvpkt->hdr.seqno, recvpkt->hdr.ctr_flags);
-
 
             gettimeofday(&tp, NULL);
             VLOG(DEBUG, " %lu, %d, %d", tp.tv_sec, recvpkt->hdr.data_size, recvpkt->hdr.seqno);
@@ -168,13 +158,12 @@ int main(int argc, char **argv) {
                
                 last_buffered = window_index;
                 fseek(fp, rcv_window[window_index]->hdr.seqno, SEEK_SET);
-                printf("\nWriting (2) contiguous packets to the file - iteration [%d], seqno %d\n", window_index, rcv_window[window_index]->hdr.seqno);
                 fwrite(rcv_window[window_index]->data, 1, rcv_window[window_index]->hdr.data_size, fp);
                                 
                 /* 
-                * if any packet received was the last packet, 
-                * exit the program
-                */
+                 * if any packet received was the last packet, 
+                 * exit the program
+                 */
                 if ( rcv_window[window_index]->hdr.ctr_flags == -2) {  
                     sndpkt = make_packet(0);
                     sndpkt->hdr.ackno = -1;
@@ -200,18 +189,12 @@ int main(int argc, char **argv) {
 
                 if(window_index >= RCV_WIND_SIZE){
                     break;
-                    printf("BROKE AT IF STATEMENT\n");
                 }
 
             }while ( ( rcv_window[window_index]->hdr.ackno != -1 ) );
             
-            printf("last-buffered after the writing loop has value %d\n", last_buffered);
-             /* update the number of the expected packet */
+            /* update the number of the expected packet */
             needed_pkt = rcv_window[last_buffered]->hdr.seqno + rcv_window[last_buffered]->hdr.data_size;
-            VLOG(DEBUG, "NEEDED PACKET HAS A VALUE OF %d", needed_pkt);
-
-            VLOG(DEBUG, "Last buffered packet is %d", rcv_window[last_buffered]->hdr.seqno );
-
              
 
             /*
@@ -242,8 +225,6 @@ int main(int argc, char **argv) {
             sndpkt->hdr.ctr_flags = 1; /* type (1) ack  - send the next one naturally */
             sndpkt->hdr.ackno = needed_pkt;
             
-            VLOG(DEBUG, "after receipt needed_pkt has a value %d", needed_pkt );
-
 	        if (sendto(sockfd, sndpkt, TCP_HDR_SIZE, 0, 
 	                (struct sockaddr *) &clientaddr, clientlen) < 0) {
 	            error("ERROR in sendto");

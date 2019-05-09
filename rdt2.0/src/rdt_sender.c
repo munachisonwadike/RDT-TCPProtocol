@@ -15,7 +15,7 @@
 #include"packet.h"
 
 #define STDIN_FD    0
-#define RESEND  1000 /* millisecond */ 
+#define RESEND  1000 /* milliseconds */ 
 
 
 
@@ -239,16 +239,11 @@ int main (int argc, char **argv)
                 memcpy(window[window_index]->data, buffer, len);
                 /* stamp the sequence number on */
                 window[window_index]->hdr.seqno = pkt_base;
-
-                VLOG(DEBUG, "Generated LAST packet in window (size %d) with index %d, set to %d shift %d  ", 
-                WINDOW_SIZE, window_index, window[window_index]->hdr.seqno, shift )
             /*
              * else, just identify last packet in window as the last and move on
              */
             }else if (len == 0){
                 window[window_index-1]->hdr.ctr_flags = -2; /* identify last as final packet with control flag set to -2 */
-                VLOG(DEBUG, "LAST packet in window w(size %d) with index %d, set to %d shift %d was already generated ", 
-                WINDOW_SIZE, window_index, window[window_index]->hdr.seqno, shift )
             }     
 
 
@@ -361,8 +356,6 @@ int main (int argc, char **argv)
 
                         window[window_index-shift] = window[window_index];
 
-                        VLOG(DEBUG, "(1) generating window (size %d)with index %d set to %d shift %d  ", 
-                            WINDOW_SIZE, window_index-shift, window[window_index-shift]->hdr.seqno, shift )
                     }else{
                         free(window[window_index]);
                     }
@@ -395,16 +388,11 @@ int main (int argc, char **argv)
                             memcpy(window[window_index]->data, buffer, len);
                             /* stamp the sequence number on */
                             window[window_index]->hdr.seqno = pkt_base;
-                        
-                            VLOG(DEBUG, "Generated LAST packet in window (size %d) with index %d, set to %d shift %d  ", 
-                            WINDOW_SIZE, window_index, window[window_index]->hdr.seqno, shift )
                         /*
                          * else, just identify last packet in window as the last and move on
                          */
                         }else if (len == 0){
                             window[window_index-1]->hdr.ctr_flags = -2; /* identify last as final packet with control flag set to -2 */
-                            VLOG(DEBUG, "LAST packet in window w(size %d) with index %d, set to %d shift %d was already generated ", 
-                            WINDOW_SIZE, window_index, window[window_index]->hdr.seqno, shift )
                         }     
 
                         break;
@@ -424,9 +412,6 @@ int main (int argc, char **argv)
                         /* stamp the sequence number on */
                         window[window_index]->hdr.seqno = pkt_base;
 
-                        VLOG(DEBUG, "(2) generating window (size %d) with index %d, set to %d shift %d  ", 
-                            WINDOW_SIZE, window_index, window[window_index]->hdr.seqno, shift )
-
                     }
                 }
 
@@ -442,9 +427,6 @@ int main (int argc, char **argv)
      
                     if ( window_index >= shift ){
                         window[window_index-shift] = window[window_index];
-
-                        VLOG(DEBUG, "window is now size %d with index %d, window[window_index]->hdr.seqno %d shift %d  ", 
-                            WINDOW_SIZE, window_index-shift, window[window_index-shift]->hdr.seqno, shift )
 
                     }else{
                         free(window[window_index]);
